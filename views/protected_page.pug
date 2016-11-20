@@ -1,0 +1,8 @@
+html
+    head
+        title Protected page
+    body
+        div Hey #{name}, How are you doing today?
+        div Want to log out?
+        form(action="/logout" method="GET")
+            button(type="Submit") Logout

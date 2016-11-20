@@ -1,0 +1,14 @@
+html
+    head
+        title Signup
+    body
+        if(message)
+            h4 #{message}
+        form(action="/pharmacy/signup" method="POST")
+            input(name="email" type="email" required placeholder="Email")
+            input(name="name" type="text" required placeholder="Name")
+            input(name="address" type="text" required placeholder="Address")
+            input(name="phone_number" type="text" required placeholder="Phone Number")
+            input(name="password" type="password" required placeholder="Password")
+            input(name="rpassword" type="password" required placeholder="Confirm Password")
+            button(type="Submit") Sign me up!

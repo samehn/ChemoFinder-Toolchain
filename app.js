@@ -1,423 +1,554 @@
-/**
- * Module dependencies.
- */
-
-var express = require('express'), routes = require('./routes'), user = require('./routes/user'), http = require('http'), path = require('path'), fs = require('fs');
-
+var express = require('express');
 var app = express();
-
-var db;
-
-var cloudant;
-
-var fileToUpload;
-
-var dbCredentials = {
-	dbName : 'my_sample_db'
-};
-
 var bodyParser = require('body-parser');
-var methodOverride = require('method-override');
-var logger = require('morgan');
-var errorHandler = require('errorhandler');
-var multipart = require('connect-multiparty')
-var multipartMiddleware = multipart();
+var multer = require('multer');
+var upload = multer(); 
+var session = require('express-session');
+var cookieParser = require('cookie-parser');
+var routes = require('./routes');
+var http = require('http');
+var path = require('path');
+var ibmdb = require('ibm_db');
+var morgan = require('morgan');
+var errorhandler = require('errorhandler');
+var bcrypt = require('bcrypt');
+require('cf-deployment-tracker-client').track();
+
+app.set('view engine', 'jade');
+
+app.set('views','./views');
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true })); 
+app.use(upload.array());
+app.use(cookieParser());
+app.use(session({secret: "297e6dwdt7dtw7dtta"}));
 
 // all environments
 app.set('port', process.env.PORT || 3000);
-app.set('views', __dirname + '/views');
-app.set('view engine', 'ejs');
-app.engine('html', require('ejs').renderFile);
-app.use(logger('dev'));
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use(methodOverride());
+app.set('views', path.join(__dirname, 'views'));
+
+app.use(morgan('combined'));
+
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/style', express.static(path.join(__dirname, '/views/style')));
+var db2;
+var hasConnect = false;
+
+const saltRounds = 10;
+
+var Users = [];
 
 // development only
 if ('development' == app.get('env')) {
-	app.use(errorHandler());
+  app.use(errorhandler());
 }
 
-function initDBConnection() {
-	
-	if(process.env.VCAP_SERVICES) {
-		var vcapServices = JSON.parse(process.env.VCAP_SERVICES);
-		// Pattern match to find the first instance of a Cloudant service in
-		// VCAP_SERVICES. If you know your service key, you can access the
-		// service credentials directly by using the vcapServices object.
-		for(var vcapService in vcapServices){
-			if(vcapService.match(/cloudant/i)){
-				dbCredentials.host = vcapServices[vcapService][0].credentials.host;
-				dbCredentials.port = vcapServices[vcapService][0].credentials.port;
-				dbCredentials.user = vcapServices[vcapService][0].credentials.username;
-				dbCredentials.password = vcapServices[vcapService][0].credentials.password;
-				dbCredentials.url = vcapServices[vcapService][0].credentials.url;
-				
-				cloudant = require('cloudant')(dbCredentials.url);
-				
-				// check if DB exists if not create
-				cloudant.db.create(dbCredentials.dbName, function (err, res) {
-					if (err) { console.log('could not create db ', err); }
-				});
-				
-				db = cloudant.use(dbCredentials.dbName);
-				break;
-			}
-		}
-		if(db==null){
-			console.warn('Could not find Cloudant credentials in VCAP_SERVICES environment variable - data will be unavailable to the UI');
-		}
-	} else{
-		console.warn('VCAP_SERVICES environment variable not set - data will be unavailable to the UI');
-		// For running this app locally you can get your Cloudant credentials 
-		// from Bluemix (VCAP_SERVICES in "cf env" output or the Environment 
-		// Variables section for an app in the Bluemix console dashboard).
-		// Alternately you could point to a local database here instead of a 
-		// Bluemix service.
-		//dbCredentials.host = "REPLACE ME";
-		//dbCredentials.port = REPLACE ME;
-		//dbCredentials.user = "REPLACE ME";
-		//dbCredentials.password = "REPLACE ME";
-		//dbCredentials.url = "REPLACE ME";
-		
-		//cloudant = require('cloudant')(dbCredentials.url);
-		
-		// check if DB exists if not create
-        	//cloudant.db.create(dbCredentials.dbName, function (err, res) {
-        	//    if (err) { console.log('could not create db ', err); }
-        	//});
-            
-        	//db = cloudant.use(dbCredentials.dbName);
-	}
+if (process.env.VCAP_SERVICES) {
+    var env = JSON.parse(process.env.VCAP_SERVICES);
+    if (env['dashDB']) {
+        hasConnect = true;
+        db2 = env['dashDB'][0].credentials;
+    }
+    
 }
 
-initDBConnection();
+if ( hasConnect == false ) {
 
-app.get('/', routes.index);
-
-function createResponseData(id, name, value, attachments) {
-
-	var responseData = {
-		id : id,
-		name : name,
-		value : value,
-		attachements : []
-	};
-	
-	 
-	attachments.forEach (function(item, index) {
-		var attachmentData = {
-			content_type : item.type,
-			key : item.key,
-			url : '/api/favorites/attach?id=' + id + '&key=' + item.key
-		};
-		responseData.attachements.push(attachmentData);
-		
-	});
-	return responseData;
+   db2 = {
+        db: "BLUDB",
+        hostname: "dashdb-entry-yp-dal09-10.services.dal.bluemix.net",
+        port: 50000,
+        username: "dash5082",
+        password: "XphM9lInA9M8"
+     };
 }
 
+var connString = "DRIVER={DB2};DATABASE=" + db2.db + ";UID=" + db2.username + ";PWD=" + db2.password + ";HOSTNAME=" + db2.hostname + ";port=" + db2.port;
 
-var saveDocument = function(id, name, value, response) {
-	
-	if(id === undefined) {
-		// Generated random id
-		id = '';
-	}
-	
-	db.insert({
-		name : name,
-		value : value
-	}, id, function(err, doc) {
-		if(err) {
-			console.log(err);
-			response.sendStatus(500);
-		} else
-			response.sendStatus(200);
-		response.end();
-	});
-	
+// function dbQueryCallBack(query, view, parameters, render) {
+    
+//   return function(req, res){  
+
+//     ibmdb.open(connString, function(err, conn) {
+//         console.log(query);
+//             if (err ) {
+//              res.send("error occurred " + err.message);
+//             }
+//             else {
+//                 conn.query(query, function(err, tables, moreResultSets) {
+                            
+//                     // console.log(tables);
+//                     // console.log(moreResultSets); 
+//                     var data=  {
+//                             "data" : tables,
+//                             "parameters": parameters
+//                         };
+
+
+//                     console.log(data);                
+//                     if ( !err && render) { 
+//                         res.render(view, data);
+
+                        
+//                     } else {
+//                        res.send("error occurred " + err.message);
+//                     }
+
+//                     /*
+//                         Close the connection to the database
+//                         param 1: The callback function to execute on completion of close function.
+//                     */
+//                     conn.close(function(){
+//                         console.log("Connection Closed");
+//                         });
+//                 });
+
+//             }
+//         } );
+//     }
+// }
+
+
+function dbQuery(query, callback) {
+    var result;
+    ibmdb.open(connString, function(err, conn) {
+        console.log(query);
+            if (err ) {
+             return "error occurred " + err.message;
+            }
+            else {
+                conn.query(query, function(err, tables, moreResultSets) {
+                    result = tables;        
+                    /*
+                        Close the connection to the database
+                        param 1: The callback function to execute on completion of close function.
+                    */
+                    console.log(err);
+                    console.log(result);
+                    conn.close(function(){
+                        console.log("Connection Closed");
+                        });
+                    console.log(result);
+                    return callback(result);     
+                });
+
+            }
+        } );
 }
 
-app.get('/api/favorites/attach', function(request, response) {
-    var doc = request.query.id;
-    var key = request.query.key;
+// var parameters ={
+//                     "message" : ["ya abdallah"],
+//                     "tableName": ["men gawer el sa3eed"]
+//                 };
+// var query = "SELECT FIRST_NAME, LAST_NAME, EMAIL, WORK_PHONE from GOSALESHR.employee FETCH FIRST 10 ROWS ONLY";           
+// var view = 'tablelist';
+// app.get('/hamada', dbQueryCallBack(query,view,parameters, true));
 
-    db.attachment.get(doc, key, function(err, body) {
-        if (err) {
-            response.status(500);
-            response.setHeader('Content-Type', 'text/plain');
-            response.write('Error: ' + err);
-            response.end();
-            return;
+app.get('/', function(req, res){
+    var base = req.protocol + '://' + req.get('host');
+    res.render('home', { base: base });
+});
+
+app.get('/admin/dashboard', function(req, res){
+    var base = req.protocol + '://' + req.get('host');
+    res.render('admin/dashboard', { base: base });
+});
+
+// app.get('/lolo', function(req, res){
+//     var koko = {};
+//     koko['lolo'] = "kiki";
+//     res.send(koko);
+// });
+
+
+// app.get('/lolo', function(req, res, next) {
+//   var base = req.protocol + '://' + req.get('host');  
+//   res.render('index', { base: base });
+// });
+
+// Doctors
+
+
+// app.get('/doctor/signup', function(req, res){
+//     res.render('doctor/signup');
+// });
+
+function validateWithRegex(regex, email) {
+    return regex.test(email);
+}
+
+app.post('/doctor/signup', function(req, res){
+    var jsonObj = {};
+    var valid = true;
+
+    //validate email
+    var emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if(!req.body.email)
+    {
+        jsonObj['email_error'] = "Email is required";
+        valid = false;
+    }
+    else if(!validateWithRegex(emailRegex, req.body.email))
+    {
+       jsonObj['email_error'] = "This email is not valid"
+       valid = false;
+    }
+    
+    //validate password
+    //Minimum 8 characters at least 1 special character
+    var passwordRegex = /^(?=.*[A-Za-z\d])(?=.*[$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=])[A-Za-z\d$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=]{8,}$/;
+    if(!req.body.password)
+    {
+        jsonObj['password_error'] = "Password is required";
+        valid = false;
+    }
+    else if(!validateWithRegex(passwordRegex, req.body.password))
+    {
+       jsonObj['password_error'] = "Password has to be minimum 8 characters at least 1 special character";
+       valid = false;
+    }
+    else if(req.body.password != req.body.rpassword)
+    {
+       jsonObj['password_error'] = "Password and cofirm password doesn't match";   
+       valid = false;
+    }
+
+    //validate name
+    if(!req.body.name)
+    {
+        jsonObj['name_error'] = "Name is required";
+        valid = false;
+    }
+
+
+    var query = "SELECT * from DASH5082.DOCTOR WHERE EMAIL ='" + req.body.email + "';";           
+        
+    var result = dbQuery(query, function(result) {
+        console.log(result);
+        if(result.length != 0)
+        {
+            jsonObj['email_error'] = "This email is already registered"
+            valid = false;
+            jsonObj['message'] = "failed";
+            res.send(jsonObj);
         }
+        else
+        {
+            if(valid)
+            {    
+                bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+                    // Store hash in your password DB.
+                    // enter new doctor to the db
+                    var query = "INSERT INTO DASH5082.DOCTOR (EMAIL, PASSWORD, NAME, APPROVE) VALUES ('" + req.body.email + "','" + hash + "','" + req.body.name + "', '0');";
+                    dbQuery(query, function(newResult) {
+                        console.log(newResult);
+                        jsonObj['message'] = "success";
+                        res.send(jsonObj);
+                    });
+                });
+            }
+            else
+            {
+                jsonObj['message'] = "failed";
+                res.send(jsonObj);
+            }
+        }
+    });              
+});
 
-        response.status(200);
-        response.setHeader("Content-Disposition", 'inline; filename="' + key + '"');
-        response.write(body);
-        response.end();
-        return;
+// app.get('/doctor/login', function(req, res){
+//     res.render('doctor/login');
+// });
+
+app.post('/doctor/login', function(req, res){
+    //console.log(Users);
+    //console.log(req.session.user);
+    if(!req.body.email || !req.body.password){
+        res.send({message: "failed", login_error:"Please enter both email and password"});
+    }
+    else{
+            var query = "SELECT * from DASH5082.DOCTOR WHERE EMAIL ='" + req.body.email + "';";
+            var result = dbQuery(query, function(result) {
+                //console.log(result[0].ID);
+
+                if(result.length > 0)
+                {
+                    if(result[0].APPROVE == '0')
+                    {
+                         res.send({message: "failed", login_error: "Your account is not approved yet"});
+                    }
+                    else
+                    {
+                        bcrypt.compare(req.body.password, result[0].PASSWORD, function(err, cmp) {
+                            // res == true
+                            if(cmp)
+                            {
+                                req.session.user = result[0];
+                                res.send({message: "success"});
+                            }
+                        });
+                    }
+                }
+                else
+                {
+                    res.send({message: "failed", login_error: "Invalid Credentials"});
+                }
+            });
+        }    
+});
+
+
+//PHARMACY
+
+// app.get('/pharmacy/signup', function(req, res){
+//     res.render('pharmacy/signup');
+// });
+
+app.post('/pharmacy/signup', function(req, res){
+    var jsonObj = {};
+    var valid = true;
+
+    //validate email
+    var emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if(!req.body.email)
+    {
+        jsonObj['email_error'] = "Email is required";
+        valid = false;
+    }
+    else if(!validateWithRegex(emailRegex, req.body.email))
+    {
+       jsonObj['email_error'] = "This email is not valid"
+       valid = false;
+    }
+    
+    //validate password
+    //Minimum 8 characters at least 1 special character
+    var passwordRegex = /^(?=.*[A-Za-z\d])(?=.*[$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=])[A-Za-z\d$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=]{8,}$/;
+    if(!req.body.password)
+    {
+        jsonObj['password_error'] = "Password is required";
+        valid = false;
+    }
+    else if(!validateWithRegex(passwordRegex, req.body.password))
+    {
+       jsonObj['password_error'] = "Password has to be minimum 8 characters at least 1 special character";
+       valid = false;
+    }
+    else if(req.body.password != req.body.rpassword)
+    {
+       jsonObj['password_error'] = "Password and cofirm password doesn't match";   
+       valid = false;
+    }
+
+    //validate rpassword
+    if(!req.body.rpassword)
+    {
+        jsonObj['rpassword_error'] = "Confirm Password is required";
+        valid = false;
+    }
+
+    //validate name
+    if(!req.body.name)
+    {
+        jsonObj['name_error'] = "Name is required";
+        valid = false;
+    }
+
+    //validate address
+    if(!req.body.address)
+    {
+        jsonObj['address_error'] = "Address is required";
+        valid = false;
+    }
+
+    //validate phone number
+    if(!req.body.phone_number)
+    {
+        jsonObj['phone_number_error'] = "Phone number is required";
+        valid = false;
+    }
+
+    //validate open from
+    if(!req.body.open_from)
+    {
+        jsonObj['open_from_error'] = "Open from is required";
+        valid = false;
+    }
+
+    //validate open to
+    if(!req.body.open_to)
+    {
+        jsonObj['open_to_error'] = "Open to is required";
+        valid = false;
+    }
+
+    var query = "SELECT * from DASH5082.PHARMACY WHERE EMAIL ='" + req.body.email + "';";            
+        
+    var result = dbQuery(query, function(result) {
+        console.log(result);
+        if(result.length != 0)
+        {
+            jsonObj['email_error'] = "This email is already registered"
+            valid = false;
+            jsonObj['message'] = "failed";
+            res.send(jsonObj);
+        }
+        else
+        {
+            if(valid)
+            {    
+                bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+                  // Store hash in your password DB.
+                  // enter new pharmacy to the db
+                  var query = "INSERT INTO DASH5082.PHARMACY (EMAIL, PASSWORD, NAME, ADDRESS, PHONE_NUMBER, OPEN_FROM, OPEN_TO, APPROVE) VALUES ('" + req.body.email + "','" + hash + "','" + req.body.name + "', '" + req.body.address + "', '" + req.body.phone_number + "', '" + req.body.open_from + "', '" + req.body.open_to + "', '0');";
+                  dbQuery(query, function(newResult) {
+                      console.log(newResult);
+                      jsonObj['message'] = "success";
+                      res.send(jsonObj);
+                  });
+                });
+            }
+            else
+            {
+                jsonObj['message'] = "failed";
+                res.send(jsonObj);
+            }
+        }
     });
 });
 
-app.post('/api/favorites/attach', multipartMiddleware, function(request, response) {
-
-	console.log("Upload File Invoked..");
-	console.log('Request: ' + JSON.stringify(request.headers));
-	
-	var id;
-	
-	db.get(request.query.id, function(err, existingdoc) {		
-		
-		var isExistingDoc = false;
-		if (!existingdoc) {
-			id = '-1';
-		} else {
-			id = existingdoc.id;
-			isExistingDoc = true;
-		}
-
-		var name = request.query.name;
-		var value = request.query.value;
-
-		var file = request.files.file;
-		var newPath = './public/uploads/' + file.name;		
-		
-		var insertAttachment = function(file, id, rev, name, value, response) {
-			
-			fs.readFile(file.path, function(err, data) {
-				if (!err) {
-				    
-					if (file) {
-						  
-						db.attachment.insert(id, file.name, data, file.type, {rev: rev}, function(err, document) {
-							if (!err) {
-								console.log('Attachment saved successfully.. ');
-	
-								db.get(document.id, function(err, doc) {
-									console.log('Attachements from server --> ' + JSON.stringify(doc._attachments));
-										
-									var attachements = [];
-									var attachData;
-									for(var attachment in doc._attachments) {
-										if(attachment == value) {
-											attachData = {"key": attachment, "type": file.type};
-										} else {
-											attachData = {"key": attachment, "type": doc._attachments[attachment]['content_type']};
-										}
-										attachements.push(attachData);
-									}
-									var responseData = createResponseData(
-											id,
-											name,
-											value,
-											attachements);
-									console.log('Response after attachment: \n'+JSON.stringify(responseData));
-									response.write(JSON.stringify(responseData));
-									response.end();
-									return;
-								});
-							} else {
-								console.log(err);
-							}
-						});
-					}
-				}
-			});
-		}
-
-		if (!isExistingDoc) {
-			existingdoc = {
-				name : name,
-				value : value,
-				create_date : new Date()
-			};
-			
-			// save doc
-			db.insert({
-				name : name,
-				value : value
-			}, '', function(err, doc) {
-				if(err) {
-					console.log(err);
-				} else {
-					
-					existingdoc = doc;
-					console.log("New doc created ..");
-					console.log(existingdoc);
-					insertAttachment(file, existingdoc.id, existingdoc.rev, name, value, response);
-					
-				}
-			});
-			
-		} else {
-			console.log('Adding attachment to existing doc.');
-			console.log(existingdoc);
-			insertAttachment(file, existingdoc._id, existingdoc._rev, name, value, response);
-		}
-		
-	});
-
+app.get('/pharmacy/login', function(req, res){
+    res.render('pharmacy/login');
 });
 
-app.post('/api/favorites', function(request, response) {
+app.post('/pharmacy/login', function(req, res){
+    //console.log(Users);
+    //console.log(req.session.user);
+    if(!req.body.email || !req.body.password){
+        res.send({message: "failed", login_error: "Please enter both email and password"});
+    }
+    else
+    {
+        var query = "SELECT * from DASH5082.PHARMACY WHERE EMAIL ='" + req.body.email + "';";
+        var result = dbQuery(query, function(result) {
+            //console.log(result[0].ID);
 
-	console.log("Create Invoked..");
-	console.log("Name: " + request.body.name);
-	console.log("Value: " + request.body.value);
-	
-	// var id = request.body.id;
-	var name = request.body.name;
-	var value = request.body.value;
-	
-	saveDocument(null, name, value, response);
-
+            if(result.length > 0)
+            {
+                if(result[0].APPROVE == '0')
+                {
+                     res.send({message: "failed", login_error: "Your account is not approved yet"});
+                }
+                else
+                {
+                    bcrypt.compare(req.body.password, result[0].PASSWORD, function(err, cmp) {
+                        // res == true
+                        if(cmp)
+                        {
+                            req.session.user = result[0];
+                            res.send({message: "success"});
+                        }
+                    });
+                }
+            }
+            else
+            {
+                res.send({message: "failed", login_error: "Invalid Credentials"});
+            }
+        });
+    }  
 });
 
-app.delete('/api/favorites', function(request, response) {
+//ADMIN
 
-	console.log("Delete Invoked..");
-	var id = request.query.id;
-	// var rev = request.query.rev; // Rev can be fetched from request. if
-	// needed, send the rev from client
-	console.log("Removing document of ID: " + id);
-	console.log('Request Query: '+JSON.stringify(request.query));
-	
-	db.get(id, { revs_info: true }, function(err, doc) {
-		if (!err) {
-			db.destroy(doc._id, doc._rev, function (err, res) {
-			     // Handle response
-				 if(err) {
-					 console.log(err);
-					 response.sendStatus(500);
-				 } else {
-					 response.sendStatus(200);
-				 }
-			});
-		}
-	});
-
+app.get('/admin/login', function(req, res){
+    var base = req.protocol + '://' + req.get('host');
+    res.render('admin/login', { base: base });
 });
 
-app.put('/api/favorites', function(request, response) {
+app.post('/admin/login', function(req, res){
+    //console.log(Users);
+    //console.log(req.session.user);
+    if(!req.body.email || !req.body.password){
+        res.send({message: "failed", login_error: "Please enter both email and password"});
+    }
+    else
+    {
+        var query = "SELECT * from DASH5082.ADMIN WHERE USERNAME ='" + req.body.email + "';";
+        var result = dbQuery(query, function(result) {
+            //console.log(result[0].ID);
 
-	console.log("Update Invoked..");
-	
-	var id = request.body.id;
-	var name = request.body.name;
-	var value = request.body.value;
-	
-	console.log("ID: " + id);
-	
-	db.get(id, { revs_info: true }, function(err, doc) {
-		if (!err) {
-			console.log(doc);
-			doc.name = name;
-			doc.value = value;
-			db.insert(doc, doc.id, function(err, doc) {
-				if(err) {
-					console.log('Error inserting data\n'+err);
-					return 500;
-				}
-				return 200;
-			});
-		}
-	});
-});
-
-app.get('/api/favorites', function(request, response) {
-
-	console.log("Get method invoked.. ")
-	
-	db = cloudant.use(dbCredentials.dbName);
-	var docList = [];
-	var i = 0;
-	db.list(function(err, body) {
-		if (!err) {
-			var len = body.rows.length;
-			console.log('total # of docs -> '+len);
-			if(len == 0) {
-				// push sample data
-				// save doc
-				var docName = 'sample_doc';
-				var docDesc = 'A sample Document';
-				db.insert({
-					name : docName,
-					value : 'A sample Document'
-				}, '', function(err, doc) {
-					if(err) {
-						console.log(err);
-					} else {
-						
-						console.log('Document : '+JSON.stringify(doc));
-						var responseData = createResponseData(
-							doc.id,
-							docName,
-							docDesc,
-							[]);
-						docList.push(responseData);
-						response.write(JSON.stringify(docList));
-						console.log(JSON.stringify(docList));
-						console.log('ending response...');
-						response.end();
-					}
-				});
-			} else {
-
-				body.rows.forEach(function(document) {
-					
-					db.get(document.id, { revs_info: true }, function(err, doc) {
-						if (!err) {
-							if(doc['_attachments']) {
-							
-								var attachments = [];
-								for(var attribute in doc['_attachments']){
-								
-									if(doc['_attachments'][attribute] && doc['_attachments'][attribute]['content_type']) {
-										attachments.push({"key": attribute, "type": doc['_attachments'][attribute]['content_type']});
-									}
-									console.log(attribute+": "+JSON.stringify(doc['_attachments'][attribute]));
-								}
-								var responseData = createResponseData(
-										doc._id,
-										doc.name,
-										doc.value,
-										attachments);
-							
-							} else {
-								var responseData = createResponseData(
-										doc._id,
-										doc.name,
-										doc.value,
-										[]);
-							}	
-						
-							docList.push(responseData);
-							i++;
-							if(i >= len) {
-								response.write(JSON.stringify(docList));
-								console.log('ending response...');
-								response.end();
-							}
-						} else {
-							console.log(err);
-						}
-					});
-					
-				});
-			}
-			
-		} else {
-			console.log(err);
-		}
-	});
-
+            if(result.length > 0)
+            {
+                bcrypt.compare(req.body.password, result[0].PASSWORD, function(err, cmp) {
+                    // res == true
+                    if(cmp)
+                    {
+                        req.session.user = result[0];
+                        res.send({message: "success"});
+                    }
+                });
+                
+            }
+            else
+            {
+                res.send({message: "failed", login_error: "Invalid Credentials"});
+            }
+        });
+    }    
 });
 
 
-http.createServer(app).listen(app.get('port'), '0.0.0.0', function() {
-	console.log('Express server listening on port ' + app.get('port'));
+app.get('/admin/approve', function(req, res) {
+    var query = "SELECT DOCTOR.EMAIL, DOCTOR.NAME,'Doctor' AS TYPE from DASH5082.DOCTOR WHERE DOCTOR.APPROVE = '0' UNION SELECT PHARMACY.EMAIL, PHARMACY.NAME, 'Pharmacy' AS TYPE from DASH5082.PHARMACY WHERE PHARMACY.APPROVE = '0';";
+    var result = dbQuery(query, function(result) {
+        //console.log(result[0].ID);
+
+        if(result.length == 0)
+        {
+            // redirect with message
+            // res.send({message: "There are no requests currently"});
+            res.render('admin/approve', {message: "There are no requests currently"});
+        }
+        else
+        {
+            // redirect with data
+            // res.send({data: result});
+            res.render('admin/approve', {data: result});
+        }
+    });
 });
 
+
+function checkSignIn(req, res, next){
+    if(req.session.user){
+        next();     //If session exists, proceed to page
+    } else {
+        var err = new Error("Not logged in!");
+    console.log(req.session.user);
+        next(err);  //Error, trying to access unauthorized page!
+    }
+}
+
+app.get('/protected_page', checkSignIn, function(req, res){
+    res.render('protected_page', {name: req.session.user.NAME})
+});
+
+
+
+app.get('/logout', function(req, res){
+    req.session.destroy(function(){
+        console.log("user logged out.")
+    });
+    res.redirect('/doctor/login');
+});
+
+app.use('/protected_page', function(err, req, res, next){
+console.log(err);
+    //User should be authenticated! Redirect him to log in.
+    res.redirect('/login');
+});
+
+http.createServer(app).listen(app.get('port'), function(){
+  console.log('Express server listening on port ' + app.get('port'));
+});

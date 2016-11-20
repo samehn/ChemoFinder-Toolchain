@@ -8,12 +8,24 @@
   "dependencies": {
     "express": "4.13.x",
     "ejs": "2.4.x",
-    "cloudant": "1.4.x",
     "body-parser": "1.14.x",
     "method-override": "2.3.x",
     "morgan": "1.6.x",
     "errorhandler": "1.4.x",
-    "connect-multiparty": "2.0.x"
+    "connect-multiparty": "2.0.x",
+    "bcrypt": "^0.8.7",
+    "cf-deployment-tracker-client": "^0.1.1",
+    "cookie-parser": "^1.4.3",
+    "debug": "~2.2.0",
+    "express-session": "^1.14.2",
+    "ibm_db": "^1.0.1",
+    "jade": "~1.11.0",
+    "logger": "0.0.1",
+    "multer": "^1.2.0",
+    "pug": "^2.0.0-beta6",
+    "serve-favicon": "^2.3.0"
+  
+
   },
   "repository": {},
   "engines": {
