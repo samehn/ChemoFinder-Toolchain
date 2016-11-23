@@ -12,6 +12,10 @@ var ibmdb = require('ibm_db');
 var morgan = require('morgan');
 var errorhandler = require('errorhandler');
 var bcrypt = require('bcrypt');
+var randtoken = require('rand-token');
+var nodemailer = require('nodemailer');
+var hbs = require('nodemailer-express-handlebars');
+var dateFormat = require('dateformat');
 require('cf-deployment-tracker-client').track();
 
 app.set('view engine', 'jade');
@@ -36,12 +40,28 @@ var hasConnect = false;
 
 const saltRounds = 10;
 
-var Users = [];
-
 // development only
 if ('development' == app.get('env')) {
   app.use(errorhandler());
 }
+
+// create reusable transporter object using the default SMTP transport
+var transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+        user: 'chemofinder@gmail.com', // Your email id
+        pass: 'chemofinder2016' // Your password
+    }
+});
+var options = {
+ viewEngine: {
+     extname: '.hbs',
+     layoutsDir: 'views/email/'
+ },
+ viewPath: 'views/email/',
+ extName: '.hbs'
+};
+transporter.use('compile', hbs(options));
 
 if (process.env.VCAP_SERVICES) {
     var env = JSON.parse(process.env.VCAP_SERVICES);
@@ -64,50 +84,6 @@ if ( hasConnect == false ) {
 }
 
 var connString = "DRIVER={DB2};DATABASE=" + db2.db + ";UID=" + db2.username + ";PWD=" + db2.password + ";HOSTNAME=" + db2.hostname + ";port=" + db2.port;
-
-// function dbQueryCallBack(query, view, parameters, render) {
-    
-//   return function(req, res){  
-
-//     ibmdb.open(connString, function(err, conn) {
-//         console.log(query);
-//             if (err ) {
-//              res.send("error occurred " + err.message);
-//             }
-//             else {
-//                 conn.query(query, function(err, tables, moreResultSets) {
-                            
-//                     // console.log(tables);
-//                     // console.log(moreResultSets); 
-//                     var data=  {
-//                             "data" : tables,
-//                             "parameters": parameters
-//                         };
-
-
-//                     console.log(data);                
-//                     if ( !err && render) { 
-//                         res.render(view, data);
-
-                        
-//                     } else {
-//                        res.send("error occurred " + err.message);
-//                     }
-
-//                     /*
-//                         Close the connection to the database
-//                         param 1: The callback function to execute on completion of close function.
-//                     */
-//                     conn.close(function(){
-//                         console.log("Connection Closed");
-//                         });
-//                 });
-
-//             }
-//         } );
-//     }
-// }
-
 
 function dbQuery(query, callback) {
     var result;
@@ -136,42 +112,16 @@ function dbQuery(query, callback) {
         } );
 }
 
-// var parameters ={
-//                     "message" : ["ya abdallah"],
-//                     "tableName": ["men gawer el sa3eed"]
-//                 };
-// var query = "SELECT FIRST_NAME, LAST_NAME, EMAIL, WORK_PHONE from GOSALESHR.employee FETCH FIRST 10 ROWS ONLY";           
-// var view = 'tablelist';
-// app.get('/hamada', dbQueryCallBack(query,view,parameters, true));
 
-app.get('/', function(req, res){
-    var base = req.protocol + '://' + req.get('host');
-    res.render('home', { base: base });
-});
+require('./routes/home')(app);
+
+
 
 app.get('/admin/dashboard', function(req, res){
     var base = req.protocol + '://' + req.get('host');
     res.render('admin/dashboard', { base: base });
 });
 
-// app.get('/lolo', function(req, res){
-//     var koko = {};
-//     koko['lolo'] = "kiki";
-//     res.send(koko);
-// });
-
-
-// app.get('/lolo', function(req, res, next) {
-//   var base = req.protocol + '://' + req.get('host');  
-//   res.render('index', { base: base });
-// });
-
-// Doctors
-
-
-// app.get('/doctor/signup', function(req, res){
-//     res.render('doctor/signup');
-// });
 
 function validateWithRegex(regex, email) {
     return regex.test(email);
@@ -256,9 +206,6 @@ app.post('/doctor/signup', function(req, res){
     });              
 });
 
-// app.get('/doctor/login', function(req, res){
-//     res.render('doctor/login');
-// });
 
 app.post('/doctor/login', function(req, res){
     //console.log(Users);
@@ -300,9 +247,6 @@ app.post('/doctor/login', function(req, res){
 
 //PHARMACY
 
-// app.get('/pharmacy/signup', function(req, res){
-//     res.render('pharmacy/signup');
-// });
 
 app.post('/pharmacy/signup', function(req, res){
     var jsonObj = {};
@@ -500,7 +444,7 @@ app.post('/admin/login', function(req, res){
 
 
 app.get('/admin/approve', function(req, res) {
-    var query = "SELECT DOCTOR.EMAIL, DOCTOR.NAME,'Doctor' AS TYPE from DASH5082.DOCTOR WHERE DOCTOR.APPROVE = '0' UNION SELECT PHARMACY.EMAIL, PHARMACY.NAME, 'Pharmacy' AS TYPE from DASH5082.PHARMACY WHERE PHARMACY.APPROVE = '0';";
+    var query = "SELECT DOCTOR.ID, 'DOCTOR' AS TYPE from DASH5082.DOCTOR WHERE EMAIL ='karim@hazem.tito' UNION SELECT PHARMACY.ID, 'PHARMACY' AS TYPE from DASH5082.PHARMACY WHERE EMAIL ='karim@hazem.tito';";
     var result = dbQuery(query, function(result) {
         //console.log(result[0].ID);
 
@@ -519,6 +463,185 @@ app.get('/admin/approve', function(req, res) {
     });
 });
 
+
+app.get('/forgotpassword', function(req, res){
+    var base = req.protocol + '://' + req.get('host');
+    res.render('forgot_password', { base: base });
+});
+
+app.post('/doctor/forgotpassword', function(req, res){
+    //console.log(Users);
+    //console.log(req.session.user);
+    if(!req.body.email){
+        res.send({message: "failed", fpassword_error: "Email is required"});
+    }
+    else
+    {
+        var query = "SELECT * from DASH5082.DOCTOR WHERE EMAIL ='" + req.body.email + "';";
+        var result = dbQuery(query, function(result) {
+            //console.log(result[0].ID);
+
+            if(result.length > 0)
+            {
+                //generate random token
+                // Generate a 20 character alpha-numeric token:
+                var token = randtoken.generate(120);
+
+                //Delete old tokens if exists
+                var query = "DELETE from DASH5082.DOCTOR_FORGOT_PASSWORD WHERE DOCTOR_ID ='" + result[0].ID + "';";
+                dbQuery(query, function(result2) {
+                    //insert new token into the database
+                    var query = "INSERT INTO DASH5082.DOCTOR_FORGOT_PASSWORD (DOCTOR_ID, TOKEN, CREATED_AT) values ('" + result[0].ID + "', '" + token + "', TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));";
+                    dbQuery(query, function(result3) {});
+                });
+                
+                var base = req.protocol + '://' + req.get('host');
+
+                var link = base + '/doctor/resetpassword/' + token;
+                //send email
+                var mailOptions = {
+                    from: 'chemofinder@gmail.com', // sender address
+                    to: req.body.email, // list of receivers
+                    subject: 'Password Recovery', // Subject line
+                    template: 'forgot_password_mail',
+                    context: {
+                        link: link
+                    }
+                    //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
+                };
+                transporter.sendMail(mailOptions, function(error, info){
+                    if(error){
+                        console.log(error);
+                        res.json({message: 'error'});
+                    }else{
+                        console.log('Message sent: ' + info.response);
+                        res.json({message: info.response});
+                    };
+                });
+            }
+            else
+            {
+                res.send({message: "failed", login_error: "This email is not registered"});
+            }
+        });
+    }    
+});
+
+app.get('/doctor/resetpassword/:token', function(req, res){
+
+    // check if the token exists
+    var query = "SELECT * from DASH5082.DOCTOR_FORGOT_PASSWORD WHERE TOKEN ='" + req.params.token + "';";
+    dbQuery(query, function(result) {
+        if(result.length > 0)
+        {
+            // check the expiration date of the token
+            var tokenDate = new Date(result[0].CREATED_AT);
+            var now = new Date();
+
+            //get difference in milliseconds
+            var diff = Math.abs(now-tokenDate);
+            //get difference in hours
+            diff = diff/(1000*60*60)
+            console.log(diff);
+
+            if(diff > 3)
+            {
+                res.send("404 Not Found");       
+            }
+            else
+            {
+                // res.send(req.params.token);
+                // render change password page
+                var base = req.protocol + '://' + req.get('host');
+                res.render('reset_password', { base: base });
+            }
+        }
+        else
+        {
+            res.send("404 Not Found");
+        }
+    });    
+    
+    //res.send("tagId is set to " + req.params.token);
+    // var base = req.protocol + '://' + req.get('host');
+    // res.render('forgot_password', { base: base });
+});
+
+app.post('/doctor/resetpassword', function(req, res){
+    // check if the token exists
+    var query = "SELECT * from DASH5082.DOCTOR_FORGOT_PASSWORD WHERE TOKEN ='" + req.body.token + "';";
+    dbQuery(query, function(result) {
+        if(result.length > 0)
+        {
+            // check the expiration date of the token
+            var tokenDate = new Date(result[0].CREATED_AT);
+            var now = new Date();
+
+            //get difference in milliseconds
+            var diff = Math.abs(now-tokenDate);
+            //get difference in hours
+            diff = diff/(1000*60*60)
+            console.log(diff);
+
+            if(diff > 3)
+            {
+                res.send("404 Not Found");       
+            }
+            else
+            {
+                var jsonObj = {};
+                var valid = true;
+                //validate password
+                //Minimum 8 characters at least 1 special character
+                var passwordRegex = /^(?=.*[A-Za-z\d])(?=.*[$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=])[A-Za-z\d$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=]{8,}$/;
+                if(!req.body.password)
+                {
+                    jsonObj['password_error'] = "Password is required";
+                    valid = false;
+                }
+                else if(!validateWithRegex(passwordRegex, req.body.password))
+                {
+                   jsonObj['password_error'] = "Password has to be minimum 8 characters at least 1 special character";
+                   valid = false;
+                }
+                else if(req.body.password != req.body.rpassword)
+                {
+                   jsonObj['password_error'] = "Password and cofirm password doesn't match";   
+                   valid = false;
+                }
+
+                //validate rpassword
+                if(!req.body.rpassword)
+                {
+                    jsonObj['rpassword_error'] = "Confirm Password is required";
+                    valid = false;
+                }
+                if(valid)
+                {    
+                    bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+                      // Store hash in your password DB.
+                      // enter new pharmacy to the db
+                      var query = "INSERT INTO DASH5082.PHARMACY (PASSWORD) VALUES ('" + hash + "');";
+                      dbQuery(query, function(newResult) {
+                          console.log(newResult);
+                          jsonObj['message'] = "success";
+                          res.send(jsonObj);
+                      });
+                    });
+                }
+                else
+                {
+                    jsonObj['message'] = "failed";
+                    res.send(jsonObj);
+                }
+            }
+        }
+        else
+        {
+            res.send("404 Not Found");
+        }
+    });
+});
 
 function checkSignIn(req, res, next){
     if(req.session.user){
@@ -540,7 +663,7 @@ app.get('/logout', function(req, res){
     req.session.destroy(function(){
         console.log("user logged out.")
     });
-    res.redirect('/doctor/login');
+    res.redirect('/');
 });
 
 app.use('/protected_page', function(err, req, res, next){
