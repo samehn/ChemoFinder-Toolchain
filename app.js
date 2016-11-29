@@ -31,6 +31,7 @@ app.use(session({secret: "297e6dwdt7dtw7dtta"}));
 
 // all environments
 app.set('port', process.env.VCAP_APP_PORT || 3000);
+app.set('host', process.env.VCAP_APP_HOST || 'localhost');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(morgan('combined'));
