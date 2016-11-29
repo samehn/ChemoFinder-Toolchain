@@ -115,7 +115,10 @@ function dbQuery(query, callback) {
         } );
 }
 
-require('./routes/home')(app);
+app.get('/', function(req, res){
+    var base = req.protocol + '://' + req.get('host');
+    res.render('user/home', { base: base });
+  });
 
 app.get('/admin/dashboard', function(req, res){
     var base = req.protocol + '://' + req.get('host');
