@@ -6,29 +6,32 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "express": "4.13.x",
-    "ejs": "2.4.x",
-    "body-parser": "1.14.x",
-    "method-override": "2.3.x",
-    "morgan": "1.6.x",
-    "errorhandler": "1.4.x",
-    "connect-multiparty": "2.0.x",
     "bcrypt": "^0.8.7",
+    "body-parser": "1.14.x",
     "cf-deployment-tracker-client": "^0.1.1",
+    "connect-multiparty": "2.0.x",
     "cookie-parser": "^1.4.3",
+    "dateformat": "^2.0.0",
     "debug": "~2.2.0",
+    "ejs": "2.4.x",
+    "errorhandler": "1.4.x",
+    "express": "4.13.x",
     "express-session": "^1.14.2",
     "ibm_db": "^1.0.1",
     "jade": "~1.11.0",
     "logger": "0.0.1",
+    "method-override": "2.3.x",
+    "morgan": "1.6.x",
     "multer": "^1.2.0",
+    "nodemailer": "^2.6.4",
+    "nodemailer-express-handlebars": "^2.0.0",
     "pug": "^2.0.0-beta6",
+    "rand-token": "^0.2.1",
+    "randexp": "^0.4.3",
     "serve-favicon": "^2.3.0"
-  
-
   },
   "repository": {},
   "engines": {
-  	"node": "4.x"
+    "node": "4.x"
   }
 }
