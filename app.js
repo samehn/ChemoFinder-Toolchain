@@ -12,11 +12,6 @@ var ibmdb = require('ibm_db');
 var morgan = require('morgan');
 var errorhandler = require('errorhandler');
 var bcrypt = require('bcrypt');
-var randtoken = require('rand-token');
-var nodemailer = require('nodemailer');
-var hbs = require('nodemailer-express-handlebars');
-var dateFormat = require('dateformat');
-var RandExp = require('randexp');
 require('cf-deployment-tracker-client').track();
 
 app.set('view engine', 'jade');
@@ -48,24 +43,6 @@ if ('development' == app.get('env')) {
   app.use(errorhandler());
 }
 
-// create reusable transporter object using the default SMTP transport
-var transporter = nodemailer.createTransport({
-    service: 'Gmail',
-    auth: {
-        user: 'chemofinder@gmail.com', // Your email id
-        pass: 'chemofinder2016' // Your password
-    }
-});
-var options = {
- viewEngine: {
-     extname: '.hbs',
-     layoutsDir: 'views/email/'
- },
- viewPath: 'views/email/',
- extName: '.hbs'
-};
-transporter.use('compile', hbs(options));
-
 if (process.env.VCAP_SERVICES) {
     var env = JSON.parse(process.env.VCAP_SERVICES);
     if (env['dashDB']) {
@@ -87,6 +64,50 @@ if ( hasConnect == false ) {
 }
 
 var connString = "DRIVER={DB2};DATABASE=" + db2.db + ";UID=" + db2.username + ";PWD=" + db2.password + ";HOSTNAME=" + db2.hostname + ";port=" + db2.port;
+
+// function dbQueryCallBack(query, view, parameters, render) {
+    
+//   return function(req, res){  
+
+//     ibmdb.open(connString, function(err, conn) {
+//         console.log(query);
+//             if (err ) {
+//              res.send("error occurred " + err.message);
+//             }
+//             else {
+//                 conn.query(query, function(err, tables, moreResultSets) {
+                            
+//                     // console.log(tables);
+//                     // console.log(moreResultSets); 
+//                     var data=  {
+//                             "data" : tables,
+//                             "parameters": parameters
+//                         };
+
+
+//                     console.log(data);                
+//                     if ( !err && render) { 
+//                         res.render(view, data);
+
+                        
+//                     } else {
+//                        res.send("error occurred " + err.message);
+//                     }
+
+//                     /*
+//                         Close the connection to the database
+//                         param 1: The callback function to execute on completion of close function.
+//                     */
+//                     conn.close(function(){
+//                         console.log("Connection Closed");
+//                         });
+//                 });
+
+//             }
+//         } );
+//     }
+// }
+
 
 function dbQuery(query, callback) {
     var result;
@@ -115,21 +136,175 @@ function dbQuery(query, callback) {
         } );
 }
 
+// var parameters ={
+//                     "message" : ["ya abdallah"],
+//                     "tableName": ["men gawer el sa3eed"]
+//                 };
+// var query = "SELECT FIRST_NAME, LAST_NAME, EMAIL, WORK_PHONE from GOSALESHR.employee FETCH FIRST 10 ROWS ONLY";           
+// var view = 'tablelist';
+// app.get('/hamada', dbQueryCallBack(query,view,parameters, true));
+
 app.get('/', function(req, res){
     var base = req.protocol + '://' + req.get('host');
-    res.render('user/home', { base: base });
-  });
+    res.render('home', { base: base });
+});
 
 app.get('/admin/dashboard', function(req, res){
     var base = req.protocol + '://' + req.get('host');
     res.render('admin/dashboard', { base: base });
 });
 
+// app.get('/lolo', function(req, res){
+//     var koko = {};
+//     koko['lolo'] = "kiki";
+//     res.send(koko);
+// });
+
+
+// app.get('/lolo', function(req, res, next) {
+//   var base = req.protocol + '://' + req.get('host');  
+//   res.render('index', { base: base });
+// });
+
+// Doctors
+
+
+// app.get('/doctor/signup', function(req, res){
+//     res.render('doctor/signup');
+// });
+
 function validateWithRegex(regex, email) {
     return regex.test(email);
 }
 
-app.post('/user/signup', function(req, res){
+app.post('/doctor/signup', function(req, res){
+    var jsonObj = {};
+    var valid = true;
+
+    //validate email
+    var emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if(!req.body.email)
+    {
+        jsonObj['email_error'] = "Email is required";
+        valid = false;
+    }
+    else if(!validateWithRegex(emailRegex, req.body.email))
+    {
+       jsonObj['email_error'] = "This email is not valid"
+       valid = false;
+    }
+    
+    //validate password
+    //Minimum 8 characters at least 1 special character
+    var passwordRegex = /^(?=.*[A-Za-z\d])(?=.*[$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=])[A-Za-z\d$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=]{8,}$/;
+    if(!req.body.password)
+    {
+        jsonObj['password_error'] = "Password is required";
+        valid = false;
+    }
+    else if(!validateWithRegex(passwordRegex, req.body.password))
+    {
+       jsonObj['password_error'] = "Password has to be minimum 8 characters at least 1 special character";
+       valid = false;
+    }
+    else if(req.body.password != req.body.rpassword)
+    {
+       jsonObj['password_error'] = "Password and cofirm password doesn't match";   
+       valid = false;
+    }
+
+    //validate name
+    if(!req.body.name)
+    {
+        jsonObj['name_error'] = "Name is required";
+        valid = false;
+    }
+
+
+    var query = "SELECT * from DASH5082.DOCTOR WHERE EMAIL ='" + req.body.email + "';";           
+        
+    var result = dbQuery(query, function(result) {
+        console.log(result);
+        if(result.length != 0)
+        {
+            jsonObj['email_error'] = "This email is already registered"
+            valid = false;
+            jsonObj['message'] = "failed";
+            res.send(jsonObj);
+        }
+        else
+        {
+            if(valid)
+            {    
+                bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+                    // Store hash in your password DB.
+                    // enter new doctor to the db
+                    var query = "INSERT INTO DASH5082.DOCTOR (EMAIL, PASSWORD, NAME, APPROVE) VALUES ('" + req.body.email + "','" + hash + "','" + req.body.name + "', '0');";
+                    dbQuery(query, function(newResult) {
+                        console.log(newResult);
+                        jsonObj['message'] = "success";
+                        res.send(jsonObj);
+                    });
+                });
+            }
+            else
+            {
+                jsonObj['message'] = "failed";
+                res.send(jsonObj);
+            }
+        }
+    });              
+});
+
+// app.get('/doctor/login', function(req, res){
+//     res.render('doctor/login');
+// });
+
+app.post('/doctor/login', function(req, res){
+    //console.log(Users);
+    //console.log(req.session.user);
+    if(!req.body.email || !req.body.password){
+        res.send({message: "failed", login_error:"Please enter both email and password"});
+    }
+    else{
+            var query = "SELECT * from DASH5082.DOCTOR WHERE EMAIL ='" + req.body.email + "';";
+            var result = dbQuery(query, function(result) {
+                //console.log(result[0].ID);
+
+                if(result.length > 0)
+                {
+                    if(result[0].APPROVE == '0')
+                    {
+                         res.send({message: "failed", login_error: "Your account is not approved yet"});
+                    }
+                    else
+                    {
+                        bcrypt.compare(req.body.password, result[0].PASSWORD, function(err, cmp) {
+                            // res == true
+                            if(cmp)
+                            {
+                                req.session.user = result[0];
+                                res.send({message: "success"});
+                            }
+                        });
+                    }
+                }
+                else
+                {
+                    res.send({message: "failed", login_error: "Invalid Credentials"});
+                }
+            });
+        }    
+});
+
+
+//PHARMACY
+
+// app.get('/pharmacy/signup', function(req, res){
+//     res.render('pharmacy/signup');
+// });
+
+app.post('/pharmacy/signup', function(req, res){
     var jsonObj = {};
     var valid = true;
 
@@ -179,63 +354,35 @@ app.post('/user/signup', function(req, res){
         valid = false;
     }
 
-    //validate type
-    if(!req.body.type)
+    //validate address
+    if(!req.body.address)
     {
-        jsonObj['type_error'] = "Type is required";
-        valid = false;
-    }
-
-    //validate street
-    if(!req.body.street && (req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER"))
-    {
-        jsonObj['street_error'] = "Street is required";
-        valid = false;
-    }
-
-    //validate city
-    if(!req.body.city && (req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER"))
-    {
-        jsonObj['city_error'] = "City is required";
-        valid = false;
-    }
-
-    //validate state
-    if(!req.body.state && (req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER"))
-    {
-        jsonObj['state_error'] = "State is required";
-        valid = false;
-    }
-
-    //validate zip
-    if(!req.body.zip && (req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER"))
-    {
-        jsonObj['zip_error'] = "Zip Code is required";
+        jsonObj['address_error'] = "Address is required";
         valid = false;
     }
 
     //validate phone number
-    if(!req.body.phone_number && (req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER"))
+    if(!req.body.phone_number)
     {
         jsonObj['phone_number_error'] = "Phone number is required";
         valid = false;
     }
 
     //validate open from
-    if(!req.body.open_from && (req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER"))
+    if(!req.body.open_from)
     {
         jsonObj['open_from_error'] = "Open from is required";
         valid = false;
     }
 
     //validate open to
-    if(!req.body.open_to && (req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER"))
+    if(!req.body.open_to)
     {
         jsonObj['open_to_error'] = "Open to is required";
         valid = false;
     }
 
-    var query = "SELECT * from DASH5082.USER WHERE EMAIL ='" + req.body.email + "';";           
+    var query = "SELECT * from DASH5082.PHARMACY WHERE EMAIL ='" + req.body.email + "';";            
         
     var result = dbQuery(query, function(result) {
         console.log(result);
@@ -251,35 +398,14 @@ app.post('/user/signup', function(req, res){
             if(valid)
             {    
                 bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
-                    // Store hash in your password DB.
-                    // enter new doctor to the db
-                    var query;
-                    if(req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER")
-                    {
-                        query = "INSERT INTO DASH5082.USER (EMAIL, PASSWORD, NAME, PHONE_NUMBER, STREET, CITY, STATE, ZIP, OPEN_FROM, OPEN_TO, TYPE, FIRST_LOGIN, ACTIVE, APPROVE) VALUES ('" + req.body.email + "','" + hash + "','" + req.body.name + "','" + req.body.phone_number + "','" + req.body.street + "','" + req.body.city + "','" + req.body.state + "','" + req.body.zip + "','" + req.body.open_from + "','" + req.body.open_to + "','" + req.body.type + "', '0', '1', '0');"; 
-                    }
-                    else
-                    {
-                        query = "INSERT INTO DASH5082.USER (EMAIL, PASSWORD, NAME, STREET, CITY, STATE, ZIP, TYPE, FIRST_LOGIN, ACTIVE, APPROVE) VALUES ('" + req.body.email + "','" + hash + "','" + req.body.name + "','" + req.body.street + "','" + req.body.city + "','" + req.body.state + "','" + req.body.zip + "','" + req.body.type + "', '0', '1', '0');";
-                    }
-                    dbQuery(query, function(newResult) {
-                        //Send Confirmation Email
-                        var link = req.protocol + '://' + req.get('host') + '/admin/manage_users';
-                        var mailOptions = {
-                            from: 'chemofinder@gmail.com', // sender address
-                            to: 'chemofinder@gmail.com', // list of receivers
-                            subject: 'New Registration Request', // Subject line
-                            template: 'new_registration_request_mail',
-                            context: {
-                                link: link
-                            }
-                            //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
-                        };
-                        sendEmail(mailOptions);
-
-                        jsonObj['message'] = "success";
-                        res.send(jsonObj);
-                    });
+                  // Store hash in your password DB.
+                  // enter new pharmacy to the db
+                  var query = "INSERT INTO DASH5082.PHARMACY (EMAIL, PASSWORD, NAME, ADDRESS, PHONE_NUMBER, OPEN_FROM, OPEN_TO, APPROVE) VALUES ('" + req.body.email + "','" + hash + "','" + req.body.name + "', '" + req.body.address + "', '" + req.body.phone_number + "', '" + req.body.open_from + "', '" + req.body.open_to + "', '0');";
+                  dbQuery(query, function(newResult) {
+                      console.log(newResult);
+                      jsonObj['message'] = "success";
+                      res.send(jsonObj);
+                  });
                 });
             }
             else
@@ -288,211 +414,49 @@ app.post('/user/signup', function(req, res){
                 res.send(jsonObj);
             }
         }
-    });              
+    });
 });
 
-app.post('/admin/addnewuser', function(req, res){
-    var jsonObj = {};
-    var valid = true;
-
-    //validate email
-    var emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    if(!req.body.email)
-    {
-        jsonObj['email_error'] = "Email is required";
-        valid = false;
-    }
-    else if(!validateWithRegex(emailRegex, req.body.email))
-    {
-       jsonObj['email_error'] = "This email is not valid"
-       valid = false;
-    }
-    
-    //validate password
-    //Minimum 8 characters at least 1 special character
-    var passwordRegex = /^(?=.*[A-Za-z\d])(?=.*[$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=])[A-Za-z\d$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=]{8,}$/;
-    if(!req.body.password)
-    {
-        jsonObj['password_error'] = "Password is required";
-        valid = false;
-    }
-    else if(!validateWithRegex(passwordRegex, req.body.password))
-    {
-       jsonObj['password_error'] = "Password has to be minimum 8 characters at least 1 special character";
-       valid = false;
-    }
-
-    //validate name
-    if(!req.body.name)
-    {
-        jsonObj['name_error'] = "Name is required";
-        valid = false;
-    }
-
-    //validate type
-    if(!req.body.type)
-    {
-        jsonObj['type_error'] = "Type is required";
-        valid = false;
-    }
-
-    //validate street
-    if(!req.body.street && (req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER"))
-    {
-        jsonObj['street_error'] = "Street is required";
-        valid = false;
-    }
-
-    //validate city
-    if(!req.body.city && (req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER"))
-    {
-        jsonObj['city_error'] = "City is required";
-        valid = false;
-    }
-
-    //validate state
-    if(!req.body.state && (req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER"))
-    {
-        jsonObj['state_error'] = "State is required";
-        valid = false;
-    }
-
-    //validate zip
-    if(!req.body.zip && (req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER"))
-    {
-        jsonObj['zip_error'] = "Zip Code is required";
-        valid = false;
-    }
-
-    //validate phone number
-    if(!req.body.phone_number && (req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER"))
-    {
-        jsonObj['phone_number_error'] = "Phone number is required";
-        valid = false;
-    }
-
-    //validate open from
-    if(!req.body.open_from && (req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER"))
-    {
-        jsonObj['open_from_error'] = "Open from is required";
-        valid = false;
-    }
-
-    //validate open to
-    if(!req.body.open_to && (req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER"))
-    {
-        jsonObj['open_to_error'] = "Open to is required";
-        valid = false;
-    }
-
-    var query = "SELECT * from DASH5082.USER WHERE EMAIL ='" + req.body.email + "';";           
-        
-    var result = dbQuery(query, function(result) {
-        console.log(result);
-        if(result.length != 0)
-        {
-            jsonObj['email_error'] = "This email is already registered"
-            valid = false;
-            jsonObj['message'] = "failed";
-            res.send(jsonObj);
-        }
-        else
-        {
-            if(valid)
-            {    
-                bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
-                    // Store hash in your password DB.
-                    // enter new doctor to the db
-                    var query;
-                    if(req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER")
-                    {
-                        query = "INSERT INTO DASH5082.USER (EMAIL, PASSWORD, NAME, PHONE_NUMBER, STREET, CITY, STATE, ZIP, OPEN_FROM, OPEN_TO, TYPE, FIRST_LOGIN, ACTIVE, APPROVE) VALUES ('" + req.body.email + "','" + hash + "','" + req.body.name + "','" + req.body.phone_number + "','" + req.body.street + "','" + req.body.city + "','" + req.body.state + "','" + req.body.zip + "','" + req.body.open_from + "','" + req.body.open_to + "','" + req.body.type + "', '1', '1', '1');"; 
-                    }
-                    else
-                    {
-                        query = "INSERT INTO DASH5082.USER (EMAIL, PASSWORD, NAME, STREET, CITY, STATE, ZIP, TYPE, FIRST_LOGIN, ACTIVE, APPROVE) VALUES ('" + req.body.email + "','" + hash + "','" + req.body.name + "','" + req.body.street + "','" + req.body.city + "','" + req.body.state + "','" + req.body.zip + "','" + req.body.type + "', '1', '1', '1');";
-                    }
-                    dbQuery(query, function(newResult) {
-                        //Send Confirmation Email
-                        var link = req.protocol + '://' + req.get('host');
-                        var mailOptions = {
-                            from: 'chemofinder@gmail.com', // sender address
-                            to: req.body.email, // list of receivers
-                            subject: 'New Account', // Subject line
-                            template: 'new_account_mail',
-                            context: {
-                                link: link,
-                                password: req.body.password
-                            }
-                            //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
-                        };
-                        sendEmail(mailOptions);
-
-                        jsonObj['message'] = "success";
-                        res.send(jsonObj);
-                    });
-                });
-            }
-            else
-            {
-                jsonObj['message'] = "failed";
-                res.send(jsonObj);
-            }
-        }
-    });              
+app.get('/pharmacy/login', function(req, res){
+    res.render('pharmacy/login');
 });
 
-app.post('/user/login', function(req, res){
+app.post('/pharmacy/login', function(req, res){
     //console.log(Users);
     //console.log(req.session.user);
     if(!req.body.email || !req.body.password){
-        res.send({message: "failed", login_error:"Please enter both email and password"});
+        res.send({message: "failed", login_error: "Please enter both email and password"});
     }
-    else{
-            var query = "SELECT * from DASH5082.USER WHERE EMAIL ='" + req.body.email + "';";
-            var result = dbQuery(query, function(result) {
-                //console.log(result[0].ID);
+    else
+    {
+        var query = "SELECT * from DASH5082.PHARMACY WHERE EMAIL ='" + req.body.email + "';";
+        var result = dbQuery(query, function(result) {
+            //console.log(result[0].ID);
 
-                if(result.length > 0)
+            if(result.length > 0)
+            {
+                if(result[0].APPROVE == '0')
+                {
+                     res.send({message: "failed", login_error: "Your account is not approved yet"});
+                }
+                else
                 {
                     bcrypt.compare(req.body.password, result[0].PASSWORD, function(err, cmp) {
                         // res == true
                         if(cmp)
                         {
-                            if(result[0].APPROVE == '0')
-                            {
-                                res.send({message: "failed", login_error: "Your account is not approved yet"});
-                            }
-                            else if(result[0].ACTIVE == '0')
-                            {
-                                res.send({message: "failed", login_error: "Your account is suspended, " + result[0].SUSPENSION_REASON});
-                            }
-                            else
-                            {
-                                req.session.user = result[0];
-                                var type = result[0].TYPE;
-                                if(result[0].FIRST_LOGIN == '1')
-                                {
-                                    res.send({message: "first login", type: type});
-                                }
-                                else
-                                {
-                                    res.send({message: "success", type: type});
-                                }
-                            }
+                            req.session.user = result[0];
+                            res.send({message: "success"});
                         }
-                        else
-                        {
-                           res.send({message: "failed", login_error: "Invalid Credentials"}); 
-                        }
-                    });   
+                    });
                 }
-                else
-                {
-                    res.send({message: "failed", login_error: "Invalid Credentials"});
-                }
-            });
-        }    
+            }
+            else
+            {
+                res.send({message: "failed", login_error: "Invalid Credentials"});
+            }
+        });
+    }  
 });
 
 //ADMIN
@@ -534,307 +498,26 @@ app.post('/admin/login', function(req, res){
     }    
 });
 
-app.get('/user/forgotpassword', function(req, res){
-    var base = req.protocol + '://' + req.get('host');
-    res.render('user/forgot_password', { base: base });
-});
 
-app.post('/user/forgotpassword', function(req, res){
-    //console.log(Users);
-    //console.log(req.session.user);
-    if(!req.body.email){
-        res.send({message: "failed", fpassword_error: "Email is required"});
-    }
-    else
-    {
-        var query = "SELECT * from DASH5082.USER WHERE EMAIL ='" + req.body.email + "';";
-        var result = dbQuery(query, function(result) {
-            //console.log(result[0].ID);
+app.get('/admin/approve', function(req, res) {
+    var query = "SELECT DOCTOR.EMAIL, DOCTOR.NAME,'Doctor' AS TYPE from DASH5082.DOCTOR WHERE DOCTOR.APPROVE = '0' UNION SELECT PHARMACY.EMAIL, PHARMACY.NAME, 'Pharmacy' AS TYPE from DASH5082.PHARMACY WHERE PHARMACY.APPROVE = '0';";
+    var result = dbQuery(query, function(result) {
+        //console.log(result[0].ID);
 
-            if(result.length > 0)
-            {
-                //generate random token
-                // Generate a 20 character alpha-numeric token:
-                var token = randtoken.generate(120);
-
-                //Delete old tokens if exists
-                var query = "DELETE from DASH5082.USER_FORGOT_PASSWORD WHERE USER_ID ='" + result[0].ID + "';";
-                dbQuery(query, function(result2) {
-                    //insert new token into the database
-                    var query = "INSERT INTO DASH5082.USER_FORGOT_PASSWORD (USER_ID, TOKEN, CREATED_AT) values ('" + result[0].ID + "', '" + token + "', TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));";
-                    dbQuery(query, function(result3) {
-                        res.send({message: "success"});
-                        var base = req.protocol + '://' + req.get('host');
-                        var link = base + '/user/resetpassword/' + token;
-                        //send email
-                        var mailOptions = {
-                            from: 'chemofinder@gmail.com', // sender address
-                            to: req.body.email, // list of receivers
-                            subject: 'Password Recovery', // Subject line
-                            template: 'forgot_password_mail',
-                            context: {
-                                link: link
-                            }
-                            //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
-                        };
-                        sendEmail(mailOptions);
-                    });
-                });
-            }
-            else
-            {
-                res.send({message: "failed", login_error: "This email is not registered"});
-            }
-        });
-    }    
-});
-
-function sendEmail(mailOptions) {
-    transporter.sendMail(mailOptions, function(error, info){
-        if(error){
-            console.log(error);
-            //res.json({message: 'error'});
-        }else{
-            console.log('Message sent: ' + info.response);
-            //res.json({message: info.response});
-        };
-    });
-}
-
-app.get('/user/resetpassword/:token', function(req, res){
-
-    // check if the token exists
-    var query = "SELECT * from DASH5082.USER_FORGOT_PASSWORD WHERE TOKEN ='" + req.params.token + "';";
-    dbQuery(query, function(result) {
-        if(result.length > 0)
+        if(result.length == 0)
         {
-            // check the expiration date of the token
-            var tokenDate = new Date(result[0].CREATED_AT);
-            var now = new Date();
-
-            //get difference in milliseconds
-            var diff = Math.abs(now-tokenDate);
-            //get difference in hours
-            diff = diff/(1000*60*60)
-            console.log(diff);
-
-            if(diff > 3)
-            {
-                res.send("404 Not Found");       
-            }
-            else
-            {
-                // res.send(req.params.token);
-                // render change password page
-                var base = req.protocol + '://' + req.get('host');
-                res.render('user/reset_password', { base: base });
-            }
+            // redirect with message
+            // res.send({message: "There are no requests currently"});
+            res.render('admin/approve', {message: "There are no requests currently"});
         }
         else
         {
-            res.send("404 Not Found");
-        }
-    });    
-    
-    //res.send("tagId is set to " + req.params.token);
-    // var base = req.protocol + '://' + req.get('host');
-    // res.render('forgot_password', { base: base });
-});
-
-app.post('/user/resetpassword', function(req, res){
-    // check if the token exists
-    var query = "SELECT * from DASH5082.USER_FORGOT_PASSWORD WHERE TOKEN ='" + req.body.token + "';";
-    dbQuery(query, function(result) {
-        if(result.length > 0)
-        {
-            // check the expiration date of the token
-            var tokenDate = new Date(result[0].CREATED_AT);
-            var now = new Date();
-
-            //get difference in milliseconds
-            var diff = Math.abs(now-tokenDate);
-            //get difference in hours
-            diff = diff/(1000*60*60);
-            console.log(diff);
-
-            if(diff > 3)
-            {
-                res.send("404 Not Found");       
-            }
-            else
-            {
-                var jsonObj = {};
-                var valid = true;
-                //validate password
-                //Minimum 8 characters at least 1 special character
-                var passwordRegex = /^(?=.*[A-Za-z\d])(?=.*[$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=])[A-Za-z\d$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=]{8,}$/;
-                if(!req.body.password)
-                {
-                    jsonObj['password_error'] = "Password is required";
-                    valid = false;
-                }
-                else if(!validateWithRegex(passwordRegex, req.body.password))
-                {
-                   jsonObj['password_error'] = "Password has to be minimum 8 characters at least 1 special character";
-                   valid = false;
-                }
-                else if(req.body.password != req.body.rpassword)
-                {
-                   jsonObj['password_error'] = "Password and cofirm password doesn't match";   
-                   valid = false;
-                }
-
-                //validate rpassword
-                if(!req.body.rpassword)
-                {
-                    jsonObj['rpassword_error'] = "Confirm Password is required";
-                    valid = false;
-                }
-                if(valid)
-                {    
-                    bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
-                      // Store hash in your password DB.
-                      // enter new pharmacy to the db
-                      var query = "INSERT INTO DASH5082.USER (PASSWORD) VALUES ('" + hash + "');";
-                      dbQuery(query, function(newResult) {
-                          console.log(newResult);
-                          jsonObj['message'] = "success";
-                          res.send(jsonObj);
-                      });
-                    });
-                }
-                else
-                {
-                    jsonObj['message'] = "failed";
-                    res.send(jsonObj);
-                }
-            }
-        }
-        else
-        {
-            res.send("404 Not Found");
-        }
-    });
-});
-
-app.get('/admin/manage_users', function(req, res) {
-    var query = "SELECT ID, EMAIL, NAME, TYPE from DASH5082.USER WHERE APPROVE='0'";
-    dbQuery(query, function(result) {
-        var query = "SELECT ID, EMAIL, NAME, TYPE, ACTIVE, SUSPENSION_REASON from DASH5082.USER WHERE APPROVE='1'";
-        dbQuery(query, function(result2) {
-            //console.log(result[0].ID);
-            var base = req.protocol + '://' + req.get('host');
             // redirect with data
-            //res.send({data: result});
-            res.render('admin/manage_users', {base: base, non_approved_users: result, approved_users: result2});  
-        });
-        
+            // res.send({data: result});
+            res.render('admin/approve', {data: result});
+        }
     });
 });
-
-app.post('/admin/approveuser', function(req, res){
-    var query = "UPDATE USER SET APPROVE='1' WHERE ID=" + req.body.id + ";";
-    dbQuery(query, function(newResult) {
-        var query = "SELECT EMAIL FROM USER WHERE ID=" + req.body.id + ";";
-        dbQuery(query, function(result) 
-        {
-            if(result.length > 0)
-            {
-                var link = req.protocol + '://' + req.get('host');
-                var mailOptions = {
-                    from: 'chemofinder@gmail.com', // sender address
-                    to: result[0].EMAIL, // list of receivers
-                    subject: 'Account Approval', // Subject line
-                    template: 'account_approval_mail',
-                    context: {
-                        link: link
-                    }
-                    //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
-                };
-                sendEmail(mailOptions);
-                res.send({message: req.body.id});
-            }
-            else
-            {
-                res.send({message: "failed"});
-            }
-        });
-        
-    });
-});
-
-app.post('/admin/suspenduser', function(req, res){
-
-    var query = "UPDATE USER SET ACTIVE='0', SUSPENSION_REASON='" + req.body.suspension_reason + "' WHERE ID=" + req.body.id + ";";
-    dbQuery(query, function(newResult) {
-        var query = "SELECT EMAIL FROM USER WHERE ID=" + req.body.id + ";";
-        dbQuery(query, function(result) 
-        {
-            if(result.length > 0)
-            {
-                console.log(req.body.suspension_email);
-                if(req.body.suspension_email == 'true')
-                {
-                    var mailOptions = {
-                        from: 'chemofinder@gmail.com', // sender address
-                        to: result[0].EMAIL, // list of receivers
-                        subject: 'Account Suspension', // Subject line
-                        template: 'account_suspension_mail',
-                        context: {
-                            message: req.body.suspension_reason
-                        }
-                        //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
-                    };
-                    sendEmail(mailOptions);    
-                }
-                
-                res.send({message: req.body.id});
-            }
-            else
-            {
-                res.send({message: "failed"});
-            }
-        });
-    });
-});
-
-
-app.post('/admin/activateuser', function(req, res){
-
-    var query = "UPDATE USER SET ACTIVE='1' WHERE ID=" + req.body.id + ";";
-    dbQuery(query, function(newResult) {
-        var query = "SELECT EMAIL FROM USER WHERE ID=" + req.body.id + ";";
-        dbQuery(query, function(result) 
-        {
-            if(result.length > 0)
-            {
-                var link = req.protocol + '://' + req.get('host');
-                var mailOptions = {
-                    from: 'chemofinder@gmail.com', // sender address
-                    to: result[0].EMAIL, // list of receivers
-                    subject: 'Account Activation', // Subject line
-                    template: 'account_activation_mail',
-                    context: {
-                        link: link
-                    }
-                    //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
-                };
-                sendEmail(mailOptions);
-                res.send({message: req.body.id});
-            }
-            else
-            {
-                res.send({message: "failed"});
-            }
-        });
-    });
-});
-
-app.get('/generaterandompassword', function(req, res) {
-    var random = new RandExp(/^(?=.*[A-Za-z\d])(?=.*[$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=])[A-Za-z\d$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=]{8,}$/).gen();
-    res.send({random: random});
-});
-
 
 
 function checkSignIn(req, res, next){
@@ -852,16 +535,12 @@ app.get('/protected_page', checkSignIn, function(req, res){
 });
 
 
-app.get('/doctor', function(req, res){
-    var base = req.protocol + '://' + req.get('host');
-    res.render('doctor/search_medicines', { base: base });
-});
 
 app.get('/logout', function(req, res){
     req.session.destroy(function(){
         console.log("user logged out.")
     });
-    res.redirect('/');
+    res.redirect('/doctor/login');
 });
 
 app.use('/protected_page', function(err, req, res, next){
