@@ -10,92 +10,49 @@ block content
       .div-search.search-bar
         input#tags.input-search.search-bar(type='text', placeholder='Search For Medicines...')         
       .div-search.search-bar
-        button.button-search.search-bar.btn.btn-primary(style='height:60px;') Add
+        button.button-search.search-bar.btn.btn-primary(onclick="addSearch()" style='height:60px;') Add
     h4.table-title Medicines   
     table#myTable.display
       thead
         tr
-          th Drug ID
           th Standardized Name
           th Brand Name
           th Form
-          th Stength
+          th Strength
+          th Strength Unit
           th Manufacturer
           th Action
       tbody
-        tr
-          td Row 1 Data 1
-          td Row 1 Data 2
-          td Row 1 Data 1
-          td Row 1 Data 2
-          td Row 1 Data 1
-          td Row 1 Data 2
-          td Row 1 Data 2
-        tr
-          td Row 2 Data 1
-          td Row 2 Data 2
-          td Row 1 Data 1
-          td Row 1 Data 2
-          td Row 1 Data 1
-          td Row 1 Data 2
-          td Row 1 Data 2
-    h4.table-title Results   
-    table#myTable2.display
-      thead
-        tr
-          th Drug ID
-          th Standardized Name
-          th Brand Name
-          th Form
-          th Stength
-          th Manufacturer
-      tbody
-        tr
-          td Row 2 Data 1
-          td Row 2 Data 2
-          td Row 1 Data 1
-          td Row 1 Data 2
-          td Row 1 Data 1
-          td Row 1 Data 2
-        tr
-          td Row 2 Data 1
-          td Row 2 Data 2
-          td Row 1 Data 1
-          td Row 1 Data 2
-          td Row 1 Data 1
-          td Row 1 Data 2      
+        if medicines.length > 0
+          - for( var i = 0, len = medicines.length; i < len; i++ ) {
+          tr
+            td #{medicines[i].GENERIC_NAME} 
+            td #{medicines[i].BRAND_NAME}
+            td #{medicines[i].FORM}
+            td #{medicines[i].STRENGTH}
+            td #{medicines[i].STRENGTH_UNIT}
+            td #{medicines[i].MANUFACTURER}
+            td 
+              button.form-control.btn.btn-primary(onclick='addMedicine('+medicines[i].ID+')') Add
+          - }
+    h4.table-title Items To Search   
+      div.div_search
+        table#table_search
+          thead
+            tr.tr_search
+              th.th_search Standardized Name
+              th.th_search Brand Name
+              th.th_search Form
+              th.th_search Strength
+              th.th_search Strength Unit
+              th.th_search Manufacturer
+          tbody#itemsToSearch
+            tr.tr_search
+              td#empty_search.td_search.text-center(valign="top", colspan="6") No medicines are added yet
+    button.btn.btn-primary Search
+              
 block scripts
   script(src='https://code.jquery.com/ui/1.12.1/jquery-ui.js')
   script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js') 
-  script.
-    $( function() {
-    $('#myTable').DataTable();
-    $('#myTable2').DataTable();
-    var availableTags = [
-    "ActionScript",
-    "AppleScript",
-    "Asp",
-    "BASIC",
-    "C",
-    "C++",
-    "Clojure",
-    "COBOL",
-    "ColdFusion",
-    "Erlang",
-    "Fortran",
-    "Groovy",
-    "Haskell",
-    "Java",
-    "JavaScript",
-    "Lisp",
-    "Perl",
-    "PHP",
-    "Python",
-    "Ruby",
-    "Scala",
-    "Scheme"
-    ];
-    $( "#tags" ).autocomplete({
-    source: availableTags
-    });
-    } );
+  script(type='text/javascript', src=base+'/scripts/doctor/main.js')
+    

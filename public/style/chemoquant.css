@@ -476,12 +476,17 @@ welcome {
 }
 .welcome__acs {
     height: 40px;
+    margin-right: 20px;
+}
+.welcome__chai {
+    height: 40px;
+    margin-right: 20px;
 }
 .welcome__heath-corp {
     position: absolute;
     height: 140px;
     top: -42px;
-    left: 10px;
+    left: 110px;
 }
 .cancer-characteristics {
     display: block;
@@ -1251,3 +1256,51 @@ regimen-dist {
 .div-search { display: table-cell; width: 100%; }
 .input-search { width: 100%; padding: .5em 1em; height:60px; border: 1px solid #ccc; border-radius: 4px; }
 .button-search { width:120px; color: black; padding: .5em 1em; height:60px; white-space: nowrap; margin: 0 0 0 1em; }
+@media screen and (max-width: 1001px) {
+    .main-actions {
+        display:none;
+    }
+}
+.fileUpload {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    /*width: 163.33px;*/
+    /*margin: 10px;*/
+}
+.fileUpload input.upload {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}
+td
+{
+    max-width: 85px;
+    word-wrap: break-word;
+}
+
+#table_search {
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 100%;
+    border: 1px solid #ddd;
+}
+
+.th_search, .td_search {
+    border: none;
+    text-align: left;
+    padding: 8px;
+}
+
+.tr_search:nth-child(even){background-color: #f2f2f2}
+.div_search{
+    overflow-x:auto;
+    margin-top: 20px;
+}
+#empty_search{background-color: #f2f2f2}

@@ -3,8 +3,8 @@ html
     style(type='text/css').
       @charset "UTF-8";[ng\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\:form{display:block;}.ng-animate-shim{visibility:hidden;}.ng-anchor{position:absolute;}
     meta(charset='utf-8')
-    title ChemFinder
-    link(rel='stylesheet', type='text/css', href= base + '/style/chemoquant.css')
+    title ChemoFinder
+    link(rel='stylesheet', type='text/css', href= base + '/stylesheets/chemoquant.css')
     link(href='https://fonts.googleapis.com/css?family=Open+Sans', rel='stylesheet')
     link(href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css', rel='stylesheet')
     link(href='https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css', rel='stylesheet')
@@ -16,13 +16,14 @@ html
           a(ui-sref='welcome', href='#/welcome')
             span.heavy-title ChemoFinder
         .header__actions
-          button.header__action-button.ng-binding(ng-click='headerCtrl.home()')
-            img(src= base +'/images/home.svg')
-            |                         Home
-          .header__actions-divider
-          button.header__action-button.ng-binding(ng-click='headerCtrl.settings()')
-            img(src= base +'/images/gear.svg')
-            |                         Settings
+          block headers
+          //- button.header__action-button.ng-binding(ng-click='headerCtrl.home()')
+          //-   img(src= base +'/images/home.svg')
+          //-   |                         Home
+          //- .header__actions-divider
+          //- button.header__action-button.ng-binding(ng-click='headerCtrl.settings()')
+          //-   img(src= base +'/images/gear.svg')
+          //-   |                         Settings
       // Settings modal start
       .back-drop.ng-hide(ng-show='headerCtrl.showSettings')
       .pop-up.ng-hide(ng-show='headerCtrl.showSettings')
@@ -54,6 +55,7 @@ html
           .welcome__branding
             img.welcome__heath-corp(src= base +'/images/IBM_HealthCorps.svg')
             img.welcome__acs(src= base +'/images/ACS_Logo.png')
+            img.welcome__chai(src= base +'/images/CHAI_LOGO.png')  
     block modals          
     script(src='https://code.jquery.com/jquery-3.1.1.js', integrity='sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA=', crossorigin='anonymous')
     script(type='text/javascript', src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js')

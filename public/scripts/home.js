@@ -7,7 +7,7 @@ $('#timepicker2').timepicker();
 $("#type").change(function() {
     $('.error-form').remove();
     $('.message-form').remove();
-    if ($("#type option:selected").text() == "Pharmacy") {
+    if ($("#type option:selected").val() == "PHARMACY" || $("#type option:selected").val() == "TREATMENT CENTER") {
         $('.handle').css('display', 'inherit');
     } else {
         $('.handle').css('display', 'none');
@@ -23,18 +23,10 @@ function login() {
     var password = $('#uPassword');
     user_array[email.attr('name')] = email.val();
     user_array[password.attr('name')] = password.val();
-    var url2 = '';
-    if(type.val() == "pharmacy")
-    {
-        url2 = '/pharmacy/login';
-    }
-    else if(type.val() == "doctor")
-    {
-        url2 = '/doctor/login';
-    }
+   
      $.ajax({
         type: "post",
-        url: url + url2,
+        url: url +'/user/login',
         data : user_array,
         success:  function(data){
             console.log(data);
@@ -51,11 +43,11 @@ function login() {
             }
             else if(data.message == "success")
             {
-                if( url2 == '/pharmacy/login')
+                if( data.type == 'PHARMACY' || data.type == 'TREATMENT CENTER')
                 {
                     window.location = url + '/pharmacy';
                 }
-                else if( url2 == '/doctor/login')
+                else if(data.type == 'DOCTOR' || data.type == 'NAVIGATOR')
                 {
                     window.location = url + '/doctor';
                 }
@@ -65,40 +57,41 @@ function login() {
 }
 
 function register() {
-    var type = $('#type');
     var user_array={};
     
+    var type = $('#type');
     var name = $('#name');
     var email = $('#email');
     var password = $('#password');
     var rpassword = $('#rpassword');
-    
+    var street = $('#street');
+    var city = $('#city');
+    var state = $('#state');
+    var zip = $('#zip');
 
+    user_array[type.attr('name')] = type.val();
     user_array[name.attr('name')] = name.val();
     user_array[email.attr('name')] = email.val();
     user_array[password.attr('name')] = password.val();
     user_array[rpassword.attr('name')] = rpassword.val();
-    
-    var url2 = '';
-    if(type.val() == "pharmacy")
+    user_array[street.attr('name')] = street.val();
+    user_array[city.attr('name')] = city.val();
+    user_array[state.attr('name')] = state.val();
+    user_array[zip.attr('name')] = zip.val();
+
+    if(type.val() == "PHARMACY" || type.val() == "TREATMENT CENTER")
     {
-        url2 = '/pharmacy/signup';
-        var address = $('#address');
         var phone = $('#phone');
         var open_from = $('#timepicker1');
         var open_to = $('#timepicker2');
-        user_array[address.attr('name')] = address.val();
         user_array[phone.attr('name')] = phone.val();
         user_array[open_from.attr('name')] = open_from.val();
         user_array[open_to.attr('name')] = open_to.val();
     }
-    else if(type.val() == "doctor")
-    {
-        url2 = '/doctor/signup';
-    }
+    console.log(user_array);
      $.ajax({
         type: "post",
-        url: url + url2,
+        url: url + '/user/signup',
         data : user_array,
         success:  function(data){
             console.log(data);
@@ -127,15 +120,35 @@ function register() {
                   var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.rpassword_error + '</div>';
                   $(error_message).insertBefore($('#rpasswordRegisterForm'));
                }
+               if(data.type_error)
+               {
+                  var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.type_error + '</div>';
+                  $(error_message).insertBefore($('#typeRegisterForm'));
+               }
                if(data.name_error)
                {
                   var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.name_error + '</div>';
                   $(error_message).insertBefore($('#nameRegisterForm'));
                }
-               if(data.address_error)
+               if(data.street_error)
                {
-                  var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.address_error + '</div>';
-                  $(error_message).insertBefore($('#addressRegisterForm'));
+                  var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.street_error + '</div>';
+                  $(error_message).insertBefore($('#streetRegisterForm'));
+               }
+               if(data.city_error)
+               {
+                  var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.city_error + '</div>';
+                  $(error_message).insertBefore($('#cityRegisterForm'));
+               }
+               if(data.state_error)
+               {
+                  var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.state_error + '</div>';
+                  $(error_message).insertBefore($('#stateRegisterForm'));
+               }
+               if(data.zip_error)
+               {
+                  var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.zip_error + '</div>';
+                  $(error_message).insertBefore($('#zipRegisterForm'));
                }
                if(data.phone_number_error)
                {

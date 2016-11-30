@@ -1,7 +1,31 @@
 extends ../layout
 
+block stylesheets
+  link(href=base+'/style/bootstrap-timepicker.min.css', rel='stylesheet')
+block headers
+  button.header__action-button.ng-binding(onclick="location.href='" + base + "/admin/manage_users';")
+    i.glyphicon.glyphicon-user
+    span.main-actions|                         Manage Users
+  .header__actions-divider
+  button.header__action-button.ng-binding(onclick="location.href='" + base + "/admin/manage_medicines';")
+    i.glyphicon.glyphicon-list-alt
+    span.main-actions|                         Manage Medicines
+  .header__actions-divider
+  button.header__action-button.ng-binding(onclick="location.href='http://google.com';")
+    i.glyphicon.glyphicon-cog
+    span.main-actions|                         Settings
+  .header__actions-divider
+  button.header__action-button.ng-binding(onclick="location.href='http://google.com';")
+    i.glyphicon.glyphicon-log-out
+    span.main-actions|                         Logout        
 block content
   .welcome__home-message.ng-binding Manage Users
+  .row
+    .col-xs-6.col-md-2 
+      button.form-control.btn.btn-primary(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewUser') Add New User
+    .col-xs-6.col-md-2
+      button.form-control.btn.btn-primary(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewAdmin') Add New Admin
+  hr  
   .welcome__home-buttons
     h4.table-title New Account Requests     
     table#newAccountsTable.display
@@ -19,7 +43,7 @@ block content
             td #{non_approved_users[i].EMAIL}
             td #{non_approved_users[i].TYPE}
             td 
-              button.form-control.btn.btn-primary(onclick='approve('+non_approved_users[i].ID+', "' + non_approved_users[i].TYPE + '")') Approve
+              button.form-control.btn.btn-primary(onclick='approve('+non_approved_users[i].ID+')') Approve
           - }
     h4.table-title Users Accounts     
     table#usersTable.display
@@ -28,6 +52,8 @@ block content
           th Name
           th Email
           th Type
+          th Suspension Reason
+          th Mail On Suspension
           th Action
       tbody
         if approved_users && approved_users.length > 0
@@ -36,12 +62,159 @@ block content
             td #{approved_users[i].NAME} 
             td #{approved_users[i].EMAIL}
             td #{approved_users[i].TYPE}
+            td
+              if approved_users[i].ACTIVE == 1
+                input.form-control(type='text', id='suspend_message_'+approved_users[i].ID)
+              else
+                !{approved_users[i].SUSPENSION_REASON}
+            td
+              if approved_users[i].ACTIVE == 1
+                input.form-control(type='checkbox', id='chk_'+approved_users[i].ID)
+              else
+                input.form-control(type='checkbox' disabled readonly)
             td 
               if approved_users[i].ACTIVE == 1
                 button.form-control.btn.btn-danger(onclick='suspend('+approved_users[i].ID+')') Suspend
               else
                 button.form-control.btn.btn-success(onclick='activate('+approved_users[i].ID+')') Activate  
-          - }                 
+          - } 
+block modals             
+  #addNewUser.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          h4#myModalLabel.modal-title Add New User
+        // /.modal-header
+        .modal-body
+          form(role='form')
+            #typeUserForm.form-group
+              .input-group
+                select#typeUser.form-control(name='type')
+                  option.form-control(value='') Select Your Type
+                  option.form-control(value='DOCTOR') Doctor
+                  option.form-control(value='NAVIGATOR') Navigator
+                  option.form-control(value='PHARMACY') Pharmacy
+                  option.form-control(value='TREATMENT CENTER') Treatment Center
+                span.input-group-addon
+                  i.glyphicon.glyphicon-briefcase
+              // /.input-group
+            // /.form-group
+            #nameUserForm.form-group
+              .input-group
+                input#nameUser.form-control(name='name', type='text', placeholder='Name')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-user
+            // /.form-group
+            #emailUserForm.form-group
+              .input-group
+                input#emailUser.form-control(name='email', type='text', placeholder='Email')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-envelope
+            // /.form-group
+            .row
+              .col-xs-8
+                #passwordUserForm.form-group
+                  .input-group
+                    input#passwordUser.form-control(name='password', type='password', placeholder='Password')
+                    span.input-group-addon
+                      i.glyphicon.glyphicon-lock
+                  // /.input-group
+                // /.form-group
+              .col-xs-4
+                 button.form-control.btn.btn-primary(type='button' onclick='generate_password(this)') Generate Password
+            #streetUserForm.form-group
+              .input-group
+                input#streetUser.form-control(name='street', type='text', placeholder='Street')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-home
+            // /.form-group
+            #cityUserForm.form-group
+              .input-group
+                input#cityUser.form-control(name='city', type='text', placeholder='City')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-home
+            // /.form-group
+            #stateUserForm.form-group
+              .input-group
+                input#stateUser.form-control(name='state', type='text', placeholder='State')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-home
+            // /.form-group
+            #zipUserForm.form-group
+              .input-group
+                input#zipUser.form-control(name='zip', type='text', placeholder='Postal Code')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-home
+            // /.form-group
+            #phoneUserForm.form-group.handle(style='display:none;')
+              .input-group
+                input#phoneUser.form-control(name='phone_number', type='text', placeholder='Phone Number')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-earphone
+            // /.form-group
+            p.handle(style='display:none;') 
+              strong Open from
+            #openFromUserForm.form-group.handle(style='display:none;')
+              .input-group.bootstrap-timepicker.timepicker
+                input#timepicker1.form-control.input-small(name='open_from', type='text')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-time
+            // /.form-group
+            p.handle(style='display:none;')
+              strong Open to
+            #openToUserForm.form-group.handle(style='display:none;')
+              .input-group.bootstrap-timepicker.timepicker
+                input#timepicker2.form-control.input-small(name='open_to', type='text')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-time
+            // /.form-group      
+        // /.modal-body
+        .modal-footer
+          button.form-control.btn.btn-primary(onclick='add_new_user();') Submit
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal
+  #addNewAdmin.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          h4#myModalLabel.modal-title Add New Admin
+        // /.modal-header
+        .modal-body
+          form(role='form')
+            #nameAdminForm.form-group
+              .input-group
+                input#nameAdmin.form-control(name='name', type='text', placeholder='Name')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-user
+            // /.form-group
+            #emailAdminForm.form-group
+              .input-group
+                input#emailAdmin.form-control(name='email', type='text', placeholder='Email')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-envelope
+            // /.form-group
+            .row
+              .col-xs-8
+                #passwordAdminForm.form-group
+                  .input-group
+                    input#passwordAdmin.form-control(name='password', type='password', placeholder='Password')
+                    span.input-group-addon
+                      i.glyphicon.glyphicon-lock
+                  // /.input-group
+                // /.form-group
+              .col-xs-4
+                 button.form-control.btn.btn-primary(type='button' onclick='generate_password(this)') Generate Password
+        .modal-footer
+          button.form-control.btn.btn-primary(onclick='add_new_admin();') Submit
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal                          
 block scripts
   script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js')
+  script(type='text/javascript', src=base+'/scripts/bootstrap-timepicker.min.js')  
   script(type='text/javascript', src=base+'/scripts/admin/manage_users.js')
