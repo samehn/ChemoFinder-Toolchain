@@ -1,0 +1,101 @@
+extends ../layout
+
+block stylesheets
+  link(rel='stylesheet', href='https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css')
+
+block content
+  .welcome__home-message.ng-binding Search Medicines
+  .welcome__home-buttons
+    section.section-search.search-bar
+      .div-search.search-bar
+        input#tags.input-search.search-bar(type='text', placeholder='Search For Medicines...')         
+      .div-search.search-bar
+        button.button-search.search-bar.btn.btn-primary(style='height:60px;') Add
+    h4.table-title Medicines   
+    table#myTable.display
+      thead
+        tr
+          th Drug ID
+          th Standardized Name
+          th Brand Name
+          th Form
+          th Stength
+          th Manufacturer
+          th Action
+      tbody
+        tr
+          td Row 1 Data 1
+          td Row 1 Data 2
+          td Row 1 Data 1
+          td Row 1 Data 2
+          td Row 1 Data 1
+          td Row 1 Data 2
+          td Row 1 Data 2
+        tr
+          td Row 2 Data 1
+          td Row 2 Data 2
+          td Row 1 Data 1
+          td Row 1 Data 2
+          td Row 1 Data 1
+          td Row 1 Data 2
+          td Row 1 Data 2
+    h4.table-title Results   
+    table#myTable2.display
+      thead
+        tr
+          th Drug ID
+          th Standardized Name
+          th Brand Name
+          th Form
+          th Stength
+          th Manufacturer
+      tbody
+        tr
+          td Row 2 Data 1
+          td Row 2 Data 2
+          td Row 1 Data 1
+          td Row 1 Data 2
+          td Row 1 Data 1
+          td Row 1 Data 2
+        tr
+          td Row 2 Data 1
+          td Row 2 Data 2
+          td Row 1 Data 1
+          td Row 1 Data 2
+          td Row 1 Data 1
+          td Row 1 Data 2      
+block scripts
+  script(src='https://code.jquery.com/ui/1.12.1/jquery-ui.js')
+  script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js') 
+  script.
+    $( function() {
+    $('#myTable').DataTable();
+    $('#myTable2').DataTable();
+    var availableTags = [
+    "ActionScript",
+    "AppleScript",
+    "Asp",
+    "BASIC",
+    "C",
+    "C++",
+    "Clojure",
+    "COBOL",
+    "ColdFusion",
+    "Erlang",
+    "Fortran",
+    "Groovy",
+    "Haskell",
+    "Java",
+    "JavaScript",
+    "Lisp",
+    "Perl",
+    "PHP",
+    "Python",
+    "Ruby",
+    "Scala",
+    "Scheme"
+    ];
+    $( "#tags" ).autocomplete({
+    source: availableTags
+    });
+    } );

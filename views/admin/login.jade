@@ -4,17 +4,17 @@ block content
   img.welcome__home-image(src= base +'/images/homeicon.svg')
   .welcome__home-message.ng-binding Welcome to ChemoFinder
   .welcome__home-buttons
-    .col-md-6(style='margin-left:25%;')
+    .col-md-6.col-md-push-3
       form(role='form')
         #emailLoginForm.form-group
           .input-group
-            input#uEmail.form-control(name='email', type='text', placeholder='Email')
+            input#uEmail.form-control(name='email', type='text', placeholder='Email', style='position:static')
             span.input-group-addon
               i.glyphicon.glyphicon-user
         // /.form-group
         #passwordLoginForm.form-group
           .input-group
-            input#uPassword.form-control(name='password', type='password', placeholder='Password')
+            input#uPassword.form-control(name='password', type='password', placeholder='Password', style='position:static')
             span.input-group-addon
               i.glyphicon.glyphicon-lock
           // /.input-group

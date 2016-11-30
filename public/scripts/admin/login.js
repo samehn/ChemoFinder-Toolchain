@@ -27,7 +27,7 @@ function login() {
             }
     		else if(data.message == "success")
     		{
-    			window.location = url + '/admin/dashboard';
+    			window.location = url + '/admin/manage_users';
     		}
     	}
     });

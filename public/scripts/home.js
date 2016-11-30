@@ -8,7 +8,7 @@ $("#type").change(function() {
     $('.error-form').remove();
     $('.message-form').remove();
     if ($("#type option:selected").text() == "Pharmacy") {
-        $('.handle').css('display', 'inline-block');
+        $('.handle').css('display', 'inherit');
     } else {
         $('.handle').css('display', 'none');
     }
@@ -48,6 +48,17 @@ function login() {
                   var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.login_error + '</div>';
                   $(error_message).insertBefore($('#emailLoginForm'));
                }
+            }
+            else if(data.message == "success")
+            {
+                if( url2 == '/pharmacy/login')
+                {
+                    window.location = url + '/pharmacy';
+                }
+                else if( url2 == '/doctor/login')
+                {
+                    window.location = url + '/doctor';
+                }
             }
         }
     });

@@ -1,0 +1,47 @@
+extends ../layout
+
+block content
+  .welcome__home-message.ng-binding Manage Users
+  .welcome__home-buttons
+    h4.table-title New Account Requests     
+    table#newAccountsTable.display
+      thead
+        tr
+          th Name
+          th Email
+          th Type
+          th Action
+      tbody
+        if non_approved_users && non_approved_users.length > 0
+          - for( var i = 0, len = non_approved_users.length; i < len; i++ ) {
+          tr
+            td #{non_approved_users[i].NAME} 
+            td #{non_approved_users[i].EMAIL}
+            td #{non_approved_users[i].TYPE}
+            td 
+              button.form-control.btn.btn-primary(onclick='approve('+non_approved_users[i].ID+', "' + non_approved_users[i].TYPE + '")') Approve
+          - }
+    h4.table-title Users Accounts     
+    table#usersTable.display
+      thead
+        tr
+          th Name
+          th Email
+          th Type
+          th Action
+      tbody
+        if approved_users && approved_users.length > 0
+          - for( var i = 0, len = approved_users.length; i < len; i++ ) {
+          tr
+            td #{approved_users[i].NAME} 
+            td #{approved_users[i].EMAIL}
+            td #{approved_users[i].TYPE}
+            td 
+              if approved_users[i].ACTIVE == 1
+                button.form-control.btn.btn-danger(onclick='suspend('+approved_users[i].ID+')') Suspend
+              else
+                button.form-control.btn.btn-success(onclick='activate('+approved_users[i].ID+')') Activate  
+          - }                 
+block scripts
+  script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js')
+  script(type='text/javascript', src=base+'/scripts/admin/manage_users.js')

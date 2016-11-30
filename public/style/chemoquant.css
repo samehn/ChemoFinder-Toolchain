@@ -1239,3 +1239,15 @@ regimen-dist {
     font-weight: 900;
     font-size: 16px;
 }
+.table-title
+{
+  text-align: left;
+  margin-bottom: 20px;
+  color: #56a3fc;
+}
+
+.search-bar { box-sizing: border-box; }
+.section-search { width: 100%; display: table; padding: 1em 0 0; margin-bottom: 60px; }
+.div-search { display: table-cell; width: 100%; }
+.input-search { width: 100%; padding: .5em 1em; height:60px; border: 1px solid #ccc; border-radius: 4px; }
+.button-search { width:120px; color: black; padding: .5em 1em; height:60px; white-space: nowrap; margin: 0 0 0 1em; }
