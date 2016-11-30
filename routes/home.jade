@@ -1,4 +1,4 @@
-extends layout
+extends ../layout
 
 block stylesheets
   link(href=base+'/style/bootstrap-timepicker.min.css', rel='stylesheet')
@@ -33,14 +33,7 @@ block modals
                   i.glyphicon.glyphicon-lock
               // /.input-group
             // /.form-group
-            #typeLoginForm.form-group
-              .input-group
-                select#login-type.form-control
-                  option.form-control(value='doctor') Doctor
-                  option.form-control(value='pharmacy') Pharmacy
-                span.input-group-addon
-                  i.glyphicon.glyphicon-briefcase
-            a(href=base+'/forgotpassword') forgot password?
+            a(href=base+'/user/forgotpassword') forgot password?
               // /.input-group
             // /.form-group
         // /.modal-body
@@ -61,9 +54,12 @@ block modals
           form(role='form')
             #typeRegisterForm.form-group
               .input-group
-                select#type.form-control
-                  option.form-control(value='doctor') Doctor
-                  option.form-control(value='pharmacy') Pharmacy
+                select#type.form-control(name='type')
+                  option.form-control(value='') Select Your Type
+                  option.form-control(value='DOCTOR') Doctor
+                  option.form-control(value='NAVIGATOR') Navigator
+                  option.form-control(value='PHARMACY') Pharmacy
+                  option.form-control(value='TREATMENT CENTER') Treatment Center
                 span.input-group-addon
                   i.glyphicon.glyphicon-briefcase
               // /.input-group
@@ -94,9 +90,27 @@ block modals
                   i.glyphicon.glyphicon-lock
               // /.input-group
             // /.form-group
-            #addressRegisterForm.form-group.handle(style='display:none;')
+            #streetRegisterForm.form-group
               .input-group
-                input#address.form-control(name='address', type='text', placeholder='Address')
+                input#street.form-control(name='street', type='text', placeholder='Street')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-home
+            // /.form-group
+            #cityRegisterForm.form-group
+              .input-group
+                input#city.form-control(name='city', type='text', placeholder='City')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-home
+            // /.form-group
+            #stateRegisterForm.form-group
+              .input-group
+                input#state.form-control(name='state', type='text', placeholder='State')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-home
+            // /.form-group
+            #zipRegisterForm.form-group
+              .input-group
+                input#zip.form-control(name='zip', type='text', placeholder='Postal Code')
                 span.input-group-addon
                   i.glyphicon.glyphicon-home
             // /.form-group
