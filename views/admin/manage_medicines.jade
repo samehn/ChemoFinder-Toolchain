@@ -1,0 +1,157 @@
+extends ../layout
+
+block stylesheets
+  link(href=base+'/style/bootstrap-timepicker.min.css', rel='stylesheet')
+block headers
+  button.header__action-button.ng-binding(onclick="location.href='" + base + "/admin/manage_users';")
+    i.glyphicon.glyphicon-user
+    span.main-actions|                         Manage Users
+  .header__actions-divider
+  button.header__action-button.ng-binding(onclick="location.href='" + base + "/admin/manage_medicines';")
+    i.glyphicon.glyphicon-list-alt
+    span.main-actions|                         Manage Medicines
+  .header__actions-divider
+  button.header__action-button.ng-binding(onclick="location.href='http://google.com';")
+    i.glyphicon.glyphicon-cog
+    span.main-actions|                         Settings
+  .header__actions-divider
+  button.header__action-button.ng-binding(onclick="location.href='http://google.com';")
+    i.glyphicon.glyphicon-log-out
+    span.main-actions|                         Logout        
+block content
+  .welcome__home-message.ng-binding Manage Medicines
+  .row
+    .col-xs-6.col-md-2 
+      button.form-control.btn.btn-primary(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewMedicine') Add New Medicine
+    .col-xs-6.col-md-2
+      form#uploadForm(ref='uploadForm', action= base + '/admin/uploadmedicines', method='post', enctype='multipart/form-data')
+        .fileUpload.btn.btn-primary
+          span Upload Medicines
+          input.upload(type='file', name="sampleFile", onchange='this.form.submit()')
+        //- input.form-control.btn.btn-primary(type='file', onchange='this.form.submit()', value='Upload Medicines')
+  hr  
+  .welcome__home-buttons
+    h4.table-title Approved Medicines     
+    table#approvedMedicinesTable.display
+      thead
+        tr
+          th Generic Name
+          th Brand Name
+          th Form
+          th Strength
+          th Strength Unit
+          th Route
+          th Manufacturer
+          th SRA Approvals
+          th Approval Date
+          th Source
+          th Extract Date 
+      tbody
+        if approved_medicines.length > 0
+          - for( var i = 0, len = approved_medicines.length; i < len; i++ ) {
+          tr
+            td #{approved_medicines[i].GENERIC_NAME} 
+            td #{approved_medicines[i].BRAND_NAME}
+            td #{approved_medicines[i].FORM}
+            td #{approved_medicines[i].STRENGTH}
+            td #{approved_medicines[i].STRENGTH_UNIT}
+            td #{approved_medicines[i].ROUTE}
+            td #{approved_medicines[i].MANUFACTURER}
+            td #{approved_medicines[i].SRA}
+            td #{approved_medicines[i].APPROVAL_DATE}
+            td #{approved_medicines[i].SOURCE}
+            td #{approved_medicines[i].EXTRACT_DATE}
+          - }
+    h4.table-title Non Approved Medicines     
+    table#nonApprovedMedicinesTable.display
+      thead
+        tr
+          th Generic Name
+          th Brand Name
+          th Form
+          th Strength
+          th Strength Unit
+          th Route
+          th Manufacturer
+          th SRA Approvals
+          th Approval Date
+          th Source
+          th Extract Date 
+      tbody
+        if non_approved_medicines.length > 0
+          - for( var i = 0, len = non_approved_medicines.length; i < len; i++ ) {
+          tr
+            td #{non_approved_medicines[i].GENERIC_NAME} 
+            td #{non_approved_medicines[i].BRAND_NAME}
+            td #{non_approved_medicines[i].FORM}
+            td #{non_approved_medicines[i].STRENGTH}
+            td #{non_approved_medicines[i].STRENGTH_UNIT}
+            td #{non_approved_medicines[i].ROUTE}
+            td #{non_approved_medicines[i].MANUFACTURER}
+            td #{non_approved_medicines[i].SRA}
+            td #{non_approved_medicines[i].APPROVAL_DATE}
+            td #{non_approved_medicines[i].SOURCE}
+            td #{non_approved_medicines[i].EXTRACT_DATE}
+          - } 
+block modals
+  #addNewMedicine.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          h4#myModalLabel.modal-title Add New Medicine
+        // /.modal-header
+        .modal-body
+          form(role='form')
+            #genericNameForm.form-group
+              input#genericName.form-control(name='generic_name', type='text', placeholder='Generic Name')
+            // /.form-group
+            #brandNameForm.form-group
+              input#brandName.form-control(name='brand_name', type='text', placeholder='Brand Name')
+            // /.form-group
+            #formForm.form-group
+              select#form.form-control(name='form')
+                option.form-control(value='') Select Form
+                option.form-control(value='TAB') Tab
+                option.form-control(value='VAIL') Vail
+                option.form-control(value='OTHER') Other
+              // /.input-group
+            // /.form-group  
+            #strengthForm.form-group
+              input#strength.form-control(name='strength', type='text', placeholder='Strength')
+            // /.form-group
+            #strengthUnitForm.form-group
+              input#strengthUnit.form-control(name='strength_unit', type='text', placeholder='Strength Unit')
+            // /.form-group
+            #routeForm.form-group
+              input#route.form-control(name='route', type='text', placeholder='Route')
+            // /.form-group
+            #manufacturerForm.form-group
+              input#manufacturer.form-control(name='manufacturer', type='text', placeholder='Manufacturer')
+            // /.form-group
+            #sraForm.form-group
+              input#sra.form-control(name='sra', type='text', placeholder='SRA Approval')
+            // /.form-group
+            p 
+              strong Approval Date
+            #approvalDateForm.form-group
+              input#approvalDate.form-control(name='approval_date', type='date', placeholder='Approval Date')
+            // /.form-group
+            #sourceForm.form-group
+              input#source.form-control(name='source', type='text', placeholder='Source')
+            // /.form-group
+            p 
+              strong Extract Date
+            #extractDateForm.form-group
+              input#extractDate.form-control(name='extract_date', type='date', placeholder='Extract Date')
+            // /.form-group  
+        // /.modal-body
+        .modal-footer
+          button.form-control.btn.btn-primary(onclick='add_new_medicine();') Submit
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal                    
+block scripts
+  script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js')
+  script(type='text/javascript', src=base+'/scripts/admin/manage_medicines.js')
