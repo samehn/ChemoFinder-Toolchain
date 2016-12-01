@@ -18,12 +18,14 @@
     "cookie-parser": "^1.4.3",
     "debug": "~2.2.0",
     "express-session": "^1.14.2",
+    "express-fileupload": "0.0.5",
     "ibm_db": "^1.0.1",
     "jade": "~1.11.0",
     "logger": "0.0.1",
     "multer": "^1.2.0",
     "pug": "^2.0.0-beta6",
-    "serve-favicon": "^2.3.0"
+    "serve-favicon": "^2.3.0",
+    "xlsx": "^0.8.0"
   
 
   },
