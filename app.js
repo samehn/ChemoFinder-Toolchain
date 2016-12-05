@@ -685,16 +685,13 @@ app.post('/user/login', function(req, res){
                             }
                             else
                             {
-                                req.session.user = result[0];
+                                
+                                req.session.user_id = result[0].ID;
+                                req.session.user_first_login = result[0].FIRST_LOGIN;
                                 var type = result[0].TYPE;
-                                if(result[0].FIRST_LOGIN == '1')
-                                {
-                                    res.send({message: "first login", type: type});
-                                }
-                                else
-                                {
-                                    res.send({message: "success", type: type});
-                                }
+                                req.session.user_type = type;
+                                
+                                res.send({message: "success", type: type});
                             }
                         }
                         else
@@ -911,7 +908,7 @@ app.post('/user/resetpassword', function(req, res){
                     bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
                       // Store hash in your password DB.
                       // enter new pharmacy to the db
-                      var query = "INSERT INTO DASH5082.USER (PASSWORD) VALUES ('" + hash + "');";
+                      var query = "UPDATE DASH5082.USER SET PASSWORD ='" + hash + "' WHERE ID =" + result[0].USER_ID + ";";
                       dbQuery(query, function(newResult) {
                           console.log(newResult);
                           jsonObj['message'] = "success";
@@ -1366,11 +1363,29 @@ app.get('/pharmacy', function(req, res){
 
 
 function checkSignIn(req, res, next){
-    if(req.session.user){
-        next();     //If session exists, proceed to page
+
+    if(req.session.user_id){
+        if(req.session.user_first_login == '0')
+        {
+           next();     //If session exists, proceed to page 
+        }
+        else
+        {
+            var err = new Error("First Login");
+            next(err);  //Error, trying to access unauthorized page!    
+        }
     } else {
         var err = new Error("Not logged in!");
-    console.log(req.session.user);
+        next(err);  //Error, trying to access unauthorized page!
+    }
+}
+
+function checkFirstLogin(req, res, next){
+
+    if(req.session.user_id){
+        next();
+    } else {
+        var err = new Error("Not logged in!");
         next(err);  //Error, trying to access unauthorized page!
     }
 }
@@ -1380,7 +1395,10 @@ app.get('/protected_page', checkSignIn, function(req, res){
 });
 
 
-app.get('/doctor', function(req, res){
+app.get('/doctor', checkSignIn, function(req, res){
+    // console.log(req.session);
+    // req.session.user_id = "1000";
+    // console.log(req.session);
     var query = "SELECT * from DASH5082.MEDICINE WHERE SRA IS NOT NULL";
     dbQuery(query, function(result) {
         //console.log(result[0].ID);
@@ -1389,6 +1407,81 @@ app.get('/doctor', function(req, res){
         //res.send({data: result});
         res.render('doctor/search_medicines', { base: base, medicines:result });  
     });
+});
+
+app.use('/doctor', function(err, req, res, next){
+console.log(err);
+    if(err == "Error: First Login")
+    {
+        res.redirect('/user/first_changepassword');
+    }
+    else
+    {
+        //User should be authenticated! Redirect him to log in.
+        res.redirect('/');
+    }
+});
+
+
+app.get('/user/first_changepassword', checkFirstLogin, function(req, res){
+    var base = req.protocol + '://' + req.get('host');
+    res.render('user/first_changepassword', { base: base });
+});
+
+app.use('/user/first_changepassword', function(err, req, res, next){
+console.log(err);
+    //User should be authenticated! Redirect him to log in.
+    res.redirect('/');
+});
+
+
+app.post('/user/first_changepassword', checkFirstLogin, function(req, res){
+    var jsonObj = {};
+    var valid = true;
+    //validate password
+    //Minimum 8 characters at least 1 special character
+    var passwordRegex = /^(?=.*[A-Za-z\d])(?=.*[$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=])[A-Za-z\d$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=]{8,}$/;
+    if(!req.body.password)
+    {
+        jsonObj['password_error'] = "Password is required";
+        valid = false;
+    }
+    else if(!validateWithRegex(passwordRegex, req.body.password))
+    {
+       jsonObj['password_error'] = "Password has to be minimum 8 characters at least 1 special character";
+       valid = false;
+    }
+    else if(req.body.password != req.body.rpassword)
+    {
+       jsonObj['password_error'] = "Password and cofirm password doesn't match";   
+       valid = false;
+    }
+
+    //validate rpassword
+    if(!req.body.rpassword)
+    {
+        jsonObj['rpassword_error'] = "Confirm Password is required";
+        valid = false;
+    }
+    if(valid)
+    {    
+        bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+          // Store hash in your password DB.
+          // enter new pharmacy to the db
+          var query = "UPDATE DASH5082.USER SET PASSWORD ='" + hash + "', FIRST_LOGIN = '0', WHERE ID =" + req.session.user_id + ";";
+          dbQuery(query, function(newResult) {
+              req.session.user_first_login = '0';  
+              console.log(newResult);
+              jsonObj['message'] = "success";
+              res.send(jsonObj);
+          });
+        });
+    }
+    else
+    {
+        jsonObj['message'] = "failed";
+        res.send(jsonObj);
+    }        
 });
 
 app.get('/logout', function(req, res){
@@ -1404,6 +1497,7 @@ console.log(err);
     res.redirect('/login');
 });
 
-http.createServer(app).listen(app.get('port'), function(){
+http.createServer(app).listen(app.get('port'),
+ function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
