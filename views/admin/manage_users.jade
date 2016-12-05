@@ -55,6 +55,7 @@ block content
           th Suspension Reason
           th Mail On Suspension
           th Action
+          th Delete(for testing)
       tbody
         if approved_users && approved_users.length > 0
           - for( var i = 0, len = approved_users.length; i < len; i++ ) {
@@ -76,7 +77,9 @@ block content
               if approved_users[i].ACTIVE == 1
                 button.form-control.btn.btn-danger(onclick='suspend('+approved_users[i].ID+')') Suspend
               else
-                button.form-control.btn.btn-success(onclick='activate('+approved_users[i].ID+')') Activate  
+                button.form-control.btn.btn-success(onclick='activate('+approved_users[i].ID+')') Activate
+            td 
+              button.form-control.btn.btn-danger(onclick='delete_user('+ approved_users[i].ID+')') Delete     
           - } 
 block modals             
   #addNewUser.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')

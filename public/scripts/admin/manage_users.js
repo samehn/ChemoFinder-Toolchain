@@ -60,6 +60,24 @@ function suspend(id) {
     }
 }
 
+function delete_user(id) {
+  if (confirm("Are you sure you want to delete this user ?") == true) {
+    var data_array={};
+    data_array['id'] = id;
+     
+    console.log(data_array);
+    $.ajax({
+          type: "post",
+          url: url + '/admin/deleteuser',
+          data : data_array,
+          success:  function(data){
+            window.location = url + '/admin/manage_users';
+          }
+    }); 
+  }
+}
+
+
 function activate(id) {
 	if (confirm("Are you sure you want to activate this user ?") == true) {
         var data_array={};

@@ -1059,6 +1059,14 @@ app.post('/admin/activateuser', function(req, res){
     });
 });
 
+app.post('/admin/deleteuser', function(req, res){
+
+    var query = "DELETE FROM USER WHERE ID=" + req.body.id + ";";
+    dbQuery(query, function(newResult) {
+        res.send({message: "success"});
+    });
+});
+
 app.get('/generaterandompassword', function(req, res) {
     var random = new RandExp(/(?=.*[A-Za-z\d])@[A-Za-z\d]{8,10}/).gen();
     res.send({random: random});
