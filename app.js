@@ -1391,7 +1391,15 @@ function checkSignIn(req, res, next){
 function checkFirstLogin(req, res, next){
 
     if(req.session.user_id){
-        next();
+        if(req.session.user_first_login == '1')
+        {
+           next();     //If session exists, proceed to page 
+        }
+        else
+        {
+            var err = new Error("Home page");
+            next(err);  //Error, trying to access unauthorized page!    
+        }
     } else {
         var err = new Error("Not logged in!");
         next(err);  //Error, trying to access unauthorized page!
@@ -1438,8 +1446,22 @@ app.get('/user/first_changepassword', checkFirstLogin, function(req, res){
 
 app.use('/user/first_changepassword', function(err, req, res, next){
 console.log(err);
-    //User should be authenticated! Redirect him to log in.
-    res.redirect('/');
+    if(err = "Error: Home page")
+    {
+        if(req.session.user_type == 'DOCTOR' || req.session.user_type == 'NAVIGATOR'){
+            res.redirect('/doctor');
+        }
+        else
+        {
+            res.redirect('/pharmacy');
+        }
+    }
+    else if(err = "Error: Not logged in!")
+    {
+      //User should be authenticated! Redirect him to log in.
+        res.redirect('/');  
+    }
+    
 });
 
 
@@ -1476,7 +1498,7 @@ app.post('/user/first_changepassword', checkFirstLogin, function(req, res){
         bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
           // Store hash in your password DB.
           // enter new pharmacy to the db
-          var query = "UPDATE DASH5082.USER SET PASSWORD ='" + hash + "', FIRST_LOGIN = '0', WHERE ID =" + req.session.user_id + ";";
+          var query = "UPDATE DASH5082.USER SET PASSWORD ='" + hash + "', FIRST_LOGIN = '0' WHERE ID =" + req.session.user_id + ";";
           dbQuery(query, function(newResult) {
               req.session.user_first_login = '0';  
               console.log(newResult);
