@@ -5,7 +5,7 @@ $(document).ready(function(){
 });
 
 function add_new_medicine() {
-	var user_array={};
+	var item_array={};
     
     var genericName = $('#genericName');
     var brandName = $('#brandName');
@@ -19,23 +19,23 @@ function add_new_medicine() {
     var source = $('#source');
     var extract_date = $('#extractDate');
 
-    user_array[genericName.attr('name')] = genericName.val();
-    user_array[brandName.attr('name')] = brandName.val();
-    user_array[form.attr('name')] = form.val();
-    user_array[strength.attr('name')] = strength.val();
-    user_array[strengthUnit.attr('name')] = strengthUnit.val();
-    user_array[route.attr('name')] = route.val();
-    user_array[manufacturer.attr('name')] = manufacturer.val();
-    user_array[sra.attr('name')] = sra.val();
-    user_array[approval_date.attr('name')] = approval_date.val();
-    user_array[source.attr('name')] = source.val();
-    user_array[extract_date.attr('name')] = extract_date.val();
+    item_array[genericName.attr('name')] = genericName.val();
+    item_array[brandName.attr('name')] = brandName.val();
+    item_array[form.attr('name')] = form.val();
+    item_array[strength.attr('name')] = strength.val();
+    item_array[strengthUnit.attr('name')] = strengthUnit.val();
+    item_array[route.attr('name')] = route.val();
+    item_array[manufacturer.attr('name')] = manufacturer.val();
+    item_array[sra.attr('name')] = sra.val();
+    item_array[approval_date.attr('name')] = approval_date.val();
+    item_array[source.attr('name')] = source.val();
+    item_array[extract_date.attr('name')] = extract_date.val();
     
-    console.log(user_array);
+    console.log(item_array);
      $.ajax({
         type: "post",
         url: url + '/admin/addnewmedicine',
-        data : user_array,
+        data : item_array,
         success:  function(data){
             console.log(data);
             console.log(data.message);

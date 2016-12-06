@@ -1354,21 +1354,29 @@ app.get('/getmedicinebyid/:id', function(req, res){
     });
 });
 
-app.get('/pharmacy', function(req, res){
-    // var query = "SELECT * from DASH5082.STOCK_LIST WHERE SRA IS NOT NULL";
-    // dbQuery(query, function(result) {
-    //     var query = "SELECT * from DASH5082.MEDICINE WHERE SRA IS NULL";
-    //     dbQuery(query, function(result2) {
-    //         //console.log(result[0].ID);
-    //         var base = req.protocol + '://' + req.get('host');
-    //         // redirect with data
-    //         //res.send({data: result});
-    //         res.render('admin/manage_medicines', {base: base, approved_medicines: result,  non_approved_medicines: result2});  
-    //     });
-        
-    // });
+app.get('/pharmacy', checkSignIn, function(req, res){
+    var query = "SELECT * FROM STOCK_LIST SL JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE SL.PHARMACY_ID = " + req.session.user_id;
+    dbQuery(query, function(result) {
+        //console.log(result[0].ID);
+        var base = req.protocol + '://' + req.get('host');
+        // redirect with data
+        //res.send({data: result});
+        res.render('pharmacy/stock_list', {base: base, stock_list: result});      
+    });
 });
 
+app.use('/pharmacy', function(err, req, res, next){
+console.log(err);
+    if(err == "Error: First Login")
+    {
+        res.redirect('/user/first_changepassword');
+    }
+    else
+    {
+        //User should be authenticated! Redirect him to log in.
+        res.redirect('/');
+    }
+});
 
 function checkSignIn(req, res, next){
 
