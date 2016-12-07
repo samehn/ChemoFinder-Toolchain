@@ -9,16 +9,19 @@ block headers
   //-   i.glyphicon.glyphicon-log-out
   //-   span.main-actions|                         Logout        
 block content
-  .welcome__home-message.ng-binding My Stock
+  .page__subtitle.ng-binding My Stock
   .row
-    .col-xs-6.col-md-2 
+    .col-xs-4.col-md-2 
       button.form-control.btn.btn-primary(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewMedicine') Add New Medicine
-    .col-xs-6.col-md-2
+    .col-xs-4.col-md-2
       form#uploadForm(ref='uploadForm', action= base + '/pharmacy/uploadstocklist', method='post', enctype='multipart/form-data')
         .fileUpload.btn.btn-primary
           span Upload Stock List
           input.upload(type='file', name="sampleFile", onchange='this.form.submit()')
         //- input.form-control.btn.btn-primary(type='file', onchange='this.form.submit()', value='Upload Medicines')
+    .col-xs-4.col-md-2
+      form#downloadForm(ref='downloadForm', action= base + '/pharmacy/downloadtemplate', method='get', enctype='multipart/form-data')
+        button.form-control.btn.btn-primary(type="submit", style="font-size:70%;") Download Stock Template    
   hr  
   .welcome__home-buttons
     h4.table-title Approved Medicines     

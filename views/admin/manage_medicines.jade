@@ -19,16 +19,18 @@ block headers
     i.glyphicon.glyphicon-log-out
     span.main-actions|                         Logout        
 block content
-  .welcome__home-message.ng-binding Manage Medicines
+  .page__subtitle.ng-binding Manage Medicines
   .row
-    .col-xs-6.col-md-2 
+    .col-xs-4.col-md-2 
       button.form-control.btn.btn-primary(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewMedicine') Add New Medicine
-    .col-xs-6.col-md-2
+    .col-xs-4.col-md-2
       form#uploadForm(ref='uploadForm', action= base + '/admin/uploadmedicines', method='post', enctype='multipart/form-data')
-        .fileUpload.btn.btn-primary
-          span Upload Medicines
+        .fileUpload.btn.btn-primary(style="height: 34px;")
+          span(style="font-size: 10px; text-align: center; line-height: 22px;") Upload Medicine List
           input.upload(type='file', name="sampleFile", onchange='this.form.submit()')
-        //- input.form-control.btn.btn-primary(type='file', onchange='this.form.submit()', value='Upload Medicines')
+    .col-xs-4.col-md-2
+      form#downloadForm(ref='downloadForm', action= base + '/admin/downloadtemplate', method='get', enctype='multipart/form-data')
+        button.form-control.btn.btn-primary(type="submit", style="font-size:56%;") Download Medicines Template        
   hr  
   .welcome__home-buttons
     h4.table-title Approved Medicines     
@@ -59,7 +61,7 @@ block content
             td #{approved_medicines[i].MANUFACTURER}
             td #{approved_medicines[i].SRA}
             td #{approved_medicines[i].APPROVAL_DATE}
-            td #{approved_medicines[i].SOURCE}
+            td.td-wrapping #{approved_medicines[i].SOURCE}
             td #{approved_medicines[i].EXTRACT_DATE}
           - }
     h4.table-title Non Approved Medicines     

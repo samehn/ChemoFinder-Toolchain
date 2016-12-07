@@ -1067,6 +1067,11 @@ app.post('/admin/deleteuser', function(req, res){
     });
 });
 
+app.get('/admin/downloadtemplate', function(req, res){
+  var file = __dirname + '/public/downloads/medicinelist_example_data.xlsx';
+  res.download(file); // Set disposition and send it.
+});
+
 app.get('/generaterandompassword', function(req, res) {
     var random = new RandExp(/(?=.*[A-Za-z\d])@[A-Za-z\d]{8,10}/).gen();
     res.send({random: random});
@@ -1354,6 +1359,7 @@ app.get('/getmedicinebyid/:id', function(req, res){
     });
 });
 
+
 app.get('/pharmacy', checkSignIn, function(req, res){
     var query = "SELECT * FROM STOCK_LIST SL JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE SL.PHARMACY_ID = " + req.session.user_id;
     dbQuery(query, function(result) {
@@ -1366,6 +1372,24 @@ app.get('/pharmacy', checkSignIn, function(req, res){
 });
 
 app.use('/pharmacy', function(err, req, res, next){
+console.log(err);
+    if(err == "Error: First Login")
+    {
+        res.redirect('/user/first_changepassword');
+    }
+    else
+    {
+        //User should be authenticated! Redirect him to log in.
+        res.redirect('/');
+    }
+});
+
+app.get('/pharmacy/downloadtemplate', checkSignIn, function(req, res){
+  var file = __dirname + '/public/downloads/stocklist_example_data.xlsx';
+  res.download(file); // Set disposition and send it.
+});
+
+app.use('/pharmacy/downloadtemplate', function(err, req, res, next){
 console.log(err);
     if(err == "Error: First Login")
     {

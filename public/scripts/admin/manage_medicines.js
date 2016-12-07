@@ -1,7 +1,11 @@
 var url = window.location.origin;
 $(document).ready(function(){
-   $('#approvedMedicinesTable').DataTable();
-   $('#nonApprovedMedicinesTable').DataTable();
+   $('#approvedMedicinesTable').DataTable({
+        "scrollX": true
+    });
+   $('#nonApprovedMedicinesTable').DataTable({
+        "scrollX": true
+    });
 });
 
 function add_new_medicine() {

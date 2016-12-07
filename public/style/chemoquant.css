@@ -437,6 +437,14 @@ welcome {
     color: #56a3fc;
     margin-bottom: 20px;
 }
+.page__subtitle {
+    display: block;
+    text-align: center;
+    font-size: 30px;
+    font-weight: 600;
+    color: #56a3fc;
+    margin-bottom: 50px;
+}
 .welcome__home-buttons {
     text-align: center;
     padding-bottom: 45px;
@@ -1279,7 +1287,7 @@ regimen-dist {
     opacity: 0;
     filter: alpha(opacity=0);
 }
-td
+.td-wrapping
 {
     max-width: 85px;
     word-wrap: break-word;
