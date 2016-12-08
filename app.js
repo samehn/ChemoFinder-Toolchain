@@ -1402,6 +1402,168 @@ console.log(err);
     }
 });
 
+app.post('/pharmacy/addnewmedicine', checkSignIn, function(req, res){
+    var jsonObj = {};
+    var valid = true;
+
+    //validate generic name
+    if(!req.body.generic_name)
+    {
+        jsonObj['generic_name_error'] = "Generic Name is required";
+        valid = false;
+    }
+
+    //validate name
+    if(!req.body.form)
+    {
+        jsonObj['form_error'] = "Form is required";
+        valid = false;
+    }
+
+    //validate type
+    if(!req.body.strength)
+    {
+        jsonObj['strength_error'] = "Strength is required";
+        valid = false;
+    }
+
+    //validate type
+    if(!req.body.strength_unit)
+    {
+        jsonObj['strength_unit_error'] = "Strength Unit is required";
+        valid = false;
+    }
+
+    //validate brand name
+    if(!req.body.brand_name)
+    {
+        jsonObj['brand_name_error'] = "Brand Name is required";
+        valid = false;
+    }
+
+    //validate type
+    if(!req.body.manufacturer)
+    {
+        jsonObj['manufacturer_error'] = "Manufacturer is required";
+        valid = false;
+    }
+
+    if(!req.body.batch_number)
+    {
+        jsonObj['batch_number_error'] = "Batch Number is required";
+        valid = false;
+    }
+
+    if(!req.body.expiry_date)
+    {
+        jsonObj['expiry_date_error'] = "Expiry Date is required";
+        valid = false;
+    }
+
+    // if(!req.body.sra)
+    // {
+    //     jsonObj['sra_error'] = "SRA is required";
+    //     valid = false;
+    // }
+
+    if(!req.body.pack_size)
+    {
+        jsonObj['pack_size_error'] = "Pack Size is required";
+        valid = false;
+    }
+
+    if(!req.body.price)
+    {
+        jsonObj['price_error'] = "Price per Pack is required";
+        valid = false;
+    }
+
+    if(!req.body.quantity)
+    {
+        jsonObj['quantity_error'] = "Quantity is required";
+        valid = false;
+    }
+
+    // if(!req.body.avg_monthly_consumption)
+    // {
+    //     jsonObj['avg_monthly_consumption_error'] = "Average Monthly Comsumption is required";
+    //     valid = false;
+    // }
+
+    var query = "SELECT * from DASH5082.MEDICINE WHERE GENERIC_NAME ='" + req.body.generic_name + "' AND BRAND_NAME = '" + req.body.brand_name + "' AND FORM = '" + req.body.form + "' AND STRENGTH = '" + req.body.strength + "' AND STRENGTH_UNIT = '" + req.body.strength_unit + "' AND MANUFACTURER = '" + req.body.manufacturer + "';";           
+    var medicineResult = dbQuerySync(query);
+    if(medicineResult.length != 0)
+    {
+        if(valid)
+        {   
+            var query = "SELECT * FROM DASH5082.STOCK_LIST WHERE MEDICINE_ID =" + medicineResult[0].ID;
+            var stockListResult = dbQuerySync(query);
+            if(stockListResult.length != 0)
+            {
+                jsonObj['generic_name_error'] = "This Medicine is already exists in your stock"
+                valid = false;
+                jsonObj['message'] = "failed";
+                res.send(jsonObj);
+            }
+            else
+            {
+                if(medicineResult[0].SRA == 'NULL')
+                {
+                    var query = "INSERT INTO DASH5082.STOCK_LIST (MEDICINE_ID, BATCH_NUMBER, EXPIRY_DATE, APPROVAL, PACK_SIZE, PRICE_PER_PACK, AVAILABLE_STOCK, AVG_MONTHLY_CONSUMPTION, PHARMACY_ID, LAST_UPDATE) VALUES (" + medicineResult[0].ID + ",'" + req.body.batch_number + "', '" + req.body.expiry_date + "', '0','" + req.body.pack_size + "','" + req.body.price + "','" + req.body.quantity + "', '" + req.body.avg_monthly_consumption + "', " + req.session.user_id + ",  TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));"; 
+                    dbQuerySync(query);
+                }
+                else
+                {
+                    var query = "INSERT INTO DASH5082.STOCK_LIST (MEDICINE_ID, BATCH_NUMBER, EXPIRY_DATE, APPROVAL, PACK_SIZE, PRICE_PER_PACK, AVAILABLE_STOCK, AVG_MONTHLY_CONSUMPTION, PHARMACY_ID, LAST_UPDATE) VALUES (" + medicineResult[0].ID + ",'" + req.body.batch_number + "', '" + req.body.expiry_date + "', '1','" + req.body.pack_size + "','" + req.body.price + "','" + req.body.quantity + "', '" + req.body.avg_monthly_consumption + "', " + req.session.user_id + ",  TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));"; 
+                    dbQuerySync(query);
+                }
+                jsonObj['message'] = "success";
+                res.send(jsonObj);
+            } 
+        }
+        else
+        {
+            jsonObj['message'] = "failed";
+            res.send(jsonObj);
+        }
+    }
+    else
+    {
+        if(valid)
+        {    
+            var query = "INSERT INTO DASH5082.MEDICINE (GENERIC_NAME, BRAND_NAME, FORM, STRENGTH, STRENGTH_UNIT, MANUFACTURER, SRA) VALUES ('" + req.body.generic_name + "','" + req.body.brand_name + "','" + req.body.form + "','" + req.body.strength + "','" + req.body.strength_unit + "','" + req.body.manufacturer + "', NULL);"; 
+            dbQuerySync(query);
+
+            var query = "SELECT ID from DASH5082.MEDICINE WHERE GENERIC_NAME ='" + req.body.generic_name + "' AND BRAND_NAME = '" + req.body.brand_name + "' AND FORM = '" + req.body.form + "' AND STRENGTH = '" + req.body.strength + "' AND STRENGTH_UNIT = '" + req.body.strength_unit + "' AND MANUFACTURER = '" + req.body.manufacturer + "';";           
+            var medicineIdResult = dbQuerySync(query);
+
+            var query = "INSERT INTO DASH5082.STOCK_LIST (MEDICINE_ID, BATCH_NUMBER, EXPIRY_DATE, APPROVAL, PACK_SIZE, PRICE_PER_PACK, AVAILABLE_STOCK, AVG_MONTHLY_CONSUMPTION, PHARMACY_ID, LAST_UPDATE) VALUES (" + medicineIdResult[0].ID + ",'" + req.body.batch_number + "', '" + req.body.expiry_date + "', '0','" + req.body.pack_size + "','" + req.body.price + "','" + req.body.quantity + "', '" + req.body.avg_monthly_consumption + "', " + req.session.user_id + ",  TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));"; 
+            dbQuerySync(query);
+
+            jsonObj['message'] = "success";
+            res.send(jsonObj);
+        }
+        else
+        {
+            jsonObj['message'] = "failed";
+            res.send(jsonObj);
+        }
+    }                  
+});
+
+app.use('/pharmacy/addnewmedicine', function(err, req, res, next){
+console.log(err);
+    if(err == "Error: First Login")
+    {
+        res.redirect('/user/first_changepassword');
+    }
+    else
+    {
+        //User should be authenticated! Redirect him to log in.
+        res.redirect('/');
+    }
+});
+
 function checkSignIn(req, res, next){
 
     if(req.session.user_id){

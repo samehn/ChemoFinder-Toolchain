@@ -50,6 +50,7 @@ function add_new_medicine() {
             {
                 var message = '<div class="alert alert-success message-form"><button class="close" data-close="alert"></button> The medicine is added successfuly</div>';
                 $(message).insertBefore($('#genericNameForm'));
+                setTimeout(function(){ location.reload(); }, 1000);
             }
             else if(data.message == "failed")
             {
