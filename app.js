@@ -1947,7 +1947,7 @@ app.get('/doctor/getsearchresults', checkSignIn, function(req, res){
                 var query = "SELECT * FROM DASH5082.MEDICINE  WHERE ID =" + parseInt(idsArray[i]); 
                 var medicine = dbQuerySync(query);
                 results[i]['medicine'] = medicine[0];
-                var query = "SELECT * FROM DASH5082.MEDICINE M JOIN STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE S.APPROVAL ='1' AND M.ID =" + parseInt(idsArray[i]) + " AND S.AVAILABLE_STOCK >='" + qsArray[i] + "'"; 
+                var query = "SELECT * FROM DASH5082.MEDICINE M JOIN STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE M.SRA IS NOT NULL AND M.ID =" + parseInt(idsArray[i]) + " AND S.AVAILABLE_STOCK >='" + qsArray[i] + "'"; 
                 var pharmacies = dbQuerySync(query);
                 if(pharmacies.length > 0)
                 {

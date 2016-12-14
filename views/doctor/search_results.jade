@@ -31,8 +31,8 @@ block content
             th Price/Pack
             th Expiry Date
             th Pack Size
-            th Last Update       
-        if results[i]['pharmacies'].length > 0
+            th Last Update 
+        if results[i]['pharmacies']
           - for( var j = 0, len = results[i]['pharmacies'].length; j < len; j++ ) {
               tr
                 td #{results[i]['pharmacies'][j].NAME}
