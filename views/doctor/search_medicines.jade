@@ -6,15 +6,17 @@ block stylesheets
 block content
   .page__subtitle.ng-binding Search Medicines
   .welcome__home-buttons
-    section.section-search.search-bar
+    section#section-search.section-search.search-bar
       .div-search.search-bar
-        input#tags.input-search.search-bar(type='text', placeholder='Search For Medicines...')         
+         select#quantity-search.qty-20.quantity-search.search-bar
+         input#tags.input-search.search-bar(type='text', placeholder='Search For Medicines...')         
       .div-search.search-bar
-        button.button-search.search-bar.btn.btn-primary(onclick="addSearch()" style='height:60px;') Add
+        button.button-search.search-bar.btn.btn-primary(onclick="addSearch()", style='height:60px;') Add
     h4.table-title Medicines   
-    table#myTable.display
+    table#myTable.display(cellspacing="0", width="100%")
       thead
         tr
+          th Quantity
           th Standardized Name
           th Brand Name
           th Form
@@ -25,7 +27,9 @@ block content
       tbody
         if medicines.length > 0
           - for( var i = 0, len = medicines.length; i < len; i++ ) {
-          tr
+          tr(data-id=medicines[i].ID)
+            td
+              select.qty-20.quantity-drop
             td #{medicines[i].GENERIC_NAME} 
             td #{medicines[i].BRAND_NAME}
             td #{medicines[i].FORM}
@@ -33,13 +37,14 @@ block content
             td #{medicines[i].STRENGTH_UNIT}
             td #{medicines[i].MANUFACTURER}
             td 
-              button.form-control.btn.btn-primary(onclick='addMedicine('+medicines[i].ID+')') Add
+              button.form-control.btn.btn-primary(onclick='addTable(this, '+medicines[i].ID+')') Add
           - }
     h4.table-title Items To Search   
       div.div_search
         table#table_search
           thead
             tr.tr_search
+              th.th_search Quantity
               th.th_search Standardized Name
               th.th_search Brand Name
               th.th_search Form
@@ -48,11 +53,11 @@ block content
               th.th_search Manufacturer
           tbody#itemsToSearch
             tr.tr_search
-              td#empty_search.td_search.text-center(valign="top", colspan="6") No medicines are added yet
-    button.btn.btn-primary Search
+              td#empty_search.td_search.text-center(valign="top", colspan="7") No medicines are added yet
+    button.btn.btn-primary(onclick="searchForResults()") Search
               
 block scripts
   script(src='https://code.jquery.com/ui/1.12.1/jquery-ui.js')
   script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js') 
-  script(type='text/javascript', src=base+'/scripts/doctor/main.js')
+  script(type='text/javascript', src=base+'/scripts/doctor/search_medicines.js')
     

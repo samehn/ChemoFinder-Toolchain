@@ -1359,6 +1359,19 @@ app.get('/getmedicinebyid/:id', function(req, res){
     });
 });
 
+app.post('/getmedicineid', function(req, res) {
+    var query = "SELECT ID from DASH5082.MEDICINE WHERE GENERIC_NAME ='" + req.body.generic_name + "' AND BRAND_NAME = '" + req.body.brand_name + "' AND FORM = '" + req.body.form + "' AND STRENGTH = '" + req.body.strength + "' AND STRENGTH_UNIT = '" + req.body.strength_unit + "' AND MANUFACTURER = '" + req.body.manufacturer + "';";
+    dbQuery(query, function(result) {
+        if(result.length != 0)
+        {
+            res.send({message:"success", medicine_id: result[0].ID});
+        }
+        else
+        {
+            res.send({message:"failed"});
+        }
+    });
+});
 
 app.get('/pharmacy', checkSignIn, function(req, res){
     var query = "SELECT * FROM STOCK_LIST SL JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE SL.PHARMACY_ID = " + req.session.user_id;
@@ -1916,6 +1929,59 @@ function parsingStockList(req, callback) {
         i++;
     }
 }
+
+app.get('/doctor/getsearchresults', checkSignIn, function(req, res){
+    if(req.param('ids') && req.param('qs'))
+    {
+        idsArray = req.param('ids').split('-');
+        qsArray = req.param('qs').split('-');
+        var vaildIds = idsArray.every(function checkInteger(id) { return Number.isInteger(parseInt(id));});
+        var vaildQs = qsArray.every(function checkInteger(quantity) { return Number.isInteger(parseInt(quantity));});
+        if(idsArray.length == qsArray.length && vaildIds && vaildQs)
+        {
+            var results = {};
+            for (var i = 0; i < idsArray.length; i++) {
+                // idsArray[i]
+                results[i] ={};
+                results[i]['quantity'] = qsArray[i];
+                var query = "SELECT * FROM DASH5082.MEDICINE  WHERE ID =" + parseInt(idsArray[i]); 
+                var medicine = dbQuerySync(query);
+                results[i]['medicine'] = medicine[0];
+                var query = "SELECT * FROM DASH5082.MEDICINE M JOIN STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE S.APPROVAL ='1' AND M.ID =" + parseInt(idsArray[i]) + " AND S.AVAILABLE_STOCK >='" + qsArray[i] + "'"; 
+                var pharmacies = dbQuerySync(query);
+                if(pharmacies.length > 0)
+                {
+                    results[i]['pharmacies'] = pharmacies;
+                }
+            }
+            console.log(results[0]);
+            var base = req.protocol + '://' + req.get('host');
+            res.render('doctor/search_results', { base: base, results: results});
+            // res.send({ids: req.param('ids'), qs: req.param('qs')});
+        }
+        else
+        {
+            res.send("404 Not Found");
+        }
+    }
+    else
+    {
+        res.send("404 Not Found");
+    }
+});
+
+app.use('/doctor/getsearchresults', function(err, req, res, next){
+console.log(err);
+    if(err == "Error: First Login")
+    {
+        res.redirect('/user/first_changepassword');
+    }
+    else
+    {
+        //User should be authenticated! Redirect him to log in.
+        res.redirect('/');
+    }
+});
 
 function checkSignIn(req, res, next){
 
