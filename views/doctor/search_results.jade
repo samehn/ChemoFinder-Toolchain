@@ -13,7 +13,7 @@ block content
   #search__results.welcome__home-buttons
     - for( i in results) {
       h4.medicine-title x#{results[i]['quantity']} #{results[i]['medicine'].GENERIC_NAME} #{results[i]['medicine'].BRAND_NAME} #{results[i]['medicine'].FORM} #{results[i]['medicine'].STRENGTH} #{results[i]['medicine'].STRENGTH_UNIT} #{results[i]['medicine'].MANUFACTURER}
-      table#pharmaciesTable.display(cellspacing="0", width="100%")
+      table.display(id="pharmaciesTable" + i, cellspacing="0", width="100%")
         thead
           tr
             th(colspan="9") Pharmacy Info 
@@ -50,26 +50,16 @@ block content
                 td #{results[i]['pharmacies'][j].LAST_UPDATE}
           - }
     - }
-    //- h4.medicine-title Medicines   
-    
-    //- h4.table-title Items To Search   
-    //-   div.div_search
-    //-     table#table_search
-    //-       thead
-    //-         tr.tr_search
-    //-           th.th_search Quantity
-    //-           th.th_search Standardized Name
-    //-           th.th_search Brand Name
-    //-           th.th_search Form
-    //-           th.th_search Strength
-    //-           th.th_search Strength Unit
-    //-           th.th_search Manufacturer
-    //-       tbody#itemsToSearch
-    //-         tr.tr_search
-    //-           td#empty_search.td_search.text-center(valign="top", colspan="7") No medicines are added yet
-    //- button.btn.btn-primary(onclick="searchForResults()") Search
-              
+
 block scripts
   script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js')
   script(type='text/javascript', src=base+'/scripts/doctor/search_results.js')  
-    
+  - for(i in results) {
+      script.
+        $( function() {
+          $('#pharmaciesTable'+ "#{i}").DataTable({
+              "scrollX": true,
+              "paging": false
+          });
+        } );
+  - }

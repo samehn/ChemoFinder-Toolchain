@@ -1,9 +1,9 @@
 var url = window.location.origin;
-$( function() {
-    $('#pharmaciesTable').DataTable({
-        "scrollX": true
-    });
-} );
+// $( function() {
+//     $('#pharmaciesTable').DataTable({
+//         "scrollX": true
+//     });
+// } );
 
 function printPage() {
 	window.print();

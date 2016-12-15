@@ -8,6 +8,13 @@ $(document).ready(function(){
     });
 });
 
+// function lolo() {
+//   $('#approvedMedicinesTable').DataTable().destroy();
+  
+//   $('#approvedMedicinesTable').DataTable({'bPaginate' : false});
+//   console.log('bobo');
+// }
+
 function add_new_medicine() {
 	var item_array={};
     

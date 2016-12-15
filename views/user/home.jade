@@ -19,7 +19,7 @@ block modals
           h4#myModalLabel.modal-title Log in
         // /.modal-header
         .modal-body
-          form(role='form')
+          form#login-form(role='form')
             #emailLoginForm.form-group
               .input-group
                 input#uEmail.form-control(name='email', type='text', placeholder='Email')
@@ -38,7 +38,7 @@ block modals
             // /.form-group
         // /.modal-body
         .modal-footer
-          button.form-control.btn.btn-primary(onclick='login();') Login
+          button#login-btn.form-control.btn.btn-primary(onclick='login();') Login
         // /.modal-footer
       // /.modal-content
     // /.modal-dialog
@@ -50,8 +50,8 @@ block modals
           button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
           h4#myModalLabel.modal-title Register
         // /.modal-header
-        .modal-body
-          form(role='form')
+        .modal-body.register-body
+          form#register-form(role='form')
             #typeRegisterForm.form-group
               .input-group
                 select#type.form-control(name='type')
@@ -138,11 +138,33 @@ block modals
             // /.form-group      
         // /.modal-body
         .modal-footer
-          button.form-control.btn.btn-primary(onclick='register();') Register
+          button#signup-btn.form-control.btn.btn-primary(onclick='register();') Register
         // /.modal-footer
       // /.modal-content
     // /.modal-dialog
   // /.modal
+  #loadingModal.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog.modal-sm
+      .modal-content
+        .modal-body
+          h2
+            span.glyphicon.glyphicon-refresh.glyphicon-refresh-animate
+            |   Loading...
+  #confimSignup.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h4#myModalLabel.modal-title Register
+        // /.modal-header
+        .modal-body
+          |  You registration is done successfuly, wait for the admin approval
+        // /.modal-body
+        .modal-footer
+          button.form-control.btn.btn-primary(onclick='location.reload();') OK
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal          
 block scripts
   script(type='text/javascript', src=base+'/scripts/bootstrap-timepicker.min.js')
   script(type='text/javascript', src=base+'/scripts/home.js')
