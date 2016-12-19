@@ -35,7 +35,7 @@ app.use(session({secret: "297e6dwdt7dtw7dtta"}));
 app.use(fileUpload());
 
 // all environments
-app.set('port', process.env.PORT || 5555);
+app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(morgan('combined'));
@@ -976,7 +976,7 @@ app.get('/admin/manage_medicines', function(req, res) {
     });
 });
 
-app.get('/admin/admins_lists', function(req, res) {
+app.get('/admin/admins_list', function(req, res) {
 
     var query = "SELECT * from DASH5082.ADMIN";
     dbQuery(query, function(result) {
@@ -985,7 +985,7 @@ app.get('/admin/admins_lists', function(req, res) {
         // redirect with data
         //res.send({data: result});
         var data = {base: base, admins: result};  
-        res.render('admin/admins_lists', data);
+        res.render('admin/admins_list', data);
     });
 });
 
