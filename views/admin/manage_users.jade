@@ -3,19 +3,23 @@ extends ../layout
 block stylesheets
   link(href=base+'/style/bootstrap-timepicker.min.css', rel='stylesheet')
 block headers
-  button.header__action-button.ng-binding(onclick="location.href='" + base + "/admin/manage_users';")
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Manage Users", onclick="location.href='" + base + "/admin/manage_users';")
     i.glyphicon.glyphicon-user
     span.main-actions|                         Manage Users
   .header__actions-divider
-  button.header__action-button.ng-binding(onclick="location.href='" + base + "/admin/manage_medicines';")
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Manage Medicines", onclick="location.href='" + base + "/admin/manage_medicines';")
     i.glyphicon.glyphicon-list-alt
     span.main-actions|                         Manage Medicines
   .header__actions-divider
-  button.header__action-button.ng-binding(onclick="location.href='http://google.com';")
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Admins Lists", onclick="location.href='" + base + "/admin/admins_lists';")
+    i.glyphicon.glyphicon-tower
+    span.main-actions|                         Admins Lists
+  .header__actions-divider  
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Settings", onclick="")
     i.glyphicon.glyphicon-cog
     span.main-actions|                         Settings
   .header__actions-divider
-  button.header__action-button.ng-binding(onclick="location.href='http://google.com';")
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Logout", onclick="")
     i.glyphicon.glyphicon-log-out
     span.main-actions|                         Logout        
 block content
@@ -28,7 +32,7 @@ block content
   hr  
   .welcome__home-buttons
     h4.table-title New Account Requests     
-    table#newAccountsTable.display
+    table#newAccountsTable.display(cellspacing="0", width="100%")
       thead
         tr
           th Name
@@ -46,7 +50,7 @@ block content
               button.form-control.btn.btn-primary(onclick='approve('+non_approved_users[i].ID+')') Approve
           - }
     h4.table-title Users Accounts     
-    table#usersTable.display
+    table#usersTable.display(cellspacing="0", width="100%")
       thead
         tr
           th Name

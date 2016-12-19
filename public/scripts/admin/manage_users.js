@@ -1,7 +1,11 @@
 var url = window.location.origin;
 $(document).ready(function(){
-   $('#newAccountsTable').DataTable();
-   $('#usersTable').DataTable();
+   $('#newAccountsTable').DataTable({
+        "scrollX": true
+    });
+   $('#usersTable').DataTable({
+        "scrollX": true
+    });
    $('#timepicker1').timepicker();
 
 	$('#timepicker2').timepicker();

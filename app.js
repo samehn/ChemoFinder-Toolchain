@@ -35,7 +35,7 @@ app.use(session({secret: "297e6dwdt7dtw7dtta"}));
 app.use(fileUpload());
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 5555);
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(morgan('combined'));
@@ -105,12 +105,12 @@ function dbQuery(query, callback) {
                         Close the connection to the database
                         param 1: The callback function to execute on completion of close function.
                     */
-                    console.log(err);
-                    console.log(result);
+                    // console.log(err);
+                    // console.log(result);
                     conn.close(function(){
                         console.log("Connection Closed");
                         });
-                    console.log(result);
+                    // console.log(result);
                     return callback(result);     
                 });
 
@@ -122,8 +122,8 @@ function dbQuerySync(query) {
     var option = { connectTimeout : 3000000 };// Connection Timeout after 40 seconds. 
     var conn = ibmdb.openSync(connString, option);
     var rows = conn.querySync(query);
-    console.log(query);
-    console.log(rows);
+    // console.log(query);
+    // console.log(rows);
     return rows;
 }
 
@@ -723,11 +723,11 @@ app.post('/admin/login', function(req, res){
     }
     else
     {
-        var query = "SELECT * from DASH5082.ADMIN WHERE USERNAME ='" + req.body.email + "';";
+        var query = "SELECT * from DASH5082.ADMIN WHERE USERNAME ='" + req.body.email + "' OR EMAIL ='" + req.body.email + "';";
         var result = dbQuery(query, function(result) {
-            //console.log(result[0].ID);
+            console.log(result[0].ID);
 
-            if(result.length > 0)
+            if(result.length != 0)
             {
                 bcrypt.compare(req.body.password, result[0].PASSWORD, function(err, cmp) {
                     // res == true
@@ -735,6 +735,10 @@ app.post('/admin/login', function(req, res){
                     {
                         req.session.user = result[0];
                         res.send({message: "success"});
+                    }
+                    else
+                    {
+                        res.send({message: "failed", login_error: "Invalid Credentials"});
                     }
                 });
                 
@@ -955,9 +959,33 @@ app.get('/admin/manage_medicines', function(req, res) {
             var base = req.protocol + '://' + req.get('host');
             // redirect with data
             //res.send({data: result});
-            res.render('admin/manage_medicines', {base: base, approved_medicines: result,  non_approved_medicines: result2});  
+            var data = {base: base, approved_medicines: result,  non_approved_medicines: result2};
+            if(req.session.extention_error)
+            {
+                data['extention_error'] = true;
+                req.session.extention_error = null;
+            }
+            if(req.session.format_error)
+            {
+                data['format_error'] = req.session.format_error;
+                req.session.format_error = null;
+            }  
+            res.render('admin/manage_medicines', data);  
         });
         
+    });
+});
+
+app.get('/admin/admins_lists', function(req, res) {
+
+    var query = "SELECT * from DASH5082.ADMIN";
+    dbQuery(query, function(result) {
+        //console.log(result[0].ID);
+        var base = req.protocol + '://' + req.get('host');
+        // redirect with data
+        //res.send({data: result});
+        var data = {base: base, admins: result};  
+        res.render('admin/admins_lists', data);
     });
 });
 
@@ -1077,15 +1105,19 @@ app.get('/generaterandompassword', function(req, res) {
     res.send({random: random});
 });
 
-function parsingApprovedMedicines(callback) {
+function parsingApprovedMedicines(req, callback) {
     var workbook = XLSX.readFile('./public/uploads/medicines/approved_medicines.xlsx');
     var first_sheet_name = workbook.SheetNames[0];
     var worksheet = workbook.Sheets[first_sheet_name];
 
     var flag = true;
+    var format_error_flag = false;
     var i = 2;
+    var warning_message = "<div class='alert alert-danger error-form'> Some medicines cannot be added/updated due to the following: <ul>";
     while(flag)
     {
+        var wm = "<li> On line " + i + ":";
+
         var id, generic_name, brand_name, form, strength, strength_unit, route, manufacturer, sra, approval_date, source, extract_date;
 
         var id_address = 'A'+i;
@@ -1094,6 +1126,11 @@ function parsingApprovedMedicines(callback) {
         if(id_cell == undefined)
         {
             flag = false;
+            warning_message = warning_message + '</ul></div>';
+            if(format_error_flag)
+            {
+                req.session.format_error = warning_message;
+            }
             callback();//res.redirect('/admin/uploadmedicines');
             break;
         }
@@ -1230,6 +1267,7 @@ function parsingApprovedMedicines(callback) {
         if(!generic_name)
         {
             jsonObj['generic_name_error'] = "Generic Name is required";
+            wm = wm + 'generic name is required, ';
             valid = false;
         }
         
@@ -1238,6 +1276,7 @@ function parsingApprovedMedicines(callback) {
         if(!brand_name)
         {
             jsonObj['brand_name_error'] = "Brand Name is required";
+            wm = wm + 'brand name is required, ';
             valid = false;
         }
         
@@ -1246,6 +1285,7 @@ function parsingApprovedMedicines(callback) {
         if(!form)
         {
             jsonObj['form_error'] = "Form is required";
+            wm = wm + 'form is required, ';
             valid = false;
         }
 
@@ -1253,6 +1293,7 @@ function parsingApprovedMedicines(callback) {
         if(!strength)
         {
             jsonObj['strength_error'] = "Strength is required";
+            wm = wm + 'strength is required, ';
             valid = false;
         }
 
@@ -1260,6 +1301,7 @@ function parsingApprovedMedicines(callback) {
         if(!strength_unit)
         {
             jsonObj['strength_unit_error'] = "Strength Unit is required";
+            wm = wm + 'strength unit is required, ';
             valid = false;
         }
 
@@ -1267,24 +1309,28 @@ function parsingApprovedMedicines(callback) {
         if(!manufacturer)
         {
             jsonObj['manufacturer_error'] = "Manufacturer is required";
+            wm = wm + 'manufacturer is required, ';
             valid = false;
         }
 
         if(!sra)
         {
             jsonObj['sra_error'] = "SRA is required";
+            wm = wm + 'sra is required, ';
             valid = false;
         }
 
         if(!source)
         {
             jsonObj['source_error'] = "Source is required";
+            wm = wm + 'source is required, ';
             valid = false;
         }
 
         if(!extract_date)
         {
             jsonObj['extract_date_error'] = "Extract Date is required";
+            wm = wm + 'extract date is required, ';
             valid = false;
         }
 
@@ -1292,10 +1338,8 @@ function parsingApprovedMedicines(callback) {
         var result = dbQuerySync(query);    
         if(result.length != 0)
         {
-            jsonObj['generic_name_error'] = "This Medicine is already exists"
-            valid = false;
-            jsonObj['message'] = "failed";
-            //res.send(jsonObj);
+            var query = "UPDATE DASH5082.MEDICINE SET ROUTE = '" + route + "', MANUFACTURER = '" + manufacturer + "', SRA = '" + sra + "', APPROVAL_DATE = TIMESTAMP_FORMAT(" + approval_date + ", 'DD-Month-YY'), SOURCE = '" + source + "', EXTRACT_DATE = TIMESTAMP_FORMAT(" + extract_date + ", 'DD-Month-YY') WHERE ID = " + result[0].ID + ";";
+            var result = dbQuerySync(query);
         }
         else
         {
@@ -1309,8 +1353,12 @@ function parsingApprovedMedicines(callback) {
             }
             else
             {
-                console.log('sssss');
+                
                 jsonObj['message'] = "failed";
+                format_error_flag = true;
+                wm = wm.slice(0, -2) + '</li>';
+                warning_message = warning_message + wm;
+                
                 //res.send(jsonObj);
             }
         }
@@ -1329,20 +1377,31 @@ app.post('/admin/uploadmedicines', function(req, res) {
         console.log('No files were uploaded.');
         return;
     }
- 
     sampleFile = req.files.sampleFile;
-    sampleFile.mv('./public/uploads/medicines/approved_medicines.xlsx', function(err) {
-        if (err) {
-            res.status(500).send(err);
-        }
-        else {
-            parsingApprovedMedicines(function() {
-              res.redirect('/admin/manage_medicines');
-            });
-            // res.redirect('/admin/uploadmedicines');
-            console.log('File uploaded!');
-        }
-    });
+    var fileArray = sampleFile.name.split('.');
+    var extension = fileArray[fileArray.length - 1];
+    if(extension == "xlsx")
+    {
+        sampleFile.mv('./public/uploads/medicines/approved_medicines.xlsx', function(err) {
+            if (err) {
+                res.status(500).send(err);
+            }
+            else {
+                parsingApprovedMedicines(req, function() {
+                    console.log(req.session);
+                    res.redirect('/admin/manage_medicines');
+                });
+                // res.redirect('/admin/uploadmedicines');
+                console.log('File uploaded!');
+            }
+        });
+    }
+    else
+    {
+        req.session.extention_error = true;
+        res.redirect('/admin/manage_medicines');
+    }
+    
 });
 
 app.get('/getapprovedmedicines', function(req, res){
@@ -1380,7 +1439,18 @@ app.get('/pharmacy', checkSignIn, function(req, res){
         var base = req.protocol + '://' + req.get('host');
         // redirect with data
         //res.send({data: result});
-        res.render('pharmacy/stock_list', {base: base, stock_list: result});      
+        var data = {base: base, stock_list: result};
+        if(req.session.extention_error)
+        {
+            data['extention_error'] = true;
+            req.session.extention_error = null;
+        }
+        if(req.session.format_error)
+        {
+            data['format_error'] = req.session.format_error;
+            req.session.format_error = null;
+        } 
+        res.render('pharmacy/stock_list', data);      
     });
 });
 
@@ -1585,20 +1655,29 @@ app.post('/pharmacy/uploadstocklist', checkSignIn, function(req, res) {
         console.log('No files were uploaded.');
         return;
     }
- 
     sampleFile = req.files.sampleFile;
-    sampleFile.mv('./public/uploads/stocks/stock_list_' + req.session.user_id + '.xlsx', function(err) {
-        if (err) {
-            res.status(500).send(err);
-        }
-        else {
-            parsingStockList(req, function() {
-              res.redirect('/pharmacy');
-            });
-            // res.redirect('/admin/uploadmedicines');
-            console.log('File uploaded!');
-        }
-    });
+    var fileArray = sampleFile.name.split('.');
+    var extension = fileArray[fileArray.length - 1];
+    if(extension == "xlsx")
+    {
+        sampleFile.mv('./public/uploads/stocks/stock_list_' + req.session.user_id + '.xlsx', function(err) {
+            if (err) {
+                res.status(500).send(err);
+            }
+            else {
+                parsingStockList(req, function() {
+                  res.redirect('/pharmacy');
+                });
+                // res.redirect('/admin/uploadmedicines');
+                console.log('File uploaded!');
+            }
+        });
+    }
+    else
+    {
+        req.session.extention_error = true;
+        res.redirect('/pharmacy');
+    }
 });
 
 app.use('/pharmacy/uploadstocklist', function(err, req, res, next){
@@ -1619,10 +1698,13 @@ function parsingStockList(req, callback) {
     var first_sheet_name = workbook.SheetNames[0];
     var worksheet = workbook.Sheets[first_sheet_name];
 
+    var warning_message = "<div class='alert alert-danger error-form'> Some medicines cannot be added due to the following: <ul>";
     var flag = true;
+    var format_error_flag = false;
     var i = 2;
     while(flag)
     {
+        var wm = "<li> On line " + i + ":";
         var id, generic_name, form, strength, strength_unit, brand_name, manufacturer, batch_number, expiry_date, sra, pack_size, price, quantity, avg_monthly_consumption;
 
         var id_address = 'A'+i;
@@ -1631,6 +1713,11 @@ function parsingStockList(req, callback) {
         if(id_cell == undefined)
         {
             flag = false;
+            warning_message = warning_message + '</ul></div>';
+            if(format_error_flag)
+            {
+                req.session.format_error = warning_message;
+            }
             callback();//res.redirect('/admin/uploadmedicines');
             break;
         }
@@ -1789,6 +1876,7 @@ function parsingStockList(req, callback) {
         if(!generic_name)
         {
             jsonObj['generic_name_error'] = "Generic Name is required";
+            wm = wm + 'generic name is required, ';
             valid = false;
         }
 
@@ -1796,6 +1884,7 @@ function parsingStockList(req, callback) {
         if(!form)
         {
             jsonObj['form_error'] = "Form is required";
+            wm = wm + 'form is required, ';
             valid = false;
         }
 
@@ -1803,6 +1892,7 @@ function parsingStockList(req, callback) {
         if(!strength)
         {
             jsonObj['strength_error'] = "Strength is required";
+            wm = wm + 'strength is required, ';
             valid = false;
         }
 
@@ -1810,6 +1900,7 @@ function parsingStockList(req, callback) {
         if(!strength_unit)
         {
             jsonObj['strength_unit_error'] = "Strength Unit is required";
+            wm = wm + 'strength unit is required, ';
             valid = false;
         }
 
@@ -1817,6 +1908,7 @@ function parsingStockList(req, callback) {
         if(!brand_name)
         {
             jsonObj['brand_name_error'] = "Brand Name is required";
+            wm = wm + 'brand name is required, ';
             valid = false;
         }
 
@@ -1824,18 +1916,21 @@ function parsingStockList(req, callback) {
         if(!manufacturer)
         {
             jsonObj['manufacturer_error'] = "Manufacturer is required";
+            wm = wm + 'manufacture is required, ';
             valid = false;
         }
 
         if(!batch_number)
         {
             jsonObj['batch_number_error'] = "Batch Number is required";
+            wm = wm + 'batch number is required, ';
             valid = false;
         }
 
         if(!expiry_date)
         {
             jsonObj['expiry_date_error'] = "Expiry Date is required";
+            wm = wm + 'expiry date is required, ';
             valid = false;
         }
 
@@ -1848,18 +1943,21 @@ function parsingStockList(req, callback) {
         if(!pack_size)
         {
             jsonObj['pack_size_error'] = "Pack Size is required";
+            wm = wm + 'pack size is required, ';
             valid = false;
         }
 
         if(!price)
         {
             jsonObj['price_error'] = "Price per Pack is required";
+            wm = wm + 'price is required, ';
             valid = false;
         }
 
         if(!quantity)
         {
             jsonObj['quantity_error'] = "Quantity is required";
+            wm = wm + 'available in stock is required, ';
             valid = false;
         }
 
@@ -1870,33 +1968,32 @@ function parsingStockList(req, callback) {
         {
             if(valid)
             {   
+                var approval = 0;
+                if(medicineResult[0].SRA != 'NULL')
+                {
+                    approval = 1;
+                }
                 var query = "SELECT * FROM DASH5082.STOCK_LIST WHERE MEDICINE_ID =" + medicineResult[0].ID;
                 var stockListResult = dbQuerySync(query);
                 if(stockListResult.length != 0)
                 {
-                    jsonObj['generic_name_error'] = "This Medicine is already exists in your stock"
-                    valid = false;
-                    jsonObj['message'] = "failed";
-                    // res.send(jsonObj);
+                    var query = "UPDATE DASH5082.STOCK_LIST SET MEDICINE_ID =" + medicineResult[0].ID + ", BATCH_NUMBER ='" + batch_number + "', EXPIRY_DATE = TIMESTAMP_FORMAT(" + expiry_date + ", 'DD-MM-YY'), APPROVAL = '" + approval + "', PACK_SIZE = '" + pack_size + "', PRICE_PER_PACK = '" + price + "', AVAILABLE_STOCK = '" + quantity + "', AVG_MONTHLY_CONSUMPTION = '" + avg_monthly_consumption + "', PHARMACY_ID =" + req.session.user_id + ", LAST_UPDATE = TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS') WHERE ID = " + stockListResult[0].ID + ";";
+                    var result = dbQuerySync(query);
+
                 }
                 else
                 {
-                    if(medicineResult[0].SRA == 'NULL')
-                    {
-                        var query = "INSERT INTO DASH5082.STOCK_LIST (MEDICINE_ID, BATCH_NUMBER, EXPIRY_DATE, APPROVAL, PACK_SIZE, PRICE_PER_PACK, AVAILABLE_STOCK, AVG_MONTHLY_CONSUMPTION, PHARMACY_ID, LAST_UPDATE) VALUES (" + medicineResult[0].ID + ",'" + batch_number + "', TIMESTAMP_FORMAT(" + expiry_date + ", 'DD-MM-YY'), '0','" + pack_size + "','" + price + "','" + quantity + "', '" + avg_monthly_consumption + "', " + req.session.user_id + ",  TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));"; 
-                        dbQuerySync(query);
-                    }
-                    else
-                    {
-                        var query = "INSERT INTO DASH5082.STOCK_LIST (MEDICINE_ID, BATCH_NUMBER, EXPIRY_DATE, APPROVAL, PACK_SIZE, PRICE_PER_PACK, AVAILABLE_STOCK, AVG_MONTHLY_CONSUMPTION, PHARMACY_ID, LAST_UPDATE) VALUES (" + medicineResult[0].ID + ",'" + batch_number + "', TIMESTAMP_FORMAT(" + expiry_date + ", 'DD-MM-YY'), '1','" + pack_size + "','" + price + "','" + quantity + "', '" + avg_monthly_consumption + "', " + req.session.user_id + ",  TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));"; 
-                        dbQuerySync(query);
-                    }
+                    var query = "INSERT INTO DASH5082.STOCK_LIST (MEDICINE_ID, BATCH_NUMBER, EXPIRY_DATE, APPROVAL, PACK_SIZE, PRICE_PER_PACK, AVAILABLE_STOCK, AVG_MONTHLY_CONSUMPTION, PHARMACY_ID, LAST_UPDATE) VALUES (" + medicineResult[0].ID + ",'" + batch_number + "', TIMESTAMP_FORMAT(" + expiry_date + ", 'DD-MM-YY'), '" + approval + "','" + pack_size + "','" + price + "','" + quantity + "', '" + avg_monthly_consumption + "', " + req.session.user_id + ",  TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));"; 
+                    dbQuerySync(query);
                     jsonObj['message'] = "success";
                     // res.send(jsonObj);
                 } 
             }
             else
             {
+                format_error_flag = true;
+                wm = wm.slice(0, -2) + '</li>';
+                warning_message = warning_message + wm;
                 jsonObj['message'] = "failed";
                 // res.send(jsonObj);
             }
@@ -1919,6 +2016,9 @@ function parsingStockList(req, callback) {
             }
             else
             {
+                format_error_flag = true;
+                wm = wm.slice(0, -2) + '</li>';
+                warning_message = warning_message + wm;
                 jsonObj['message'] = "failed";
                 // res.send(jsonObj);
             }

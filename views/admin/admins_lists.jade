@@ -1,0 +1,45 @@
+extends ../layout
+
+block headers
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Manage Users", onclick="location.href='" + base + "/admin/manage_users';")
+    i.glyphicon.glyphicon-user
+    span.main-actions|                         Manage Users
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Manage Medicines", onclick="location.href='" + base + "/admin/manage_medicines';")
+    i.glyphicon.glyphicon-list-alt
+    span.main-actions|                         Manage Medicines
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Admins Lists", onclick="location.href='" + base + "/admin/admins_lists';")
+    i.glyphicon.glyphicon-tower
+    span.main-actions|                         Admins Lists
+  .header__actions-divider  
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Settings", onclick="")
+    i.glyphicon.glyphicon-cog
+    span.main-actions|                         Settings
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Logout", onclick="")
+    i.glyphicon.glyphicon-log-out
+    span.main-actions|                         Logout        
+block content
+  .page__subtitle.ng-binding Admins Lists
+  .welcome__home-buttons     
+    table#adminsTable.display(cellspacing="0", width="100%")
+      thead
+        tr
+          th Username
+          th Email
+      tbody
+        if admins && admins.length > 0
+          - for( var i = 0, len = admins.length; i < len; i++ ) {
+          tr
+            td #{admins[i].USERNAME} 
+            td #{admins[i].EMAIL}
+          - }
+block scripts
+  script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js')
+  script.
+    $(function() {
+        $('#adminsTable').DataTable({
+          "scrollX": true
+        });
+    });  

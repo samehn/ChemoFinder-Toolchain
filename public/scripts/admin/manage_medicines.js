@@ -8,6 +8,17 @@ $(document).ready(function(){
     });
 });
 
+$(document).click(function() {
+  $('.error-form').remove();
+});
+
+$('#add-new-medicine-form').keydown(function(event){
+  if(event.keyCode == 13) {
+    event.preventDefault();
+    add_new_medicine();
+    return false;
+  }
+});
 // function lolo() {
 //   $('#approvedMedicinesTable').DataTable().destroy();
   
@@ -41,21 +52,21 @@ function add_new_medicine() {
     item_array[approval_date.attr('name')] = approval_date.val();
     item_array[source.attr('name')] = source.val();
     item_array[extract_date.attr('name')] = extract_date.val();
-    
+    $('#loadingModal').modal('show');
     console.log(item_array);
      $.ajax({
         type: "post",
         url: url + '/admin/addnewmedicine',
         data : item_array,
         success:  function(data){
+            $('#loadingModal').modal('hide');
             console.log(data);
             console.log(data.message);
             $('.error-form').remove();
             $('.message-form').remove();
             if(data.message == "success")
             {
-                var message = '<div class="alert alert-success message-form"><button class="close" data-close="alert"></button> The medicine is added successfuly</div>';
-                $(message).insertBefore($('#genericNameForm'));
+              $('#confimAddMedicine').modal('show');
             }
             else if(data.message == "failed")
             {

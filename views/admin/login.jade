@@ -5,10 +5,10 @@ block content
   .welcome__home-message.ng-binding Welcome to ChemoFinder
   .welcome__home-buttons
     .col-md-6.col-md-push-3
-      form(role='form')
+      form#login-form(role='form')
         #emailLoginForm.form-group
           .input-group
-            input#uEmail.form-control(name='email', type='text', placeholder='Email', style='position:static')
+            input#uEmail.form-control(name='email', type='text', placeholder='Email or Username', style='position:static')
             span.input-group-addon
               i.glyphicon.glyphicon-user
         // /.form-group
@@ -19,7 +19,15 @@ block content
               i.glyphicon.glyphicon-lock
           // /.input-group
         // /.form-group
-      button.form-control.btn.btn-primary(onclick='login()') Login
+      button#login-btn.form-control.btn.btn-primary(onclick='login()') Login
+block modals
+  #loadingModal.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog.modal-sm
+      .modal-content
+        .modal-body
+          h2
+            span.glyphicon.glyphicon-refresh.glyphicon-refresh-animate
+            |   Loading...      
 block scripts
   script(type='text/javascript', src=base+'/scripts/admin/login.js')
     

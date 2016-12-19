@@ -10,6 +10,12 @@ block headers
   //-   span.main-actions|                         Logout        
 block content
   .page__subtitle.ng-binding My Stock
+  - if(extention_error) {
+      .alert.alert-danger.error-form This file extension is not allowed, only files with xlsx extension are allowed
+  - }
+  - if(format_error) {
+      !{format_error} 
+  - }
   .row
     .col-xs-4.col-md-2 
       button.form-control.btn.btn-primary(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewMedicine') Add New Medicine
@@ -17,7 +23,7 @@ block content
       form#uploadForm(ref='uploadForm', action= base + '/pharmacy/uploadstocklist', method='post', enctype='multipart/form-data')
         .fileUpload.btn.btn-primary
           span Upload Stock List
-          input.upload(type='file', name="sampleFile", onchange='this.form.submit()')
+          input.upload(type='file', name="sampleFile", onchange='$("#loadingModal").modal("show");this.form.submit()')
         //- input.form-control.btn.btn-primary(type='file', onchange='this.form.submit()', value='Upload Medicines')
     .col-xs-4.col-md-2
       form#downloadForm(ref='downloadForm', action= base + '/pharmacy/downloadtemplate', method='get', enctype='multipart/form-data')
@@ -122,7 +128,14 @@ block modals
         // /.modal-footer
       // /.modal-content
     // /.modal-dialog
-  // /.modal                    
+  // /.modal
+  #loadingModal.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog.modal-sm
+      .modal-content
+        .modal-body
+          h2
+            span.glyphicon.glyphicon-refresh.glyphicon-refresh-animate
+            |   Loading...                    
 block scripts
   script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js')
   script(type='text/javascript', src=base+'/scripts/pharmacy/stock_list.js')

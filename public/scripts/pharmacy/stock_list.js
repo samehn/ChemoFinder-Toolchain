@@ -5,6 +5,10 @@ $(document).ready(function(){
     });
 });
 
+$(document).click(function() {
+  $('.error-form').remove();
+});
+
 function add_new_medicine() {
 	var item_array={};
     
