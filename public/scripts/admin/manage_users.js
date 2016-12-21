@@ -6,6 +6,9 @@ $(document).ready(function(){
    $('#usersTable').DataTable({
         "scrollX": true
     });
+   $('#suspensionHistory').DataTable({
+        "scrollX": true
+    });
    $('#timepicker1').timepicker();
 
 	$('#timepicker2').timepicker();

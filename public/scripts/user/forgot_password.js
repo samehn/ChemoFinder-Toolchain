@@ -17,15 +17,36 @@ $("#forgot-password-btn").click(function(e) {
     return false;
 });
 
-function reset_password() {
+function go_home(user_type) {
+    if(user_type == 'user')
+    {
+        url2 = '/';
+    }
+    else
+    {
+        url2 = '/admin/login';
+    }
+    window.location.href = url + url2;
+}
+
+function reset_password(user_type) {
 	var user_array={};
     var email = $('#uEmail');
     user_array[email.attr('name')] = email.val();
     console.log(user_array);
     $('#loadingModal').modal('show');
+    var url2;
+    if(user_type == 'user')
+    {
+        url2 = '/user/forgotpassword';
+    }
+    else
+    {
+        url2 = '/admin/forgotpassword';
+    }
     $.ajax({
     	type: "post",
-    	url: url + '/user/forgotpassword',
+    	url: url + url2,
     	data : user_array,
     	success:  function(data){
             $('#loadingModal').modal('hide');

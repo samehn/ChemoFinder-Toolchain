@@ -1,5 +1,18 @@
 extends ../layout
 
+block headers
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Search Medicines", onclick="location.href='" + base + "/doctor';")
+    i.glyphicon.glyphicon-search
+    span.main-actions|                         Search Medicines
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Profile", onclick="location.href='" + base + "/doctor/profile';")
+    i.glyphicon.glyphicon-user
+    span.main-actions|                         Profile
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Logout", onclick="")
+    i.glyphicon.glyphicon-log-out
+    span.main-actions|                         Logout
+
 block content
   .page__subtitle.ng-binding Search Results
   .row.action__buttons

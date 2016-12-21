@@ -3,6 +3,19 @@ extends ../layout
 block stylesheets
   link(rel='stylesheet', href='https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css')
 
+block headers
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Search Medicines", onclick="location.href='" + base + "/doctor';")
+    i.glyphicon.glyphicon-search
+    span.main-actions|                         Search Medicines
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Profile", onclick="location.href='" + base + "/doctor/profile';")
+    i.glyphicon.glyphicon-user
+    span.main-actions|                         Profile
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Logout", onclick="")
+    i.glyphicon.glyphicon-log-out
+    span.main-actions|                         Logout
+
 block content
   .page__subtitle.ng-binding Search Medicines
   .welcome__home-buttons
@@ -11,7 +24,7 @@ block content
          select#quantity-search.qty-20.quantity-search.search-bar
          input#tags.input-search.search-bar(type='text', placeholder='Search For Medicines...')         
       .div-search.search-bar
-        button.button-search.search-bar.btn.btn-primary(onclick="addSearch()", style='height:60px;') Add
+        button.button-search.search-bar.btn.btn-primary(onclick="addSearch()", style='height:60px; color: white;') Add
     h4.table-title Medicines   
     table#myTable.display(cellspacing="0", width="100%")
       thead

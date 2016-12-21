@@ -1,13 +1,17 @@
 extends ../layout
 
 block headers
-  //- button.header__action-button.ng-binding(onclick="location.href='http://google.com';")
-  //-   i.glyphicon.glyphicon-cog
-  //-   span.main-actions|                         Settings
-  //- .header__actions-divider
-  //- button.header__action-button.ng-binding(onclick="location.href='http://google.com';")
-  //-   i.glyphicon.glyphicon-log-out
-  //-   span.main-actions|                         Logout        
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="My Stock", onclick="location.href='" + base + "/pharmacy';")
+    i.glyphicon.glyphicon-list-alt
+    span.main-actions|                         My Stock
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Profile", onclick="location.href='" + base + "/pharmacy/profile';")
+    i.glyphicon.glyphicon-user
+    span.main-actions|                         Profile
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Logout", onclick="")
+    i.glyphicon.glyphicon-log-out
+    span.main-actions|                         Logout       
 block content
   .page__subtitle.ng-binding My Stock
   - if(extention_error) {
@@ -17,17 +21,19 @@ block content
       !{format_error} 
   - }
   .row
-    .col-xs-4.col-md-2 
-      button.form-control.btn.btn-primary(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewMedicine') Add New Medicine
-    .col-xs-4.col-md-2
+    .col-xs-6.col-md-3 
+      button.form-control.btn.btn-primary.mg-btm-5(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewMedicine') Add New Medicine
+    .col-xs-6.col-md-3 
+      button.form-control.btn.btn-primary.mg-btm-5(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewApprovedMedicine') Add New Approved Medicine  
+    .col-xs-6.col-md-3
       form#uploadForm(ref='uploadForm', action= base + '/pharmacy/uploadstocklist', method='post', enctype='multipart/form-data')
-        .fileUpload.btn.btn-primary
+        .fileUpload.btn.btn-primary.mg-btm-5
           span Upload Stock List
           input.upload(type='file', name="sampleFile", onchange='$("#loadingModal").modal("show");this.form.submit()')
-        //- input.form-control.btn.btn-primary(type='file', onchange='this.form.submit()', value='Upload Medicines')
-    .col-xs-4.col-md-2
+        //- input.form-control.btn.btn-primary.mg-btm-5(type='file', onchange='this.form.submit()', value='Upload Medicines')
+    .col-xs-6.col-md-3
       form#downloadForm(ref='downloadForm', action= base + '/pharmacy/downloadtemplate', method='get', enctype='multipart/form-data')
-        button.form-control.btn.btn-primary(type="submit", style="font-size:70%;") Download Stock Template    
+        button.form-control.btn.btn-primary.mg-btm-5(type="submit") Download Stock Template    
   hr  
   .welcome__home-buttons
     h4.table-title Approved Medicines     
@@ -75,7 +81,7 @@ block modals
           h4#myModalLabel.modal-title Add New Medicine
         // /.modal-header
         .modal-body
-          form(role='form')
+          form#add-new-medicine-form(role='form')
             #genericNameForm.form-group
               input#genericName.form-control(name='generic_name', type='text', placeholder='Generic Name')
             // /.form-group
@@ -129,13 +135,75 @@ block modals
       // /.modal-content
     // /.modal-dialog
   // /.modal
+  #addNewApprovedMedicine.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          h4#myModalLabel.modal-title Add New Approved Medicine
+        // /.modal-header
+        .modal-body
+          form#add-new-approved-medicine-form(role='form')
+            #medicineFormApproved.form-group
+              select#medicineApproved.form-control(name='medicine')
+                option.form-control(value='') Select Form
+                - for( var i = 0, len = medicines.length; i < len; i++ ) {
+                option.form-control(value= medicines[i].ID) #{medicines[i].GENERIC_NAME} - #{medicines[i].BRAND_NAME} - #{medicines[i].FORM} - #{medicines[i].STRENGTH} - #{medicines[i].STRENGTH_UNIT} - #{medicines[i].MANUFACTURER} 
+                - }
+              // /.input-group
+            // /.form-group
+            #batchNumberFormApproved.form-group
+              input#batchNumberApproved.form-control(name='batch_number', type='number', step="any", placeholder='Batch Number')
+            // /.form-group            
+            p 
+              strong Expiry Date
+            #expiryDateFormApproved.form-group
+              input#expiryDateApproved.form-control(name='expiry_date', type='date', placeholder='Expiry Date')
+            // /.form-group
+            #sraFormApproved.form-group
+              input#sraApproved.form-control(name='sra', type='text', placeholder='SRA Approval')
+            // /.form-group
+            #packSizeFormApproved.form-group
+              input#packSizeApproved.form-control(name='pack_size', type='text', placeholder='Pack Size')
+            // /.form-group
+            #priceFormApproved.form-group
+              input#priceApproved.form-control(name='price', type='text', placeholder='Price per Pack')
+            // /.form-group
+            #quantityFormApproved.form-group
+              input#quantityApproved.form-control(name='quantity', type='text', placeholder='Available Stock (packs)')
+            // /.form-group
+            #avgMonthlyConsumptionFormApproved.form-group
+              input#avgMonthlyConsumptionApproved.form-control(name='avg_monthly_consumption', type='text', placeholder='Avg. Monthly Consumption')
+            // /.form-group  
+        // /.modal-body
+        .modal-footer
+          button.form-control.btn.btn-primary(onclick='add_new_approved_medicine();') Submit
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal
   #loadingModal.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
     .modal-dialog.modal-sm
       .modal-content
         .modal-body
           h2
             span.glyphicon.glyphicon-refresh.glyphicon-refresh-animate
-            |   Loading...                    
+            |   Loading...
+  #confimAddNewMedicine.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h4#myModalLabel.modal-title Add New Medicine
+        // /.modal-header
+        .modal-body
+          |  The medicine is added successfuly
+        // /.modal-body
+        .modal-footer
+          button.form-control.btn.btn-primary(onclick='location.reload();') OK
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal                              
 block scripts
   script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js')
   script(type='text/javascript', src=base+'/scripts/pharmacy/stock_list.js')

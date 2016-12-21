@@ -44,6 +44,18 @@ $("#login-btn").click(function(e) {
     return false;
 });
 
+$("#Register").on("show.bs.modal", function () {
+  $("html").addClass("modal-open");
+}).on("hidden.bs.modal", function () {
+  $("html").removeClass("modal-open");
+});
+
+$("#Login").on("show.bs.modal", function () {
+  $("html").addClass("modal-open");
+}).on("hidden.bs.modal", function () {
+  $("html").removeClass("modal-open");
+});
+
 function login() {
     
     var type = $('#login-type');

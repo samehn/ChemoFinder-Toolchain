@@ -70,8 +70,6 @@ block content
             td
               if approved_users[i].ACTIVE == 1
                 input.form-control(type='text', id='suspend_message_'+approved_users[i].ID)
-              else
-                !{approved_users[i].SUSPENSION_REASON}
             td
               if approved_users[i].ACTIVE == 1
                 input.form-control(type='checkbox', id='chk_'+approved_users[i].ID)
@@ -84,7 +82,26 @@ block content
                 button.form-control.btn.btn-success(onclick='activate('+approved_users[i].ID+')') Activate
             td 
               button.form-control.btn.btn-danger(onclick='delete_user('+ approved_users[i].ID+')') Delete     
-          - } 
+          - }
+    h4.table-title Users Suspension History     
+    table#suspensionHistory.display(cellspacing="0", width="100%")
+      thead
+        tr
+          th Name
+          th Email
+          th Type
+          th Suspension Reason
+          th Date
+      tbody
+        if suspension_history && suspension_history.length > 0
+          - for( var i = 0, len = suspension_history.length; i < len; i++ ) {
+          tr
+            td #{suspension_history[i].NAME} 
+            td #{suspension_history[i].EMAIL}
+            td #{suspension_history[i].TYPE}
+            td !{suspension_history[i].SUSPENSION_REASON}
+            td #{suspension_history[i].CREATED_AT}    
+          - }       
 block modals             
   #addNewUser.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
     .modal-dialog

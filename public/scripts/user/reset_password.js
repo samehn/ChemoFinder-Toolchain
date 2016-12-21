@@ -16,7 +16,19 @@ $("#reset-password-btn").click(function(e) {
     return false;
 });
 
-function reset_password() {
+function go_home(user_type) {
+    if(user_type == 'user')
+    {
+        url2 = '/';
+    }
+    else
+    {
+        url2 = '/admin/login';
+    }
+    window.location.href = url + url2;
+}
+
+function reset_password(user_type) {
 	var pathname = window.location.pathname;
   var urlArray = pathname.split('/');
   var token = urlArray[urlArray.length -1];
@@ -27,10 +39,19 @@ function reset_password() {
   user_array[rpassword.attr('name')] = rpassword.val();
   user_array['token'] = token;
   console.log(user_array);
+  var url2;
+  if(user_type == 'user')
+  {
+    url2 = '/user/resetpassword';
+  }
+  else
+  {
+    url2 = '/admin/resetpassword';
+  } 
   $('#loadingModal').modal('show');
   $.ajax({
   	type: "post",
-  	url: url + '/user/resetpassword',
+  	url: url + url2,
   	data : user_array,
   	success:  function(data){
       $('#loadingModal').modal('hide');

@@ -1258,7 +1258,8 @@ regimen-dist {
   margin-bottom: 20px;
   color: #56a3fc;
 }
-
+.word-wrapping{ word-wrap: break-word; }
+.mg-btm-5{ margin-bottom: 10px; }
 .search-bar { box-sizing: border-box; }
 .section-search { width: 100%; display: table; padding: 1em 0 0; margin-bottom: 60px; }
 .div-search { display: table-cell; width: 100%; }
@@ -1320,7 +1321,7 @@ input[type=number] {
 }   
 input[type=number]::-webkit-inner-spin-button { 
   opacity:1;
-  background: #eee url('http://i.stack.imgur.com/YYySO.png') no-repeat 50% 50%;
+  background: #eee url('../images/spinner.png') no-repeat 50% 50%;
   width: 14px;
   height: 14px;
   padding: 4px;

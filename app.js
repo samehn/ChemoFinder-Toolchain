@@ -753,7 +753,14 @@ app.post('/admin/login', function(req, res){
 
 app.get('/user/forgotpassword', function(req, res){
     var base = req.protocol + '://' + req.get('host');
-    res.render('user/forgot_password', { base: base });
+    var user_type = 'user';
+    res.render('user/forgot_password', {user_type: user_type, base: base });
+});
+
+app.get('/admin/forgotpassword', function(req, res){
+    var base = req.protocol + '://' + req.get('host');
+    var user_type = 'admin';
+    res.render('user/forgot_password', {user_type: user_type, base: base });
 });
 
 app.post('/user/forgotpassword', function(req, res){
@@ -783,6 +790,56 @@ app.post('/user/forgotpassword', function(req, res){
                         res.send({message: "success"});
                         var base = req.protocol + '://' + req.get('host');
                         var link = base + '/user/resetpassword/' + token;
+                        //send email
+                        var mailOptions = {
+                            from: 'chemofinder@gmail.com', // sender address
+                            to: req.body.email, // list of receivers
+                            subject: 'Password Recovery', // Subject line
+                            template: 'forgot_password_mail',
+                            context: {
+                                link: link
+                            }
+                            //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
+                        };
+                        sendEmail(mailOptions);
+                    });
+                });
+            }
+            else
+            {
+                res.send({message: "failed", login_error: "This email is not registered"});
+            }
+        });
+    }    
+});
+
+app.post('/admin/forgotpassword', function(req, res){
+    //console.log(Users);
+    //console.log(req.session.user);
+    if(!req.body.email){
+        res.send({message: "failed", fpassword_error: "Email is required"});
+    }
+    else
+    {
+        var query = "SELECT * from DASH5082.ADMIN WHERE EMAIL ='" + req.body.email + "';";
+        var result = dbQuery(query, function(result) {
+            //console.log(result[0].ID);
+
+            if(result.length > 0)
+            {
+                //generate random token
+                // Generate a 20 character alpha-numeric token:
+                var token = randtoken.generate(120);
+
+                //Delete old tokens if exists
+                var query = "DELETE from DASH5082.ADMIN_FORGOT_PASSWORD WHERE ADMIN_ID ='" + result[0].ID + "';";
+                dbQuery(query, function(result2) {
+                    //insert new token into the database
+                    var query = "INSERT INTO DASH5082.ADMIN_FORGOT_PASSWORD (ADMIN_ID, TOKEN, CREATED_AT) values ('" + result[0].ID + "', '" + token + "', TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));";
+                    dbQuery(query, function(result3) {
+                        res.send({message: "success"});
+                        var base = req.protocol + '://' + req.get('host');
+                        var link = base + '/admin/resetpassword/' + token;
                         //send email
                         var mailOptions = {
                             from: 'chemofinder@gmail.com', // sender address
@@ -844,7 +901,49 @@ app.get('/user/resetpassword/:token', function(req, res){
                 // res.send(req.params.token);
                 // render change password page
                 var base = req.protocol + '://' + req.get('host');
-                res.render('user/reset_password', { base: base });
+                var user_type = 'user';
+                res.render('user/reset_password', { base: base, user_type: user_type });
+            }
+        }
+        else
+        {
+            res.send("404 Not Found");
+        }
+    });    
+    
+    //res.send("tagId is set to " + req.params.token);
+    // var base = req.protocol + '://' + req.get('host');
+    // res.render('forgot_password', { base: base });
+});
+
+app.get('/admin/resetpassword/:token', function(req, res){
+
+    // check if the token exists
+    var query = "SELECT * from DASH5082.ADMIN_FORGOT_PASSWORD WHERE TOKEN ='" + req.params.token + "';";
+    dbQuery(query, function(result) {
+        if(result.length > 0)
+        {
+            // check the expiration date of the token
+            var tokenDate = new Date(result[0].CREATED_AT);
+            var now = new Date();
+
+            //get difference in milliseconds
+            var diff = Math.abs(now-tokenDate);
+            //get difference in hours
+            diff = diff/(1000*60*60)
+            console.log(diff);
+
+            if(diff > 3)
+            {
+                res.send("404 Not Found");       
+            }
+            else
+            {
+                // res.send(req.params.token);
+                // render change password page
+                var base = req.protocol + '://' + req.get('host');
+                var user_type = 'admin';
+                res.render('user/reset_password', { base: base, user_type: user_type });
             }
         }
         else
@@ -934,16 +1033,97 @@ app.post('/user/resetpassword', function(req, res){
     });
 });
 
+app.post('/admin/resetpassword', function(req, res){
+    // check if the token exists
+    var query = "SELECT * from DASH5082.ADMIN_FORGOT_PASSWORD WHERE TOKEN ='" + req.body.token + "';";
+    dbQuery(query, function(result) {
+        if(result.length > 0)
+        {
+            // check the expiration date of the token
+            var tokenDate = new Date(result[0].CREATED_AT);
+            var now = new Date();
+
+            //get difference in milliseconds
+            var diff = Math.abs(now-tokenDate);
+            //get difference in hours
+            diff = diff/(1000*60*60);
+            console.log(diff);
+
+            if(diff > 3)
+            {
+                jsonObj['message'] = "failed";
+                jsonObj['password_error'] = "This link is already expired";
+                res.send(jsonObj);       
+            }
+            else
+            {
+                var jsonObj = {};
+                var valid = true;
+                //validate password
+                //Minimum 8 characters at least 1 special character
+                var passwordRegex = /^(?=.*[A-Za-z\d])(?=.*[$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=])[A-Za-z\d$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=]{8,}$/;
+                if(!req.body.password)
+                {
+                    jsonObj['password_error'] = "Password is required";
+                    valid = false;
+                }
+                else if(!validateWithRegex(passwordRegex, req.body.password))
+                {
+                   jsonObj['password_error'] = "Password has to be minimum 8 characters at least 1 special character";
+                   valid = false;
+                }
+                else if(req.body.password != req.body.rpassword)
+                {
+                   jsonObj['password_error'] = "Password and cofirm password doesn't match";   
+                   valid = false;
+                }
+
+                //validate rpassword
+                if(!req.body.rpassword)
+                {
+                    jsonObj['rpassword_error'] = "Confirm Password is required";
+                    valid = false;
+                }
+                if(valid)
+                {    
+                    bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+                      // Store hash in your password DB.
+                      // enter new pharmacy to the db
+                      var query = "UPDATE DASH5082.ADMIN SET PASSWORD ='" + hash + "' WHERE ID =" + result[0].ADMIN_ID + ";";
+                      dbQuery(query, function(newResult) {
+                          console.log(newResult);
+                          jsonObj['message'] = "success";
+                          res.send(jsonObj);
+                      });
+                    });
+                }
+                else
+                {
+                    jsonObj['message'] = "failed";
+                    res.send(jsonObj);
+                }
+            }
+        }
+        else
+        {
+            res.send("404 Not Found");
+        }
+    });
+});
+
 app.get('/admin/manage_users', function(req, res) {
     var query = "SELECT ID, EMAIL, NAME, TYPE from DASH5082.USER WHERE APPROVE='0'";
     dbQuery(query, function(result) {
         var query = "SELECT ID, EMAIL, NAME, TYPE, ACTIVE, SUSPENSION_REASON from DASH5082.USER WHERE APPROVE='1'";
         dbQuery(query, function(result2) {
-            //console.log(result[0].ID);
-            var base = req.protocol + '://' + req.get('host');
-            // redirect with data
-            //res.send({data: result});
-            res.render('admin/manage_users', {base: base, non_approved_users: result, approved_users: result2});  
+            var query = "SELECT U.NAME, U.EMAIL, U.TYPE, US.SUSPENSION_REASON, US.CREATED_AT FROM USER_SUSPENSION US JOIN USER U ON U.ID = US.USER_ID";
+            dbQuery(query, function(result3) {
+                //console.log(result[0].ID);
+                var base = req.protocol + '://' + req.get('host');
+                // redirect with data
+                //res.send({data: result});
+                res.render('admin/manage_users', {base: base, non_approved_users: result, approved_users: result2, suspension_history: result3});
+            });  
         });
         
     });
@@ -1022,8 +1202,10 @@ app.post('/admin/approveuser', function(req, res){
 
 app.post('/admin/suspenduser', function(req, res){
 
-    var query = "UPDATE USER SET ACTIVE='0', SUSPENSION_REASON='" + req.body.suspension_reason + "' WHERE ID=" + req.body.id + ";";
+    var query = "UPDATE USER SET ACTIVE='0' WHERE ID=" + req.body.id + ";";
     dbQuery(query, function(newResult) {
+        var query = "INSERT INTO DASH5082.USER_SUSPENSION (USER_ID, SUSPENSION_REASON, CREATED_AT) VALUES (" + req.body.id + ", '" + req.body.suspension_reason + "', TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));";
+        dbQuerySync(query);
         var query = "SELECT EMAIL FROM USER WHERE ID=" + req.body.id + ";";
         dbQuery(query, function(result) 
         {
@@ -1435,11 +1617,13 @@ app.post('/getmedicineid', function(req, res) {
 app.get('/pharmacy', checkSignIn, function(req, res){
     var query = "SELECT * FROM STOCK_LIST SL JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE SL.PHARMACY_ID = " + req.session.user_id;
     dbQuery(query, function(result) {
+        var query = "SELECT * from DASH5082.MEDICINE WHERE SRA IS NOT NULL";
+        var result2 = dbQuerySync(query);
         //console.log(result[0].ID);
         var base = req.protocol + '://' + req.get('host');
         // redirect with data
         //res.send({data: result});
-        var data = {base: base, stock_list: result};
+        var data = {base: base, stock_list: result, medicines: result2};
         if(req.session.extention_error)
         {
             data['extention_error'] = true;
@@ -1485,7 +1669,7 @@ console.log(err);
     }
 });
 
-app.post('/pharmacy/addnewmedicine', checkSignIn, function(req, res){
+app.post('/pharmacy/addnewmedicine', function(req, res){
     var jsonObj = {};
     var valid = true;
 
@@ -1610,7 +1794,7 @@ app.post('/pharmacy/addnewmedicine', checkSignIn, function(req, res){
             res.send(jsonObj);
         }
     }
-    else
+    else    
     {
         if(valid)
         {    
@@ -1634,18 +1818,87 @@ app.post('/pharmacy/addnewmedicine', checkSignIn, function(req, res){
     }                  
 });
 
-app.use('/pharmacy/addnewmedicine', function(err, req, res, next){
-console.log(err);
-    if(err == "Error: First Login")
+app.post('/pharmacy/addnewapprovedmedicine', function(req, res){
+    var jsonObj = {};
+    var valid = true;
+
+    //validate type
+    if(!req.body.medicine)
     {
-        res.redirect('/user/first_changepassword');
+        jsonObj['medicine_error'] = "Medicine is required";
+        valid = false;
+    }
+
+    if(!req.body.batch_number)
+    {
+        jsonObj['batch_number_error'] = "Batch Number is required";
+        valid = false;
+    }
+
+    if(!req.body.expiry_date)
+    {
+        jsonObj['expiry_date_error'] = "Expiry Date is required";
+        valid = false;
+    }
+
+    // if(!req.body.sra)
+    // {
+    //     jsonObj['sra_error'] = "SRA is required";
+    //     valid = false;
+    // }
+
+    if(!req.body.pack_size)
+    {
+        jsonObj['pack_size_error'] = "Pack Size is required";
+        valid = false;
+    }
+
+    if(!req.body.price)
+    {
+        jsonObj['price_error'] = "Price per Pack is required";
+        valid = false;
+    }
+
+    if(!req.body.quantity)
+    {
+        jsonObj['quantity_error'] = "Quantity is required";
+        valid = false;
+    }
+
+    // if(!req.body.avg_monthly_consumption)
+    // {
+    //     jsonObj['avg_monthly_consumption_error'] = "Average Monthly Comsumption is required";
+    //     valid = false;
+    // }
+    console.log(req.body);
+    
+    if(valid)
+    {
+        var query = "SELECT * FROM DASH5082.STOCK_LIST WHERE MEDICINE_ID =" + req.body.medicine;
+        console.log(query);
+        var stockListResult = dbQuerySync(query);
+        if(stockListResult.length != 0)
+        {
+            jsonObj['generic_name_error'] = "This Medicine is already exists in your stock"
+            valid = false;
+            jsonObj['message'] = "failed";
+            res.send(jsonObj);
+        }
+        else
+        {
+            var query = "INSERT INTO DASH5082.STOCK_LIST (MEDICINE_ID, BATCH_NUMBER, EXPIRY_DATE, APPROVAL, PACK_SIZE, PRICE_PER_PACK, AVAILABLE_STOCK, AVG_MONTHLY_CONSUMPTION, PHARMACY_ID, LAST_UPDATE) VALUES (" + req.body.medicine + ",'" + req.body.batch_number + "', '" + req.body.expiry_date + "', '1','" + req.body.pack_size + "','" + req.body.price + "','" + req.body.quantity + "', '" + req.body.avg_monthly_consumption + "', " + req.session.user_id + ",  TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));"; 
+            dbQuerySync(query);
+            jsonObj['message'] = "success";
+            res.send(jsonObj);
+        }
     }
     else
     {
-        //User should be authenticated! Redirect him to log in.
-        res.redirect('/');
-    }
+        jsonObj['message'] = "failed";
+        res.send(jsonObj);
+    }                  
 });
+
 
 app.post('/pharmacy/uploadstocklist', checkSignIn, function(req, res) {
     var sampleFile;
@@ -2225,6 +2478,48 @@ app.post('/user/first_changepassword', checkFirstLogin, function(req, res){
         jsonObj['message'] = "failed";
         res.send(jsonObj);
     }        
+});
+
+app.get('/doctor/profile', checkSignIn, function(req, res){
+    var query = "SELECT * from DASH5082.USER WHERE ID=" + req.session.user_id;
+    dbQuery(query, function(result) {
+        var base = req.protocol + '://' + req.get('host');
+        res.render('doctor/profile', { base: base, info: result });  
+    });
+});
+
+app.use('/doctor/profile', function(err, req, res, next){
+console.log(err);
+    if(err == "Error: First Login")
+    {
+        res.redirect('/user/first_changepassword');
+    }
+    else
+    {
+        //User should be authenticated! Redirect him to log in.
+        res.redirect('/');
+    }
+});
+
+app.get('/pharmacy/profile', checkSignIn, function(req, res){
+    var query = "SELECT * from DASH5082.USER WHERE ID=" + req.session.user_id;
+    dbQuery(query, function(result) {
+        var base = req.protocol + '://' + req.get('host');
+        res.render('pharmacy/profile', { base: base, info: result });  
+    });
+});
+
+app.use('/pharmacy/profile', function(err, req, res, next){
+console.log(err);
+    if(err == "Error: First Login")
+    {
+        res.redirect('/user/first_changepassword');
+    }
+    else
+    {
+        //User should be authenticated! Redirect him to log in.
+        res.redirect('/');
+    }
 });
 
 app.get('/logout', function(req, res){

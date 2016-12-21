@@ -1,0 +1,204 @@
+extends ../layout
+
+block headers
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="My Stock", onclick="location.href='" + base + "/pharmacy';")
+    i.glyphicon.glyphicon-list-alt
+    span.main-actions|                         My Stock
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Profile", onclick="location.href='" + base + "/pharmacy/profile';")
+    i.glyphicon.glyphicon-user
+    span.main-actions|                         Profile
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Logout", onclick="")
+    i.glyphicon.glyphicon-log-out
+    span.main-actions|                         Logout       
+block content
+  .page__subtitle.ng-binding Profile
+  .row
+    .col-xs-2.col-xs-push-2 
+      h4 Pharmacy Name
+    .col-xs-2.col-xs-push-6 
+      h4 
+        strong.word-wrapping #{info[0].NAME}
+  hr
+  .row
+    .col-xs-2.col-xs-push-2 
+      h4 Email
+    .col-xs-2.col-xs-push-6 
+      h4 
+        strong.word-wrapping #{info[0].EMAIL}
+  hr
+  - if(info[0].STREET){
+    .row
+      .col-xs-2.col-xs-push-2 
+        h4 Street
+      .col-xs-2.col-xs-push-6 
+        h4 
+          strong.word-wrapping #{info[0].STREET}
+    hr
+  - }
+  - if(info[0].CITY){
+    .row
+      .col-xs-2.col-xs-push-2 
+        h4 City
+      .col-xs-2.col-xs-push-6 
+        h4 
+          strong.word-wrapping #{info[0].CITY}
+    hr
+  - }
+  - if(info[0].STATE){
+    .row
+      .col-xs-2.col-xs-push-2 
+        h4 Region
+      .col-xs-2.col-xs-push-6 
+        h4 
+          strong.word-wrapping #{info[0].STATE}
+    hr
+  - }
+
+  - if(info[0].ZIP){
+    .row
+      .col-xs-2.col-xs-push-2 
+        h4 Postal Code
+      .col-xs-2.col-xs-push-6 
+        h4 
+          strong.word-wrapping #{info[0].ZIP}
+    hr
+  - }
+  .row
+    .col-xs-2.col-xs-push-2 
+      h4 Phone Number
+    .col-xs-2.col-xs-push-6 
+      h4 
+        strong.word-wrapping #{info[0].PHONE_NUMBER}
+  hr
+  .row
+    .col-xs-2.col-xs-push-2 
+      h4 Open From
+    .col-xs-2.col-xs-push-6 
+      h4 
+        strong.word-wrapping #{info[0].OPEN_FROM}
+  hr
+  .row
+    .col-xs-2.col-xs-push-2 
+      h4 Open To
+    .col-xs-2.col-xs-push-6 
+      h4 
+        strong.word-wrapping #{info[0].OPEN_TO}
+  hr
+  .row.text-center(style="margin-bottom: 80px;")
+    .col-xs-6.col-md-3.col-md-push-2
+      button.form-control.btn.btn-primary(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#editProfile') Edit Profile
+    .col-xs-6.col-md-3.col-md-push-4
+      button.form-control.btn.btn-primary(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#changePassword') Change Password
+block modals
+  #editProfile.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          h4#myModalLabel.modal-title Edit Profile
+        // /.modal-header
+        .modal-body
+          form#edit-profile-form(role='form')
+            #nameForm.form-group
+              .input-group
+                input#name.form-control(name='name', type='text', placeholder='Pharmacy Name', value= info[0].NAME )
+                span.input-group-addon
+                  i.glyphicon.glyphicon-user
+            // /.form-group
+            #emailForm.form-group
+              .input-group
+                input#email.form-control(name='email', type='text', placeholder='Email', value= info[0].EMAIL)
+                span.input-group-addon
+                  i.glyphicon.glyphicon-envelope
+            // /.form-group
+            #streetForm.form-group
+              .input-group
+                input#street.form-control(name='street', type='text', placeholder='Street', value= info[0].STREET)
+                span.input-group-addon
+                  i.glyphicon.glyphicon-home
+            // /.form-group
+            #cityForm.form-group
+              .input-group
+                input#city.form-control(name='city', type='text', placeholder='City', value= info[0].CITY)
+                span.input-group-addon
+                  i.glyphicon.glyphicon-home
+            // /.form-group
+            #stateForm.form-group
+              .input-group
+                input#state.form-control(name='state', type='text', placeholder='Region', value= info[0].STATE)
+                span.input-group-addon
+                  i.glyphicon.glyphicon-home
+            // /.form-group
+            #zipForm.form-group
+              .input-group
+                input#zip.form-control(name='zip', type='text', placeholder='Postal Code', value= info[0].ZIP)
+                span.input-group-addon
+                  i.glyphicon.glyphicon-home
+            // /.form-group
+            #phoneForm.form-group
+              .input-group
+                input#phone.form-control(name='phone_number', type='text', placeholder='Phone Number', value= info[0].PHONE_NUMBER)
+                span.input-group-addon
+                  i.glyphicon.glyphicon-earphone
+            // /.form-group
+            p
+              strong Open from
+            #openFromForm.form-group
+              .input-group.bootstrap-timepicker.timepicker
+                input#timepicker1.form-control.input-small(name='open_from', type='text', value= info[0].OPEN_FROM)
+                span.input-group-addon
+                  i.glyphicon.glyphicon-time
+            // /.form-group
+            p
+              strong Open to
+            #openToForm.form-group
+              .input-group.bootstrap-timepicker.timepicker
+                input#timepicker2.form-control.input-small(name='open_to', type='text', value= info[0].OPEN_TO)
+                span.input-group-addon
+                  i.glyphicon.glyphicon-time
+            // /.form-group      
+        // /.modal-body
+        .modal-footer
+          button#edit-profile-btn.form-control.btn.btn-primary(onclick='editProfile();') Save Changes
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal
+  #changePassword.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          h4#myModalLabel.modal-title Change Password
+        // /.modal-header
+        .modal-body
+          form#change-password-form(role='form')
+            #oldPasswordForm.form-group
+              .input-group
+                input#oldPassword.form-control(name='old_password', type='password', placeholder='Old Password')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-lock
+              // /.input-group
+            // /.form-group
+            #newPasswordForm.form-group
+              .input-group
+                input#newPassword.form-control(name='new_password', type='password', placeholder='New Password')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-lock
+              // /.input-group
+            // /.form-group
+            #rnewPasswordForm.form-group
+              .input-group
+                input#rnewPassword.form-control(name='rnew_password' type='password', placeholder='Confirm New Password')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-lock
+              // /.input-group
+            // /.form-group
+        .modal-footer
+          button#change-password-btn.form-control.btn.btn-primary(onclick='changePassword();') Change
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal

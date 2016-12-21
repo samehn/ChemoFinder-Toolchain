@@ -19,7 +19,8 @@ block content
               i.glyphicon.glyphicon-lock
           // /.input-group
         // /.form-group
-      button#login-btn.form-control.btn.btn-primary(onclick='login()') Login
+      button#login-btn.form-control.btn.btn-primary(style='margin-bottom: 20px', onclick='login()') Login
+      a(href=base+'/admin/forgotpassword') forgot password?
 block modals
   #loadingModal.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
     .modal-dialog.modal-sm
