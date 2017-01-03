@@ -2336,6 +2336,266 @@ console.log(err);
     }
 });
 
+app.post('/doctor/updateprofile', function(req, res){
+    var jsonObj = {};
+    var valid = true;
+
+    //validate email
+    var emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if(!req.body.email)
+    {
+        jsonObj['email_error'] = "Email is required";
+        valid = false;
+    }
+    else if(!validateWithRegex(emailRegex, req.body.email))
+    {
+       jsonObj['email_error'] = "This email is not valid"
+       valid = false;
+    }
+    
+    //validate name
+    if(!req.body.name)
+    {
+        jsonObj['name_error'] = "Name is required";
+        valid = false;
+    }
+
+    //validate street
+    if(!req.body.street && (req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER"))
+    {
+        jsonObj['street_error'] = "Street is required";
+        valid = false;
+    }
+
+    //validate city
+    if(!req.body.city && (req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER"))
+    {
+        jsonObj['city_error'] = "City is required";
+        valid = false;
+    }
+
+    //validate state
+    if(!req.body.state && (req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER"))
+    {
+        jsonObj['state_error'] = "State is required";
+        valid = false;
+    }
+
+    //validate zip
+    if(!req.body.zip && (req.body.type == "PHARMACY" || req.body.type == "TREATMENT CENTER"))
+    {
+        jsonObj['zip_error'] = "Zip Code is required";
+        valid = false;
+    }
+
+    var query = "SELECT * from DASH5082.USER WHERE EMAIL ='" + req.body.email + "';";           
+        
+    var result = dbQuery(query, function(result) {
+        console.log(result);
+        if(result.length != 0 && result[0].ID != req.session.user_id)
+        {
+            jsonObj['email_error'] = "This email is already registered"
+            valid = false;
+            jsonObj['message'] = "failed";
+            res.send(jsonObj);
+        }
+        else
+        {
+            if(valid)
+            {
+                query = "UPDATE DASH5082.USER SET EMAIL='" + req.body.email + "', NAME ='" + req.body.name + "', STREET ='" + req.body.street + "', CITY ='" + req.body.city + "', STATE ='" + req.body.state + "', ZIP ='" + req.body.zip + "' WHERE ID =" + req.session.user_id;
+                
+                dbQuery(query, function(newResult) {
+                    jsonObj['message'] = "success";
+                    res.send(jsonObj);
+                });
+                
+            }
+            else
+            {
+                jsonObj['message'] = "failed";
+                res.send(jsonObj);
+            }
+        }
+    });              
+});
+
+app.post('/pharmacy/updateprofile', function(req, res){
+    var jsonObj = {};
+    var valid = true;
+
+    //validate email
+    var emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if(!req.body.email)
+    {
+        jsonObj['email_error'] = "Email is required";
+        valid = false;
+    }
+    else if(!validateWithRegex(emailRegex, req.body.email))
+    {
+       jsonObj['email_error'] = "This email is not valid"
+       valid = false;
+    }
+    
+    //validate name
+    if(!req.body.name)
+    {
+        jsonObj['name_error'] = "Name is required";
+        valid = false;
+    }
+
+    //validate street
+    if(!req.body.street)
+    {
+        jsonObj['street_error'] = "Street is required";
+        valid = false;
+    }
+
+    //validate city
+    if(!req.body.city)
+    {
+        jsonObj['city_error'] = "City is required";
+        valid = false;
+    }
+
+    //validate state
+    if(!req.body.state)
+    {
+        jsonObj['state_error'] = "State is required";
+        valid = false;
+    }
+
+    //validate zip
+    if(!req.body.zip)
+    {
+        jsonObj['zip_error'] = "Zip Code is required";
+        valid = false;
+    }
+
+    //validate phone number
+    if(!req.body.phone_number)
+    {
+        jsonObj['phone_number_error'] = "Phone number is required";
+        valid = false;
+    }
+
+    //validate open from
+    if(!req.body.open_from)
+    {
+        jsonObj['open_from_error'] = "Open from is required";
+        valid = false;
+    }
+
+    //validate open to
+    if(!req.body.open_to)
+    {
+        jsonObj['open_to_error'] = "Open to is required";
+        valid = false;
+    }
+
+    var query = "SELECT * from DASH5082.USER WHERE EMAIL ='" + req.body.email + "';";           
+        
+    var result = dbQuery(query, function(result) {
+        console.log(result);
+        if(result.length != 0 && result[0].ID != req.session.user_id)
+        {
+            jsonObj['email_error'] = "This email is already registered"
+            valid = false;
+            jsonObj['message'] = "failed";
+            res.send(jsonObj);
+        }
+        else
+        {
+            if(valid)
+            {
+                query = "UPDATE DASH5082.USER SET EMAIL='" + req.body.email + "', NAME ='" + req.body.name + "', STREET ='" + req.body.street + "', CITY ='" + req.body.city + "', STATE ='" + req.body.state + "', ZIP ='" + req.body.zip + "', PHONE_NUMBER ='" + req.body.phone_number + "', OPEN_FROM='" + req.body.open_from + "', OPEN_TO='" + req.body.open_to + "' WHERE ID =" + req.session.user_id;
+                
+                dbQuery(query, function(newResult) {
+                    jsonObj['message'] = "success";
+                    res.send(jsonObj);
+                });
+                
+            }
+            else
+            {
+                jsonObj['message'] = "failed";
+                res.send(jsonObj);
+            }
+        }
+    });              
+});
+
+app.post('/user/changepassword', function(req, res){
+    var jsonObj = {};
+    var valid = true;
+    
+    //validate old_password
+    if(!req.body.old_password)
+    {
+        jsonObj['old_password_error'] = "Old Password is required";
+        valid = false;
+    }
+
+    //validate password
+    //Minimum 8 characters at least 1 special character
+    var passwordRegex = /^(?=.*[A-Za-z\d])(?=.*[$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=])[A-Za-z\d$@$!%*#?&\^\\\/"'<>;:+\-()_~{}\[\]=]{8,}$/;
+    if(!req.body.new_password)
+    {
+        jsonObj['new_password_error'] = "New Password is required";
+        valid = false;
+    }
+    else if(!validateWithRegex(passwordRegex, req.body.new_password))
+    {
+       jsonObj['new_password_error'] = "Password has to be minimum 8 characters at least 1 special character";
+       valid = false;
+    }
+    else if(req.body.new_password != req.body.rnew_password)
+    {
+       jsonObj['new_password_error'] = "Password and cofirm password doesn't match";   
+       valid = false;
+    }
+
+    //validate rnew_password
+    if(!req.body.rnew_password)
+    {
+        jsonObj['rnew_password_error'] = "Confirm New Password is required";
+        valid = false;
+    }
+    if(valid)
+    {   var query = "SELECT * FROM DASH5082.USER WHERE ID =" + req.session.user_id + ";";
+        dbQuery(query, function(result) {
+            console.log(result);
+            bcrypt.compare(req.body.old_password, result[0].PASSWORD, function(err, cmp) {
+                // res == true
+                if(cmp)
+                {
+                    bcrypt.hash(req.body.new_password, saltRounds, function(err, hash) {
+                      // Store hash in your password DB.
+                      // enter new pharmacy to the db
+                      var query = "UPDATE DASH5082.USER SET PASSWORD ='" + hash + "' WHERE ID =" + req.session.user_id + ";";
+                      dbQuery(query, function(newResult) {
+                          jsonObj['message'] = "success";
+                          res.send(jsonObj);
+                      });
+                    });
+                }
+                else
+                {
+                    jsonObj['old_password_error'] = "Wrong Password";
+                    jsonObj['message'] = "failed";
+                    valid = false;
+                    res.send(jsonObj);
+                }
+            });
+        });
+    }
+    else
+    {
+        jsonObj['message'] = "failed";
+        res.send(jsonObj);
+    }        
+});
+
 function checkSignIn(req, res, next){
 
     if(req.session.user_id){

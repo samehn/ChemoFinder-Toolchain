@@ -160,3 +160,34 @@ block modals
       // /.modal-content
     // /.modal-dialog
   // /.modal
+  #confimUpdate.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h4#myModalLabel.modal-title Edit Profile
+        // /.modal-header
+        .modal-body
+          |  Your profile is updated successfuly
+        // /.modal-body
+        .modal-footer
+          button.form-control.btn.btn-primary(onclick='location.reload();') OK
+  #confimChangePassword.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h4#myModalLabel.modal-title Change Password
+        // /.modal-header
+        .modal-body
+          |  Your password has been reset successfully!
+        // /.modal-body
+        .modal-footer
+          button.form-control.btn.btn-primary(onclick='location.reload();') OK        
+  #loadingModal.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog.modal-sm
+      .modal-content
+        .modal-body
+          h2
+            span.glyphicon.glyphicon-refresh.glyphicon-refresh-animate
+            |   Loading...        
+block scripts
+  script(type='text/javascript', src=base+'/scripts/doctor/profile.js')  
