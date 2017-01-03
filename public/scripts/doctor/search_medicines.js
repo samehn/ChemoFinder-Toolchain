@@ -100,18 +100,27 @@ function addMedicine(id, quantity) {
             var strength_unit = medicine.STRENGTH_UNIT;
             var manufacturer = medicine.MANUFACTURER;
             if ( $( "#table-search-" + id ).length ) {
-                var newQuantity = parseInt($( "#table-search-" + id +" :first-child").text()) + parseInt(quantity);
+                var newQuantity = parseInt($( "#table-search-" + id +" :first").text()) + parseInt(quantity);
                 console.log(newQuantity);
-                $( "#table-search-" + id +" :first-child").html();
-                $( "#table-search-" + id +" :first-child").text(newQuantity);
+                console.log($( "#table-search-" + id +" :first"));
+                $( "#table-search-" + id +" :first").html();
+                $( "#table-search-" + id +" :first").text(newQuantity);
                 $( "#table-search-" + id).attr('data-quantity', newQuantity);
             }
             else
             {       
-                $('#itemsToSearch').append('<tr id="table-search-' + id + '" data-id="' + id + '" data-quantity="' + quantity + '" class="tr_search table-result-search"><td class="td_search">' + quantity + '</td><td class="td_search">' + generic_name + '</td><td class="td_search">' + brand_name + '</td><td class="td_search">' + form + '</td><td class="td_search">' + strength + '</td><td class="td_search">' + strength_unit + '</td><td class="td_search">' + manufacturer + '</td></tr>'); 
+                $('#itemsToSearch').append('<tr id="table-search-' + id + '" data-id="' + id + '" data-quantity="' + quantity + '" class="tr_search table-result-search"><td class="td_search">' + quantity + '</td><td class="td_search">' + generic_name + '</td><td class="td_search">' + brand_name + '</td><td class="td_search">' + form + '</td><td class="td_search">' + strength + '</td><td class="td_search">' + strength_unit + '</td><td class="td_search">' + manufacturer + '</td><td class="td_search"><button onclick="removeMedicine(this)" class="form-control btn btn-primary">Remove</button></td></tr>'); 
             }
         }
     });
+}
+
+function removeMedicine(element) {
+    console.log(element);
+    element.parentNode.parentNode.parentNode.removeChild(element.parentNode.parentNode);
+    if($('.table-result-search').length == 0){
+        $('#itemsToSearch').append('<td id="empty_search" style="text-align: center;" valign="top" colspan="8" class="td_search">No medicines are added yet</td>');
+    }
 }
 
 function searchForResults() {

@@ -12,7 +12,7 @@ block headers
     i.glyphicon.glyphicon-user
     span.main-actions|                         Profile
   .header__actions-divider
-  button.header__action-button.ng-binding(data-toggle="tooltip", title="Logout", onclick="")
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Logout", onclick="location.href='" + base + "/logout';")
     i.glyphicon.glyphicon-log-out
     span.main-actions|                         Logout
 
@@ -64,9 +64,10 @@ block content
               th.th_search Strength
               th.th_search Strength Unit
               th.th_search Manufacturer
+              th.th_search Action
           tbody#itemsToSearch
             tr.tr_search
-              td#empty_search.td_search.text-center(valign="top", colspan="7") No medicines are added yet
+              td#empty_search.td_search(style="text-align: center;", valign="top", colspan="8") No medicines are added yet
     button.btn.btn-primary(onclick="searchForResults()") Search
               
 block scripts

@@ -2789,6 +2789,13 @@ app.get('/logout', function(req, res){
     res.redirect('/');
 });
 
+app.get('/admin/logout', function(req, res){
+    req.session.destroy(function(){
+        console.log("user logged out.")
+    });
+    res.redirect('/admin/login');
+});
+
 app.use('/protected_page', function(err, req, res, next){
 console.log(err);
     //User should be authenticated! Redirect him to log in.
