@@ -53,6 +53,32 @@ function getMedicine(medicine_id) {
   });
 }
 
+function showDetails(medicine_id) {
+  var item_array = {medicine_id: medicine_id};
+  $.ajax({
+    type: "get",
+    url: url + '/getmedicinebyid/' + medicine_id,
+    data : item_array,
+    success:  function(data){
+      console.log(data);
+      // var medicineInfo = data.result[0].GENERIC_NAME + " - " + data.result[0].FORM + " - " + data.result[0].STRENGTH + " - " + data.result[0].STRENGTH_UNIT + " - " + data.result[0].BRAND_NAME + " - " + data.result[0].MANUFACTURER;
+      // $('#medicineInfo').html(medicineInfo);
+      $('#genericNameShow').html(data.medicine[0].GENERIC_NAME);
+      $('#brandNameShow').html(data.medicine[0].BRAND_NAME);
+      $('#formShow').html(data.medicine[0].FORM);
+      $('#strengthShow').html(data.medicine[0].STRENGTH);
+      $('#strengthUnitShow').html(data.medicine[0].STRENGTH_UNIT);
+      $('#routeShow').html(data.medicine[0].ROUTE);
+      $('#manufacturerShow').html(data.medicine[0].MANUFACTURER);
+      $('#sraShow').html(data.medicine[0].SRA);
+      $('#approvalDateShow').html(data.medicine[0].APPROVAL_DATE);
+      $('#sourceShow').html(data.medicine[0].SOURCE);
+      $('#extractDateShow').html(data.medicine[0].EXTRACT_DATE);
+      $('#medicineDetails').modal('show');
+    }
+  });
+}
+
 function deleteStockRecord(medicine_id, element) {
   if (confirm("Are you sure you want to remove this medicine from the medicines list?") == true) {
         var data_array={};

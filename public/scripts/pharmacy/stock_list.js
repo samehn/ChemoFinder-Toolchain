@@ -61,6 +61,33 @@ function getStockRecord(stock_id) {
   });
 }
 
+function showStockRecord(stock_id) {
+  var item_array = {stock_id: stock_id};
+  $.ajax({
+    type: "post",
+    url: url + '/pharmacy/getstockrecord',
+    data : item_array,
+    success:  function(data){
+      console.log(data);
+      $('#genericNameShow').html(data.result[0].GENERIC_NAME);
+      $('#brandNameShow').html(data.result[0].BRAND_NAME);
+      $('#formShow').html(data.result[0].FORM);
+      $('#strengthShow').html(data.result[0].STRENGTH);
+      $('#strengthUnitShow').html(data.result[0].STRENGTH_UNIT);
+      $('#manufacturerShow').html(data.result[0].MANUFACTURER);
+      $('#batchNumberShow').html(data.result[0].BATCH_NUMBER);
+      $('#expiryDateShow').html(data.result[0].EXPIRY_DATE);
+      $('#sraShow').html(data.result[0].SRA);
+      $('#packSizeShow').html(data.result[0].PACK_SIZE);
+      $('#priceShow').html(data.result[0].PRICE_PER_PACK);
+      $('#quantityShow').html(data.result[0].AVAILABLE_STOCK);
+      $('#avgMonthlyConsumptionShow').html(data.result[0].AVG_MONTHLY_CONSUMPTION);
+      $('#updateDateShow').html(data.result[0].LAST_UPDATE);
+      $('#medicineDetails').modal('show');
+    }
+  });
+}
+
 function updateStockRecord(stock_id) {
   var item_array={};
     

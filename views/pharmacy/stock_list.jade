@@ -40,45 +40,127 @@ block content
     table#stockListTable.display
       thead
         tr
+          th Update
+          th Delete 
+          th Details
           th Generic Name
           th Form
           th Strength
           th Strength Unit
           th Brand Name
-          th Manufacturer
-          th Batch Number
-          th Expiry Date
-          th SRA Approvals
-          th Pack Size
-          th Price per Pack
-          th Available Stock
-          th Avg. Monthly Consumption
-          th Date of Last Update
-          th Update
-          th Delete  
+          th Manufacturer 
       tbody
         - for( var i = 0, len = stock_list.length; i < len; i++ ) {
         tr
+          td
+            button.form-control.btn.btn-primary(onclick='getStockRecord(' + stock_list[i].STOCK_LIST_ID + ')') Update
+          td
+            button.form-control.btn.btn-gray(onclick='deleteStockRecord(' + stock_list[i].STOCK_LIST_ID + ', this)') Delete
+          td
+            button.form-control.btn.btn-gray(onclick='showStockRecord(' + stock_list[i].STOCK_LIST_ID + ')') Show Details  
           td #{stock_list[i].GENERIC_NAME}
           td #{stock_list[i].FORM} 
           td #{stock_list[i].STRENGTH}
           td #{stock_list[i].STRENGTH_UNIT}
           td #{stock_list[i].BRAND_NAME}
           td #{stock_list[i].MANUFACTURER}
-          td #{stock_list[i].BATCH_NUMBER}
-          td #{stock_list[i].EXPIRY_DATE}
-          td #{stock_list[i].SRA}
-          td #{stock_list[i].PACK_SIZE}
-          td #{stock_list[i].PRICE_PER_PACK}
-          td #{stock_list[i].AVAILABLE_STOCK}
-          td #{stock_list[i].AVG_MONTHLY_CONSUMPTION}
-          td #{stock_list[i].LAST_UPDATE}
-          td
-            button.form-control.btn.btn-primary(onclick='getStockRecord(' + stock_list[i].STOCK_LIST_ID + ')') Update
-          td
-            button.form-control.btn.btn-gray(onclick='deleteStockRecord(' + stock_list[i].STOCK_LIST_ID + ', this)') Delete
         - }
 block modals
+  #medicineDetails.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          h4#myModalLabel.modal-title Medicine Details
+        // /.modal-header
+        .modal-body
+          .row
+            .col-xs-6.text-center
+              label Generic Name
+            .col-xs-6.text-center  
+              p.wrapping#genericNameShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Form
+            .col-xs-6.text-center  
+              p.wrapping#formShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Strength
+            .col-xs-6.text-center  
+              p.wrapping#strengthShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Strength Unit
+            .col-xs-6.text-center  
+              p.wrapping#strengthUnitShow 
+          hr
+          .row
+            .col-xs-6.text-center
+              label Brand Name
+            .col-xs-6.text-center  
+              p.wrapping#brandNameShow
+          hr  
+          .row
+            .col-xs-6.text-center
+              label Manufacturer
+            .col-xs-6.text-center  
+              p.wrapping#manufacturerShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Batch Number
+            .col-xs-6.text-center  
+              p.wrapping#batchNumberShow
+          hr  
+          .row
+            .col-xs-6.text-center
+              label Expiry Date
+            .col-xs-6.text-center  
+              p.wrapping#expiryDateShow   
+          hr
+          .row
+            .col-xs-6.text-center
+              label SRA Approvals
+            .col-xs-6.text-center  
+              p.wrapping#sraShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Pack Size
+            .col-xs-6.text-center  
+              p.wrapping#packSizeShow   
+          hr
+          .row
+            .col-xs-6.text-center
+              label Price per Pack
+            .col-xs-6.text-center  
+              p.wrapping#priceShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Available Stock
+            .col-xs-6.text-center  
+              p.wrapping#quantityShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Avg. Monthly Consumption
+            .col-xs-6.text-center  
+              p.wrapping#avgMonthlyConsumptionShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Date of Last Update
+            .col-xs-6.text-center  
+              p.wrapping#updateDateShow  
+        // /.modal-body
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal
   #addNewMedicine.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
     .modal-dialog
       .modal-content

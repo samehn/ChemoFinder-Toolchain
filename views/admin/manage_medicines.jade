@@ -47,77 +47,141 @@ block content
     table#approvedMedicinesTable.display(cellspacing="0", width="100%")
       thead
         tr
+          th Update
+          th Delete
+          th Details
           th Generic Name
           th Brand Name
           th Form
           th Strength
           th Strength Unit
-          th Route
           th Manufacturer
-          th SRA Approvals
-          th Approval Date
-          th Source
-          th Extract Date
-          th Update
-          th Delete 
       tbody
         if approved_medicines.length > 0
           - for( var i = 0, len = approved_medicines.length; i < len; i++ ) {
           tr
+            td
+              button.form-control.btn.btn-primary(onclick='getMedicine(' + approved_medicines[i].ID + ')') Update
+            td
+              button.form-control.btn.btn-gray(onclick='deleteStockRecord(' + approved_medicines[i].ID + ', this)') Delete
+            td
+              button.form-control.btn.btn-gray(onclick='showDetails(' + approved_medicines[i].ID + ')') Show Details  
             td #{approved_medicines[i].GENERIC_NAME} 
             td #{approved_medicines[i].BRAND_NAME}
             td #{approved_medicines[i].FORM}
             td #{approved_medicines[i].STRENGTH}
             td #{approved_medicines[i].STRENGTH_UNIT}
-            td #{approved_medicines[i].ROUTE}
             td #{approved_medicines[i].MANUFACTURER}
-            td #{approved_medicines[i].SRA}
-            td #{approved_medicines[i].APPROVAL_DATE}
-            td.td-wrapping #{approved_medicines[i].SOURCE}
-            td #{approved_medicines[i].EXTRACT_DATE}
-            td
-              button.form-control.btn.btn-primary(onclick='getMedicine(' + approved_medicines[i].ID + ')') Update
-            td
-              button.form-control.btn.btn-gray(onclick='deleteStockRecord(' + approved_medicines[i].ID + ', this)') Delete
           - }
     h4.table-title Non Approved Medicines     
     table#nonApprovedMedicinesTable.display(cellspacing="0", width="100%")
       thead
         tr
+          th Update
+          th Delete
+          th Details
           th Generic Name
           th Brand Name
           th Form
           th Strength
           th Strength Unit
-          th Route
           th Manufacturer
-          th SRA Approvals
-          th Approval Date
-          th Source
-          th Extract Date
-          th Update
-          th Delete 
       tbody
         if non_approved_medicines.length > 0
           - for( var i = 0, len = non_approved_medicines.length; i < len; i++ ) {
           tr
+            td
+              button.form-control.btn.btn-primary(onclick='getMedicine(' + non_approved_medicines[i].ID + ')') Update
+            td
+              button.form-control.btn.btn-gray(onclick='deleteStockRecord(' + non_approved_medicines[i].ID + ', this)') Delete
+            td
+              button.form-control.btn.btn-gray(onclick='showDetails(' + non_approved_medicines[i].ID + ')') Show Details    
             td #{non_approved_medicines[i].GENERIC_NAME} 
             td #{non_approved_medicines[i].BRAND_NAME}
             td #{non_approved_medicines[i].FORM}
             td #{non_approved_medicines[i].STRENGTH}
             td #{non_approved_medicines[i].STRENGTH_UNIT}
-            td #{non_approved_medicines[i].ROUTE}
             td #{non_approved_medicines[i].MANUFACTURER}
-            td #{non_approved_medicines[i].SRA}
-            td #{non_approved_medicines[i].APPROVAL_DATE}
-            td #{non_approved_medicines[i].SOURCE}
-            td #{non_approved_medicines[i].EXTRACT_DATE}
-            td
-              button.form-control.btn.btn-primary(onclick='getMedicine(' + non_approved_medicines[i].ID + ')') Update
-            td
-              button.form-control.btn.btn-gray(onclick='deleteStockRecord(' + non_approved_medicines[i].ID + ', this)') Delete
           - } 
 block modals
+  #medicineDetails.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          h4#myModalLabel.modal-title Medicine Details
+        // /.modal-header
+        .modal-body
+          .row
+            .col-xs-6.text-center
+              label Generic Name
+            .col-xs-6.text-center  
+              p.wrapping#genericNameShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Brand Name
+            .col-xs-6.text-center  
+              p.wrapping#brandNameShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Form
+            .col-xs-6.text-center  
+              p.wrapping#formShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Strength
+            .col-xs-6.text-center  
+              p.wrapping#strengthShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Strength Unit
+            .col-xs-6.text-center  
+              p.wrapping#strengthUnitShow 
+          hr
+          .row
+            .col-xs-6.text-center
+              label Route
+            .col-xs-6.text-center  
+              p.wrapping#routeShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Manufacturer
+            .col-xs-6.text-center  
+              p.wrapping#manufacturerShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label SRA Approvals
+            .col-xs-6.text-center  
+              p.wrapping#sraShow   
+          hr
+          .row
+            .col-xs-6.text-center
+              label Approval Date
+            .col-xs-6.text-center  
+              p.wrapping#approvalDateShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Source
+            .col-xs-6.text-center  
+              p.wrapping#sourceShow   
+          hr
+          .row
+            .col-xs-6.text-center
+              label Extract Date
+            .col-xs-6.text-center  
+              p.wrapping#extractDateShow
+            // /.form-group  
+        // /.modal-body
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal
   #addNewMedicine.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
     .modal-dialog
       .modal-content
