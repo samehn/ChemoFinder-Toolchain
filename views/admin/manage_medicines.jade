@@ -26,10 +26,6 @@ block content
   .page__subtitle.ng-binding Manage Medicines
   - if(extention_error) {
       .alert.alert-danger.error-form This file extension is not allowed, only files with xlsx extension are allowed
-      // .alert.alert-danger.error-form The following
-      //   ul
-      //     li hahah
-      //     li ls 
   - }
   - if(format_error) {
       !{format_error} 
@@ -61,7 +57,9 @@ block content
           th SRA Approvals
           th Approval Date
           th Source
-          th Extract Date 
+          th Extract Date
+          th Update
+          th Delete 
       tbody
         if approved_medicines.length > 0
           - for( var i = 0, len = approved_medicines.length; i < len; i++ ) {
@@ -77,6 +75,10 @@ block content
             td #{approved_medicines[i].APPROVAL_DATE}
             td.td-wrapping #{approved_medicines[i].SOURCE}
             td #{approved_medicines[i].EXTRACT_DATE}
+            td
+              button.form-control.btn.btn-primary(onclick='getMedicine(' + approved_medicines[i].ID + ')') Update
+            td
+              button.form-control.btn.btn-gray(onclick='deleteStockRecord(' + approved_medicines[i].ID + ', this)') Delete
           - }
     h4.table-title Non Approved Medicines     
     table#nonApprovedMedicinesTable.display(cellspacing="0", width="100%")
@@ -92,7 +94,9 @@ block content
           th SRA Approvals
           th Approval Date
           th Source
-          th Extract Date 
+          th Extract Date
+          th Update
+          th Delete 
       tbody
         if non_approved_medicines.length > 0
           - for( var i = 0, len = non_approved_medicines.length; i < len; i++ ) {
@@ -108,6 +112,10 @@ block content
             td #{non_approved_medicines[i].APPROVAL_DATE}
             td #{non_approved_medicines[i].SOURCE}
             td #{non_approved_medicines[i].EXTRACT_DATE}
+            td
+              button.form-control.btn.btn-primary(onclick='getMedicine(' + non_approved_medicines[i].ID + ')') Update
+            td
+              button.form-control.btn.btn-gray(onclick='deleteStockRecord(' + non_approved_medicines[i].ID + ', this)') Delete
           - } 
 block modals
   #addNewMedicine.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
@@ -168,6 +176,64 @@ block modals
       // /.modal-content
     // /.modal-dialog
   // /.modal
+  #updateMedicine.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          h4#myModalLabel.modal-title Update Medicine
+        // /.modal-header
+        .modal-body
+          form#update-medicine-form(role='form')
+            #genericNameFormUpdate.form-group
+              input#genericNameUpdate.form-control(name='generic_name', type='text', placeholder='Generic Name')
+            // /.form-group
+            #brandNameFormUpdate.form-group
+              input#brandNameUpdate.form-control(name='brand_name', type='text', placeholder='Brand Name')
+            // /.form-group
+            #formFormUpdate.form-group
+              select#formUpdate.form-control(name='form')
+                option.form-control(value='') Select Form
+                option.form-control(value='TAB') Tab
+                option.form-control(value='VIAL') Vial
+                option.form-control(value='OTHER') Other
+              // /.input-group
+            // /.form-group  
+            #strengthFormUpdate.form-group
+              input#strengthUpdate.form-control(name='strength', type='text', placeholder='Strength')
+            // /.form-group
+            #strengthUnitFormUpdate.form-group
+              input#strengthUnitUpdate.form-control(name='strength_unit', type='text', placeholder='Strength Unit')
+            // /.form-group
+            #routeFormUpdate.form-group
+              input#routeUpdate.form-control(name='route', type='text', placeholder='Route')
+            // /.form-group
+            #manufacturerFormUpdate.form-group
+              input#manufacturerUpdate.form-control(name='manufacturer', type='text', placeholder='Manufacturer')
+            // /.form-group
+            #sraFormUpdate.form-group
+              input#sraUpdate.form-control(name='sra', type='text', placeholder='SRA Approval')
+            // /.form-group
+            p 
+              strong Approval Date
+            #approvalDateFormUpdate.form-group
+              input#approvalDateUpdate.form-control(name='approval_date', type='date', placeholder='Approval Date')
+            // /.form-group
+            #sourceFormUpdate.form-group
+              input#sourceUpdate.form-control(name='source', type='text', placeholder='Source')
+            // /.form-group
+            p 
+              strong Extract Date
+            #extractDateFormUpdate.form-group
+              input#extractDateUpdate.form-control(name='extract_date', type='date', placeholder='Extract Date')
+            // /.form-group  
+        // /.modal-body
+        .modal-footer
+          button#update-medicine-btn.form-control.btn.btn-primary Submit
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal
   #loadingModal.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
     .modal-dialog.modal-sm
       .modal-content
@@ -183,6 +249,21 @@ block modals
         // /.modal-header
         .modal-body
           |  The medicine is added successfuly
+        // /.modal-body
+        .modal-footer
+          button.form-control.btn.btn-primary(onclick='location.reload();') OK
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal
+  #confimUpdateMedicine.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h4#myModalLabel.modal-title Update Medicine
+        // /.modal-header
+        .modal-body
+          |  The medicine is updated successfuly
         // /.modal-body
         .modal-footer
           button.form-control.btn.btn-primary(onclick='location.reload();') OK

@@ -455,6 +455,110 @@ app.post('/admin/addnewuser', function(req, res){
     });              
 });
 
+app.post('/admin/updatemedicine', function(req, res){
+    var jsonObj = {};
+    var valid = true;
+
+    if(!req.body.medicine_id)
+    {
+        jsonObj['generic_name_error'] = "Generic Name is required";
+        valid = false;
+    }
+
+    //validate generic name
+    if(!req.body.generic_name)
+    {
+        jsonObj['generic_name_error'] = "Generic Name is required";
+        valid = false;
+    }
+    
+    
+    //validate brand name
+    if(!req.body.brand_name)
+    {
+        jsonObj['brand_name_error'] = "Brand Name is required";
+        valid = false;
+    }
+    
+
+    //validate name
+    if(!req.body.form)
+    {
+        jsonObj['form_error'] = "Form is required";
+        valid = false;
+    }
+
+    //validate type
+    if(!req.body.strength)
+    {
+        jsonObj['strength_error'] = "Strength is required";
+        valid = false;
+    }
+
+    //validate type
+    if(!req.body.strength_unit)
+    {
+        jsonObj['strength_unit_error'] = "Strength Unit is required";
+        valid = false;
+    }
+
+    //validate type
+    if(!req.body.manufacturer)
+    {
+        jsonObj['manufacturer_error'] = "Manufacturer is required";
+        valid = false;
+    }
+
+    if(!req.body.sra)
+    {
+        jsonObj['sra_error'] = "SRA is required";
+        valid = false;
+    }
+
+    if(!req.body.source)
+    {
+        jsonObj['source_error'] = "Source is required";
+        valid = false;
+    }
+
+    if(!req.body.extract_date)
+    {
+        jsonObj['extract_date_error'] = "Extract Date is required";
+        valid = false;
+    }
+
+    var query = "SELECT * from DASH5082.MEDICINE WHERE ID =" + req.body.medicine_id + ";";           
+        
+    var result = dbQuery(query, function(result) {
+        console.log(result);
+        if(result.length == 0)
+        {
+            jsonObj['generic_name_error'] = "This is not a valid medicine"
+            valid = false;
+            jsonObj['message'] = "failed";
+            res.send(jsonObj);
+        }
+        else
+        {
+            if(valid)
+            {    
+                var query = "UPDATE DASH5082.MEDICINE SET GENERIC_NAME = '" + req.body.generic_name + "', BRAND_NAME = '" + req.body.brand_name + "', FORM = '" + req.body.form + "', STRENGTH = '" + req.body.strength + "', STRENGTH_UNIT = '" + req.body.strength_unit + "', ROUTE = '" + req.body.route + "', MANUFACTURER = '" + req.body.manufacturer + "', SRA = '" + req.body.sra + "', APPROVAL_DATE = TIMESTAMP_FORMAT(" + req.body.approval_date + ", 'DD-Month-YY'), SOURCE = '" + req.body.source + "', EXTRACT_DATE = TIMESTAMP_FORMAT(" + req.body.extract_date + ", 'DD-Month-YY') WHERE ID = " + req.body.medicine_id + ";";
+                console.log(query);
+                dbQuery(query, function(newResult) {
+
+                    jsonObj['message'] = "success";
+                    res.send(jsonObj);
+                });
+            }
+            else
+            {
+                jsonObj['message'] = "failed";
+                res.send(jsonObj);
+            }
+        }
+    });              
+});
+
 app.post('/admin/addnewmedicine', function(req, res){
     var jsonObj = {};
     var valid = true;
@@ -1615,7 +1719,7 @@ app.post('/getmedicineid', function(req, res) {
 });
 
 app.get('/pharmacy', checkSignIn, function(req, res){
-    var query = "SELECT * FROM STOCK_LIST SL JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE SL.PHARMACY_ID = " + req.session.user_id;
+    var query = "SELECT *, SL.ID AS STOCK_LIST_ID FROM STOCK_LIST SL JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE SL.PHARMACY_ID = " + req.session.user_id;
     dbQuery(query, function(result) {
         var query = "SELECT * from DASH5082.MEDICINE WHERE SRA IS NOT NULL";
         var result2 = dbQuerySync(query);
@@ -1899,6 +2003,166 @@ app.post('/pharmacy/addnewapprovedmedicine', function(req, res){
     }                  
 });
 
+app.post('/pharmacy/updatemedicine', function(req, res){
+    var jsonObj = {};
+    var valid = true;
+
+    // if(!req.body.medicine)
+    // {
+    //     jsonObj['medicine_error'] = "Medicine is required";
+    //     valid = false;
+    // }
+
+    if(!req.body.batch_number)
+    {
+        jsonObj['batch_number_error'] = "Batch Number is required";
+        valid = false;
+    }
+
+    if(!req.body.expiry_date)
+    {
+        jsonObj['expiry_date_error'] = "Expiry Date is required";
+        valid = false;
+    }
+
+    // if(!req.body.sra)
+    // {
+    //     jsonObj['sra_error'] = "SRA is required";
+    //     valid = false;
+    // }
+
+    if(!req.body.pack_size)
+    {
+        jsonObj['pack_size_error'] = "Pack Size is required";
+        valid = false;
+    }
+
+    if(!req.body.price)
+    {
+        jsonObj['price_error'] = "Price per Pack is required";
+        valid = false;
+    }
+
+    if(!req.body.quantity)
+    {
+        jsonObj['quantity_error'] = "Quantity is required";
+        valid = false;
+    }
+
+    // if(!req.body.avg_monthly_consumption)
+    // {
+    //     jsonObj['avg_monthly_consumption_error'] = "Average Monthly Comsumption is required";
+    //     valid = false;
+    // }
+    console.log(req.body);
+    
+    if(valid)
+    {
+        var query = "SELECT * FROM DASH5082.STOCK_LIST WHERE ID =" + req.body.stock_id + " AND PHARMACY_ID =" + req.session.user_id;
+        console.log(query);
+        var stockListResult = dbQuerySync(query);
+        
+        if(stockListResult.length == 0)
+        {
+            jsonObj['batch_number_error'] = "This Medicine is not exists in your stock"
+            valid = false;
+            jsonObj['message'] = "failed";
+            res.send(jsonObj);
+        }
+        else
+        {
+            var query = "UPDATE DASH5082.STOCK_LIST SET BATCH_NUMBER = '" + req.body.batch_number + "', EXPIRY_DATE = '" + req.body.expiry_date + "', PACK_SIZE = '" + req.body.pack_size + "', PRICE_PER_PACK = '" + req.body.price + "', AVAILABLE_STOCK = '" + req.body.quantity + "', AVG_MONTHLY_CONSUMPTION = '" + req.body.avg_monthly_consumption + "', LAST_UPDATE = CURRENT_TIMESTAMP WHERE ID =" + req.body.stock_id + " AND PHARMACY_ID =" + req.session.user_id; 
+            dbQuerySync(query);
+            jsonObj['message'] = "success";
+            res.send(jsonObj);
+        }
+    }
+    else
+    {
+        jsonObj['message'] = "failed";
+        res.send(jsonObj);
+    }                  
+});
+
+app.post('/pharmacy/deletemedicine', function(req, res){
+    var jsonObj = {};
+    var valid = true;
+
+    if(!req.body.stock_id)
+    {
+        jsonObj['medicine_error'] = "Medicine is required";
+        valid = false;
+    }
+
+    console.log(req.body);
+    
+    if(valid)
+    {
+        var query = "SELECT * FROM DASH5082.STOCK_LIST WHERE ID =" + req.body.stock_id + " AND PHARMACY_ID =" + req.session.user_id;
+        console.log(query);
+        var stockListResult = dbQuerySync(query);
+        
+        if(stockListResult.length == 0)
+        {
+            jsonObj['medicine_error'] = "This Medicine is not exists in your stock"
+            valid = false;
+            jsonObj['message'] = "failed";
+            res.send(jsonObj);
+        }
+        else
+        {
+            var query = "DELETE FROM DASH5082.STOCK_LIST WHERE ID =" + req.body.stock_id + " AND PHARMACY_ID =" + req.session.user_id; 
+            dbQuerySync(query);
+            jsonObj['message'] = "success";
+            res.send(jsonObj);
+        }
+    }
+    else
+    {
+        jsonObj['message'] = "failed";
+        res.send(jsonObj);
+    }                  
+});
+
+app.post('/admin/deletemedicine', function(req, res){
+    var jsonObj = {};
+    var valid = true;
+
+    if(!req.body.medicine_id)
+    {
+        jsonObj['medicine_error'] = "Medicine is required";
+        valid = false;
+    }
+
+    console.log(req.body);
+    
+    if(valid)
+    {
+        var query = "SELECT * FROM DASH5082.MEDICINE WHERE ID =" + req.body.medicine_id;
+        console.log(query);
+        var result = dbQuerySync(query);
+        
+        if(result.length == 0)
+        {
+            jsonObj['medicine_error'] = "This is not a valid medicine"
+            valid = false;
+            jsonObj['message'] = "failed";
+            res.send(jsonObj);
+        }
+        else
+        {
+            var query = "DELETE FROM DASH5082.MEDICINE WHERE ID =" + req.body.medicine_id; 
+            dbQuerySync(query);
+            jsonObj['message'] = "success";
+            res.send(jsonObj);
+        }
+    }
+    else
+    {
+        jsonObj['message'] = "failed";
+        res.send(jsonObj);
+    }                  
+});
 
 app.post('/pharmacy/uploadstocklist', checkSignIn, function(req, res) {
     var sampleFile;
@@ -2594,6 +2858,24 @@ app.post('/user/changepassword', function(req, res){
         jsonObj['message'] = "failed";
         res.send(jsonObj);
     }        
+});
+
+app.post('/pharmacy/getstockrecord', function (req, res) {
+    if(req.body.stock_id, Number.isInteger(parseInt(req.body.stock_id))) {
+        var query = "SELECT * FROM DASH5082.STOCK_LIST SL JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE SL.ID =" + req.body.stock_id + " AND SL.PHARMACY_ID =" + req.session.user_id + ";";
+        dbQuery(query, function(result) {
+            console.log(result);
+            if(result.length != 0){
+                res.send({message:"success", result:result});
+            }
+            else{
+                res.send({message:"failed"});        
+            }       
+        });
+    }
+    else{
+        res.send({message:"failed"});
+    }
 });
 
 function checkSignIn(req, res, next){

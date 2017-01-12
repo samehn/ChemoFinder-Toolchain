@@ -7,6 +7,7 @@ $(document).ready(function(){
 
 $(document).click(function() {
   $('.error-form').remove();
+  $('.info-form').remove();
 });
 
 $('#add-new-medicine-form').keydown(function(event){
@@ -36,6 +37,131 @@ $("#addNewApprovedMedicine").on("show.bs.modal", function () {
 }).on("hidden.bs.modal", function () {
   $("html").removeClass("modal-open");
 });
+
+function getStockRecord(stock_id) {
+  var item_array = {stock_id: stock_id};
+  $.ajax({
+    type: "post",
+    url: url + '/pharmacy/getstockrecord',
+    data : item_array,
+    success:  function(data){
+      console.log(data);
+      var medicineInfo = data.result[0].GENERIC_NAME + " - " + data.result[0].FORM + " - " + data.result[0].STRENGTH + " - " + data.result[0].STRENGTH_UNIT + " - " + data.result[0].BRAND_NAME + " - " + data.result[0].MANUFACTURER;
+      $('#medicineInfo').html(medicineInfo);
+      $('#batchNumberUpdate').val(data.result[0].BATCH_NUMBER);
+      $('#expiryDateUpdate').val(data.result[0].EXPIRY_DATE);
+      $('#sraUpdate').val(data.result[0].SRA);
+      $('#packSizeUpdate').val(data.result[0].PACK_SIZE);
+      $('#priceUpdate').val(data.result[0].PRICE_PER_PACK);
+      $('#quantityUpdate').val(data.result[0].AVAILABLE_STOCK);
+      $('#avgMonthlyConsumptionUpdate').val(data.result[0].AVG_MONTHLY_CONSUMPTION);
+      $('#update-stock-btn').attr('onclick','updateStockRecord(' + stock_id + ')');
+      $('#updateMedicine').modal('show');
+    }
+  });
+}
+
+function updateStockRecord(stock_id) {
+  var item_array={};
+    
+  var batch = $('#batchNumberUpdate');
+  var expiry_date = $('#expiryDateUpdate');
+  var sra = $('#sraUpdate');
+  var pack_size = $('#packSizeUpdate');
+  var price = $('#priceUpdate');
+  var quantity = $('#quantityUpdate');
+  var avg = $('#avgMonthlyConsumptionUpdate');
+  item_array['stock_id'] = stock_id;
+  item_array[batch.attr('name')] = batch.val();
+  item_array[expiry_date.attr('name')] = expiry_date.val();
+  item_array[sra.attr('name')] = sra.val();
+  item_array[pack_size.attr('name')] = pack_size.val();
+  item_array[price.attr('name')] = price.val();
+  item_array[quantity.attr('name')] = quantity.val();
+  item_array[avg.attr('name')] = avg.val();
+  $('#loadingModal').modal('show');
+  console.log(item_array);
+  $.ajax({
+    type: "post",
+    url: url + '/pharmacy/updatemedicine',
+    data : item_array,
+    success:  function(data) {
+      $('#loadingModal').modal('hide');
+      $("body").addClass("modal-open");
+      console.log(data);
+      console.log(data.message);
+      $('.error-form').remove();
+      $('.message-form').remove();
+      if(data.message == "success")
+      {
+        $('#confimUpdateMedicine').modal('show');
+      }
+      else if(data.message == "failed")
+      {
+        if(data.batch_number_error)
+        {
+          var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.batch_number_error + '</div>';
+          $(error_message).insertBefore($('#batchNumberUpdateForm'));
+        }
+        if(data.expiry_date_error)
+        {
+          var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.expiry_date_error + '</div>';
+          $(error_message).insertBefore($('#expiryDateUpdateForm'));
+        }
+        if(data.sra_error)
+        {
+          var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.sra_error + '</div>';
+          $(error_message).insertBefore($('#sraUpdateForm'));
+        }
+        if(data.pack_size_error)
+        {
+          var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.pack_size_error + '</div>';
+          $(error_message).insertBefore($('#packSizeUpdateForm'));
+        }
+        if(data.price_error)
+        {
+          var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.price_error + '</div>';
+          $(error_message).insertBefore($('#priceUpdateForm'));
+        }
+        if(data.quantity_error)
+        {
+          var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.quantity_error + '</div>';
+          $(error_message).insertBefore($('#quantityUpdateForm'));
+        }
+        if(data.avg_monthly_consumption_error)
+        {
+          var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.avg_monthly_consumption_error + '</div>';
+          $(error_message).insertBefore($('#avgMonthlyConsumptionUpdateForm'));
+        }
+      }
+    }
+  });
+}
+
+function deleteStockRecord(stock_id, element) {
+  if (confirm("Are you sure you want to remove this medicine from your stock ?") == true) {
+        var data_array={};
+    data_array['stock_id'] = stock_id;
+    $.ajax({
+          type: "post",
+          url: url + '/pharmacy/deletemedicine',
+          data : data_array,
+          success:  function(data){
+            console.log(data);
+            if(data.message == "success")
+            {
+              $(element).parent().parent().remove();
+              var message = '<div class="alert alert-success info-form"><button class="close" data-close="alert"></button>The medicine is deleted successfuly from your stock </div>';
+              $(message).insertAfter($('.page__subtitle'));
+            }
+            else {
+              var message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>This is not a valid medicine </div>';
+              $(message).insertAfter($('.page__subtitle'));
+            }
+          }
+    }); 
+  }
+}
 
 function add_new_medicine() {
 	var item_array={};

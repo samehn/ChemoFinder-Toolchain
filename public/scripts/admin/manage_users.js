@@ -37,7 +37,7 @@ function approve(id) {
 	        	window.location = url + '/admin/manage_users';
 	        }
 		}); 
-    }
+  }
 }
 
 function suspend(id) {

@@ -53,7 +53,9 @@ block content
           th Price per Pack
           th Available Stock
           th Avg. Monthly Consumption
-          th Date of Last Update   
+          th Date of Last Update
+          th Update
+          th Delete  
       tbody
         - for( var i = 0, len = stock_list.length; i < len; i++ ) {
         tr
@@ -71,6 +73,10 @@ block content
           td #{stock_list[i].AVAILABLE_STOCK}
           td #{stock_list[i].AVG_MONTHLY_CONSUMPTION}
           td #{stock_list[i].LAST_UPDATE}
+          td
+            button.form-control.btn.btn-primary(onclick='getStockRecord(' + stock_list[i].STOCK_LIST_ID + ')') Update
+          td
+            button.form-control.btn.btn-gray(onclick='deleteStockRecord(' + stock_list[i].STOCK_LIST_ID + ', this)') Delete
         - }
 block modals
   #addNewMedicine.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
@@ -89,7 +95,7 @@ block modals
               select#form.form-control(name='form')
                 option.form-control(value='') Select Form
                 option.form-control(value='TAB') Tab
-                option.form-control(value='VAIL') Vial
+                option.form-control(value='VIAL') Vial
                 option.form-control(value='OTHER') Other
               // /.input-group
             // /.form-group
@@ -182,6 +188,48 @@ block modals
       // /.modal-content
     // /.modal-dialog
   // /.modal
+  #updateMedicine.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          h4#myModalLabel.modal-title Update Medicine
+        // /.modal-header
+        .modal-body
+          form#update-medicine-form(role='form')
+            #genericNameUpdateForm.form-group.text-center
+              label#medicineInfo
+            // /.form-group
+            #batchNumberUpdateForm.form-group
+              input#batchNumberUpdate.form-control(name='batch_number', type='number', step="any", placeholder='Batch Number')
+            // /.form-group            
+            p 
+              strong Expiry Date
+            #expiryDateUpdateForm.form-group
+              input#expiryDateUpdate.form-control(name='expiry_date', type='date', placeholder='Expiry Date')
+            // /.form-group
+            #sraUpdateForm.form-group
+              input#sraUpdate.form-control(name='sra', type='text', placeholder='SRA Approval')
+            // /.form-group
+            #packSizeUpdateForm.form-group
+              input#packSizeUpdate.form-control(name='pack_size', type='text', placeholder='Pack Size')
+            // /.form-group
+            #priceUpdateForm.form-group
+              input#priceUpdate.form-control(name='price', type='text', placeholder='Price per Pack')
+            // /.form-group
+            #quantityUpdateForm.form-group
+              input#quantityUpdate.form-control(name='quantity', type='text', placeholder='Available Stock (packs)')
+            // /.form-group
+            #avgMonthlyConsumptionUpdateForm.form-group
+              input#avgMonthlyConsumptionUpdate.form-control(name='avg_monthly_consumption', type='text', placeholder='Avg. Monthly Consumption')
+            // /.form-group  
+        // /.modal-body
+        .modal-footer
+          button#update-stock-btn.form-control.btn.btn-primary Submit
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal
   #loadingModal.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
     .modal-dialog.modal-sm
       .modal-content
@@ -197,6 +245,21 @@ block modals
         // /.modal-header
         .modal-body
           |  The medicine is added successfuly
+        // /.modal-body
+        .modal-footer
+          button.form-control.btn.btn-primary(onclick='location.reload();') OK
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal
+  #confimUpdateMedicine.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h4#myModalLabel.modal-title Add New Medicine
+        // /.modal-header
+        .modal-body
+          |  The medicine is updated successfuly
         // /.modal-body
         .modal-footer
           button.form-control.btn.btn-primary(onclick='location.reload();') OK
