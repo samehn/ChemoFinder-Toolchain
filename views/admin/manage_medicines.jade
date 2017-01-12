@@ -249,12 +249,15 @@ block modals
         // /.modal-header
         .modal-body
           form#update-medicine-form(role='form')
+            label Generic Name
             #genericNameFormUpdate.form-group
               input#genericNameUpdate.form-control(name='generic_name', type='text', placeholder='Generic Name')
             // /.form-group
+            label Brand Name
             #brandNameFormUpdate.form-group
               input#brandNameUpdate.form-control(name='brand_name', type='text', placeholder='Brand Name')
             // /.form-group
+            label Form
             #formFormUpdate.form-group
               select#formUpdate.form-control(name='form')
                 option.form-control(value='') Select Form
@@ -262,32 +265,36 @@ block modals
                 option.form-control(value='VIAL') Vial
                 option.form-control(value='OTHER') Other
               // /.input-group
-            // /.form-group  
+            // /.form-group
+            label Strength  
             #strengthFormUpdate.form-group
               input#strengthUpdate.form-control(name='strength', type='text', placeholder='Strength')
             // /.form-group
+            label Strength Unit
             #strengthUnitFormUpdate.form-group
               input#strengthUnitUpdate.form-control(name='strength_unit', type='text', placeholder='Strength Unit')
             // /.form-group
+            label Route
             #routeFormUpdate.form-group
               input#routeUpdate.form-control(name='route', type='text', placeholder='Route')
             // /.form-group
+            label Manufacturer
             #manufacturerFormUpdate.form-group
               input#manufacturerUpdate.form-control(name='manufacturer', type='text', placeholder='Manufacturer')
             // /.form-group
+            label SRA Approval
             #sraFormUpdate.form-group
               input#sraUpdate.form-control(name='sra', type='text', placeholder='SRA Approval')
             // /.form-group
-            p 
-              strong Approval Date
+            label Approval Date
             #approvalDateFormUpdate.form-group
               input#approvalDateUpdate.form-control(name='approval_date', type='date', placeholder='Approval Date')
             // /.form-group
+            label Source
             #sourceFormUpdate.form-group
               input#sourceUpdate.form-control(name='source', type='text', placeholder='Source')
             // /.form-group
-            p 
-              strong Extract Date
+            label Extract Date
             #extractDateFormUpdate.form-group
               input#extractDateUpdate.form-control(name='extract_date', type='date', placeholder='Extract Date')
             // /.form-group  
