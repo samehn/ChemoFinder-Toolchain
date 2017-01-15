@@ -42,7 +42,7 @@ function approve(id) {
 
 function suspend(id) {
 	if (confirm("Are you sure you want to suspend this user ?") == true) {
-        var data_array={};
+    var data_array={};
 		data_array['id'] = id;
 		data_array['suspension_reason'] = $('#suspend_message_' + id).val();
 		var chk = $('#chk_'+id);
@@ -67,11 +67,40 @@ function suspend(id) {
     }
 }
 
+function showHistory(id) {
+  var data_array={};
+  data_array['id'] = id;       
+  console.log(data_array);
+  $.ajax({
+        type: "post",
+        url: url + '/admin/get_user_history',
+        data : data_array,
+        success:  function(data){
+          $('#history_details').html('');
+          if(data.message == "success"){
+            for (var i = 0; i < data.results.length; i++) {
+              var type = 'suspended';
+              if(data.results[i].TYPE == 1){
+                type = 'activated'
+              }
+              $('#history_details').append('<tr class="tr_history"> <td class="td_search">' + type + '</td><td class="td_search">' + data.results[i].SUSPENSION_REASON + '</td><td class="td_search">' + data.results[i].CREATED_AT + '</td></tr>');
+            }
+          }
+          else{
+            $('#history_details').html('<tr class="tr_search"><td id="empty_search" style="text-align: center;" valign="top" colspan="3" class="td_search">There are no history for this user</td></tr>');
+          }
+
+          $('#history').modal('show');
+          console.log(data);
+        }
+  });
+}
+
 function delete_user(id) {
   if (confirm("Are you sure you want to delete this user ?") == true) {
     var data_array={};
     data_array['id'] = id;
-     
+         
     console.log(data_array);
     $.ajax({
           type: "post",
@@ -89,7 +118,7 @@ function activate(id) {
 	if (confirm("Are you sure you want to activate this user ?") == true) {
         var data_array={};
 		data_array['id'] = id;
-		 
+		data_array['suspension_reason'] = $('#suspend_message_' + id).val(); 
 		 console.log(data_array);
 		$.ajax({
 	        type: "post",

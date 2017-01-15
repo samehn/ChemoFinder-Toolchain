@@ -59,6 +59,7 @@ block content
           th Suspension Reason
           th Mail On Suspension
           th Action
+          th Suspension History
           th Delete (for testing)
       tbody
         if approved_users && approved_users.length > 0
@@ -68,8 +69,7 @@ block content
             td #{approved_users[i].EMAIL}
             td #{approved_users[i].TYPE}
             td
-              if approved_users[i].ACTIVE == 1
-                input.form-control(type='text', id='suspend_message_'+approved_users[i].ID)
+              input.form-control(type='text', id='suspend_message_'+approved_users[i].ID)
             td
               if approved_users[i].ACTIVE == 1
                 input.form-control(type='checkbox', id='chk_'+approved_users[i].ID)
@@ -80,28 +80,11 @@ block content
                 button.form-control.btn.btn-gray(onclick='suspend('+approved_users[i].ID+')') Suspend
               else
                 button.form-control.btn.btn-success(onclick='activate('+approved_users[i].ID+')') Activate
+            td
+              button.form-control.btn.btn-gray(onclick='showHistory('+approved_users[i].ID+')') Show Suspension History
             td 
               button.form-control.btn.btn-danger(onclick='delete_user('+ approved_users[i].ID+')') Delete     
           - }
-    h4.table-title Users Suspension History     
-    table#suspensionHistory.display(cellspacing="0", width="100%")
-      thead
-        tr
-          th Name
-          th Email
-          th Type
-          th Suspension Reason
-          th Date
-      tbody
-        if suspension_history && suspension_history.length > 0
-          - for( var i = 0, len = suspension_history.length; i < len; i++ ) {
-          tr
-            td #{suspension_history[i].NAME} 
-            td #{suspension_history[i].EMAIL}
-            td #{suspension_history[i].TYPE}
-            td !{suspension_history[i].SUSPENSION_REASON}
-            td #{suspension_history[i].CREATED_AT}    
-          - }       
 block modals             
   #addNewUser.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
     .modal-dialog
@@ -235,6 +218,28 @@ block modals
         .modal-footer
           button.form-control.btn.btn-primary(onclick='add_new_admin();') Submit
         // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal
+  #history.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          h4#myModalLabel.modal-title Suspension History
+        // /.modal-header
+        .modal-body
+          div.div_search
+            table#table_search
+              thead
+                tr.tr_search
+                  th.th_search Status
+                  th.th_search Reason
+                  th.th_search Date
+              tbody#history_details
+                tr.tr_search
+                  td#empty_search.td_search(style="text-align: center;", valign="top", colspan="3") There are no history for this user     
+        // /.modal-body
       // /.modal-content
     // /.modal-dialog
   // /.modal                          

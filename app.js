@@ -1220,16 +1220,25 @@ app.get('/admin/manage_users', function(req, res) {
     dbQuery(query, function(result) {
         var query = "SELECT ID, EMAIL, NAME, TYPE, ACTIVE, SUSPENSION_REASON from DASH5082.USER WHERE APPROVE='1'";
         dbQuery(query, function(result2) {
-            var query = "SELECT U.NAME, U.EMAIL, U.TYPE, US.SUSPENSION_REASON, US.CREATED_AT FROM USER_SUSPENSION US JOIN USER U ON U.ID = US.USER_ID";
-            dbQuery(query, function(result3) {
-                //console.log(result[0].ID);
-                var base = req.protocol + '://' + req.get('host');
-                // redirect with data
-                //res.send({data: result});
-                res.render('admin/manage_users', {base: base, non_approved_users: result, approved_users: result2, suspension_history: result3});
-            });  
+            //console.log(result[0].ID);
+            var base = req.protocol + '://' + req.get('host');
+            // redirect with data
+            //res.send({data: result});
+            res.render('admin/manage_users', {base: base, non_approved_users: result, approved_users: result2});  
         });
         
+    });
+});
+
+app.post('/admin/get_user_history', function(req, res) {
+    var query = "SELECT * from DASH5082.USER_SUSPENSION WHERE USER_ID = " + req.body.id ;
+    dbQuery(query, function(result) {
+        if(result.length > 0){
+            res.send({message:'success', results:result});
+        }
+        else{
+            res.send({message:'failed'});
+        }
     });
 });
 
@@ -1346,6 +1355,8 @@ app.post('/admin/activateuser', function(req, res){
 
     var query = "UPDATE USER SET ACTIVE='1' WHERE ID=" + req.body.id + ";";
     dbQuery(query, function(newResult) {
+        var query = "INSERT INTO DASH5082.USER_SUSPENSION (USER_ID, SUSPENSION_REASON, TYPE, CREATED_AT) VALUES (" + req.body.id + ", '" + req.body.suspension_reason + "', 1, TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));";
+        dbQuerySync(query);
         var query = "SELECT EMAIL FROM USER WHERE ID=" + req.body.id + ";";
         dbQuery(query, function(result) 
         {

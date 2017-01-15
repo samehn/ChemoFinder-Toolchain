@@ -1312,6 +1312,7 @@ regimen-dist {
 }
 
 .tr_search:nth-child(even){background-color: #f2f2f2}
+.tr_history:nth-child(odd){background-color: #f2f2f2}
 .div_search{
     overflow-x:auto;
     margin-top: 20px;
