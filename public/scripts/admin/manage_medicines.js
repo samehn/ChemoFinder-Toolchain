@@ -10,6 +10,7 @@ $(document).ready(function(){
 
 $(document).click(function() {
   $('.error-form').remove();
+  $('.message-form').remove();
 });
 
 $('#add-new-medicine-form').keydown(function(event){

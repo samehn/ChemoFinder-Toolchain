@@ -30,17 +30,25 @@ block content
   - if(format_error) {
       !{format_error} 
   - }
+  - if(success_message) {
+      !{success_message} 
+  - }
   .row
-    .col-xs-6.col-md-4 
+    .col-xs-6.col-md-3 
       button.form-control.btn.btn-primary(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewMedicine') Add New Medicine
-    .col-xs-6.col-md-4
+    .col-xs-6.col-md-3
       form#uploadForm(ref='uploadForm', action= base + '/admin/uploadmedicines', method='post', enctype='multipart/form-data')
         .fileUpload.btn.btn-primary(style="height: 34px;")
           span Upload Medicine List
           input.upload(type='file', name="sampleFile", onchange='$("#loadingModal").modal("show");this.form.submit();')
-    .col-xs-12.col-md-4
+    .col-xs-6.col-md-3
       form#downloadForm(ref='downloadForm', action= base + '/admin/downloadtemplate', method='get', enctype='multipart/form-data')
         button.form-control.btn.btn-primary(type="submit") Download Medicines Template        
+    .col-xs-6.col-md-3
+      form#uploadTemplateForm(ref='uploadTemplateForm', action= base + '/admin/uploadstocklist', method='post', enctype='multipart/form-data')
+        .fileUpload.btn.btn-primary(style="height: 34px;")
+          span Upload Stock List Template
+          input.upload(type='file', name="sampleFile", onchange='$("#loadingModal").modal("show");this.form.submit();')
   hr  
   .welcome__home-buttons
     h4.table-title Approved Medicines     

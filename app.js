@@ -3,6 +3,7 @@ var app = express();
 var bodyParser = require('body-parser');
 // var multer = require('multer');
 // var upload = multer(); 
+var fs = require('fs');
 var session = require('express-session');
 var cookieParser = require('cookie-parser');
 var routes = require('./routes');
@@ -130,7 +131,9 @@ function dbQuerySync(query) {
 
 require('./routes/home')(app);
 
-
+// setInterval(function () { 
+//     console.log('second passed'); 
+// }, 1000);
 
 app.get('/admin/dashboard', function(req, res){
     var base = req.protocol + '://' + req.get('host');
@@ -1263,6 +1266,11 @@ app.get('/admin/manage_medicines', function(req, res) {
                 data['format_error'] = req.session.format_error;
                 req.session.format_error = null;
             }  
+            if(req.session.success_message)
+            {
+                data['success_message'] = req.session.success_message;
+                req.session.success_message = null;
+            } 
             res.render('admin/manage_medicines', data);  
         });
         
@@ -1766,6 +1774,19 @@ console.log(err);
     }
 });
 
+app.get('/pharmacy/downloadlaststock', checkSignIn, function(req, res){
+  var path = '/public/uploads/stocks/stock_list_' + req.session.user_id + '.xlsx';
+  var file = __dirname + path;
+  if (fs.existsSync('.' + path)) {
+    res.download(file); // Set disposition and send it.
+  }
+  else{
+    req.session.format_error = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button> You have no previous stocks to be downloaded </div>';
+    res.redirect('/pharmacy');
+  }
+  
+});
+
 app.get('/pharmacy/downloadtemplate', checkSignIn, function(req, res){
   var file = __dirname + '/public/downloads/stocklist_example_data.xlsx';
   res.download(file); // Set disposition and send it.
@@ -2173,6 +2194,37 @@ app.post('/admin/deletemedicine', function(req, res){
         jsonObj['message'] = "failed";
         res.send(jsonObj);
     }                  
+});
+
+app.post('/admin/uploadstocklist', function(req, res) {
+    var sampleFile;
+ 
+    if (!req.files) {
+        res.send('No files were uploaded.');
+        console.log('No files were uploaded.');
+        return;
+    }
+    sampleFile = req.files.sampleFile;
+    var fileArray = sampleFile.name.split('.');
+    var extension = fileArray[fileArray.length - 1];
+    if(extension == "xlsx")
+    {
+        sampleFile.mv('./public/downloads/stocklist_example_data.xlsx', function(err) {
+            if (err) {
+                res.status(500).send(err);
+            }
+            else {
+                req.session.success_message = '<div class="alert alert-success message-form"> The file is uploaded successfuly</div>'
+                res.redirect('/admin/manage_medicines');
+                console.log('File uploaded!');
+            }
+        });
+    }
+    else
+    {
+        req.session.extention_error = true;
+        res.redirect('/admin/manage_medicines');
+    }
 });
 
 app.post('/pharmacy/uploadstocklist', checkSignIn, function(req, res) {
