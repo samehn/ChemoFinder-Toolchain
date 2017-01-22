@@ -1899,7 +1899,7 @@ app.post('/pharmacy/addnewmedicine', function(req, res){
     {
         if(valid)
         {   
-            var query = "SELECT * FROM DASH5082.STOCK_LIST WHERE MEDICINE_ID =" + medicineResult[0].ID;
+            var query = "SELECT * FROM DASH5082.STOCK_LIST WHERE MEDICINE_ID = " + medicineResult[0].ID + " AND PHARMACY_ID = " + req.session.user_id;
             var stockListResult = dbQuerySync(query);
             if(stockListResult.length != 0)
             {
@@ -2010,12 +2010,12 @@ app.post('/pharmacy/addnewapprovedmedicine', function(req, res){
     
     if(valid)
     {
-        var query = "SELECT * FROM DASH5082.STOCK_LIST WHERE MEDICINE_ID =" + req.body.medicine;
+        var query = "SELECT * FROM DASH5082.STOCK_LIST WHERE MEDICINE_ID = " + req.body.medicine + " AND PHARMACY_ID = " + req.session.user_id;
         console.log(query);
         var stockListResult = dbQuerySync(query);
         if(stockListResult.length != 0)
         {
-            jsonObj['generic_name_error'] = "This Medicine is already exists in your stock"
+            jsonObj['medicine_error'] = "This Medicine is already exists in your stock"
             valid = false;
             jsonObj['message'] = "failed";
             res.send(jsonObj);
@@ -2619,24 +2619,88 @@ app.get('/doctor/getsearchresults', checkSignIn, function(req, res){
         var vaildQs = qsArray.every(function checkInteger(quantity) { return Number.isInteger(parseInt(quantity));});
         if(idsArray.length == qsArray.length && vaildIds && vaildQs)
         {
-            var results = {};
+            var medicines = [];
             for (var i = 0; i < idsArray.length; i++) {
                 // idsArray[i]
-                results[i] ={};
-                results[i]['quantity'] = qsArray[i];
+                var obj = {}
+                
+                obj['quantity'] = qsArray[i];
                 var query = "SELECT * FROM DASH5082.MEDICINE  WHERE ID =" + parseInt(idsArray[i]); 
                 var medicine = dbQuerySync(query);
-                results[i]['medicine'] = medicine[0];
-                var query = "SELECT * FROM DASH5082.MEDICINE M JOIN STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE S.APPROVAL ='1' AND M.ID =" + parseInt(idsArray[i]) + " AND S.AVAILABLE_STOCK >='" + qsArray[i] + "'"; 
+                obj['medicine'] = medicine[0];
+                var query = "SELECT U.ID AS ID, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, S.LAST_UPDATE FROM DASH5082.MEDICINE M JOIN STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE S.APPROVAL ='1' AND M.ID =" + parseInt(idsArray[i]) + " AND S.AVAILABLE_STOCK >=" + qsArray[i]; 
                 var pharmacies = dbQuerySync(query);
                 if(pharmacies.length > 0)
                 {
-                    results[i]['pharmacies'] = pharmacies;
+                    obj['pharmacies'] = pharmacies;
+                }
+                medicines.push(obj);
+            }
+            //console.log(medicines);
+            //get all pharmacies in one array
+
+            var pharmacies = [];
+            for (var i = 0; i < medicines.length; i++) {
+                if(medicines[i].pharmacies) {
+                   pharmacies.push(medicines[i].pharmacies);     
                 }
             }
-            console.log(results[0]);
+
+            //console.log(pharmacies);
+            //Flatten the stoes array
+            var mergedPharmacies = [].concat.apply([], pharmacies);
+            //console.log(mergedPharmacies);
+            //remove the duplicates in the pharmacies array
+
+            var flags = {};
+            var uniquePharmacies = mergedPharmacies.filter(function(entry) {
+                if (flags[entry.ID]) {
+                    return false;
+                }
+                flags[entry.ID] = true;
+                return true;
+            });
+
+            //unify medicines by creating a new copy and removing the pharmacies from the new one to avoid circular references
+
+            var newMedicines = JSON.parse(JSON.stringify(medicines));
+
+            for(var i=0; i< newMedicines.length;i++) {
+                delete newMedicines[i].pharmacies;
+            }
+
+            //get the medicines available in each pharmacy and insert them in the pharmacies array
+
+            for(var i=0;i< uniquePharmacies.length;i++){
+                var pharmacyMedicines = [];
+                var total = 0;
+                for(var j=0; j< medicines.length;j++) {
+                    if(medicines[j].pharmacies){
+                        if(containsMatchingIds(medicines[j].pharmacies, uniquePharmacies[i]) ) {
+                            var price = getStockPrice(uniquePharmacies[i].ID, medicines[j].pharmacies);
+                            console.log(price);
+                            console.log(medicines[j].pharmacies);
+                            pharmacyMedicines.push(newMedicines[j]);
+                            // console.log(medicines[j].pharmacies);
+                            total = total + (parseInt(price)* medicines[j].quantity);
+                        }
+                    }    
+                }
+                uniquePharmacies[i]['totalPrice'] = total;
+                uniquePharmacies[i]['medicines'] = pharmacyMedicines;
+            }
+
+            var fullPharmacies = uniquePharmacies.filter(function(pharmacy){
+                return medicines.length == pharmacy.medicines.length
+            });
+
+            var sortedPharmacies = fullPharmacies.sort(function(a, b){
+                return a.totalPrice - b.totalPrice;
+            });
+
+            console.log(sortedPharmacies);
             var base = req.protocol + '://' + req.get('host');
-            res.render('doctor/search_results', { base: base, results: results});
+            res.render('doctor/search_results', { base: base, medicines: medicines, pharmacies: sortedPharmacies});
             // res.send({ids: req.param('ids'), qs: req.param('qs')});
         }
         else
@@ -2649,6 +2713,23 @@ app.get('/doctor/getsearchresults', checkSignIn, function(req, res){
         res.send("404 Not Found");
     }
 });
+
+function containsMatchingIds(a, obj) {
+    for (var i = 0; i < a.length; i++) {
+        if (a[i].ID === obj.ID) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function getStockPrice(pharmacyId, pharmacies) {
+    for (var i = 0; i < pharmacies.length; i++) {
+        if(pharmacies[i].ID == pharmacyId){
+            return pharmacies[i].PRICE_PER_PACK;
+        }
+    }
+}
 
 app.use('/doctor/getsearchresults', function(err, req, res, next){
 console.log(err);

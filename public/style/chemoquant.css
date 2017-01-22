@@ -1254,6 +1254,7 @@ regimen-dist {
 }
 .table-title
 {
+  font-weight: bold;  
   text-align: left;
   margin-bottom: 20px;
   color: #56a3fc;
@@ -1262,6 +1263,7 @@ regimen-dist {
 .btn-gray{background-color: lightgray;}
 .btn-gray:hover{background-color: darkgray;}
 .word-wrapping{ word-wrap: break-word; }
+.mg-top-20{ margin-top: 20px; }
 .mg-btm-5{ margin-bottom: 10px; }
 .search-bar { box-sizing: border-box; }
 .section-search { width: 100%; display: table; padding: 1em 0 0; margin-bottom: 60px; }

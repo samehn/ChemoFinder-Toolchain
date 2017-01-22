@@ -24,8 +24,46 @@ block content
       button.form-control.btn.btn-primary(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewMedicine') Send SMS
   hr  
   #search__results.welcome__home-buttons
-    - for( i in results) {
-      h4.medicine-title x#{results[i]['quantity']} #{results[i]['medicine'].GENERIC_NAME} #{results[i]['medicine'].BRAND_NAME} #{results[i]['medicine'].FORM} #{results[i]['medicine'].STRENGTH} #{results[i]['medicine'].STRENGTH_UNIT} #{results[i]['medicine'].MANUFACTURER}
+    h4.table-title Available Pharmacies
+    div.div_search
+        table#table_search
+          thead
+            tr.tr_search
+              th.th_search Name
+              th.th_search Phone
+              th.th_search Email
+              th.th_search Street
+              th.th_search City
+              th.th_search State
+              th.th_search ZIP
+              th.th_search Open From
+              th.th_search Open To
+              th.th_search Total Price
+              th.th_search Last Update
+          tbody#itemsToSearch
+            tr.tr_search
+            -  if(pharmacies.length > 0) { 
+                -  for (var i = 0; i < pharmacies.length; i++) {
+                    tr.tr_search.table-result-search
+                      td.td_search #{pharmacies[i].NAME}
+                      td.td_search #{pharmacies[i].PHONE_NUMBER}
+                      td.td_search #{pharmacies[i].EMAIL}
+                      td.td_search #{pharmacies[i].STREET}
+                      td.td_search #{pharmacies[i].CITY}
+                      td.td_search #{pharmacies[i].STATE}
+                      td.td_search #{pharmacies[i].ZIP}
+                      td.td_search #{pharmacies[i].OPEN_FROM}
+                      td.td_search #{pharmacies[i].OPEN_TO}
+                      td.td_search #{pharmacies[i].totalPrice}
+                      td.td_search #{pharmacies[i].LAST_UPDATE}
+                - } 
+            - }
+            -  else {
+                td#empty_search.td_search(style="text-align: center;", valign="top", colspan="13") There are no available pharmacies that had this list of medicines with these quantities
+            -  }  
+    h4.table-title.mg-top-20 Search Details 
+    - for(var i = 0; i < medicines.length; i++) {
+      h4.medicine-title x#{medicines[i]['quantity']} #{medicines[i]['medicine'].GENERIC_NAME} #{medicines[i]['medicine'].BRAND_NAME} #{medicines[i]['medicine'].FORM} #{medicines[i]['medicine'].STRENGTH} #{medicines[i]['medicine'].STRENGTH_UNIT} #{medicines[i]['medicine'].MANUFACTURER}
       table.display(id="pharmaciesTable" + i, cellspacing="0", width="100%")
         thead
           tr
@@ -45,29 +83,29 @@ block content
             th Expiry Date
             th Pack Size
             th Last Update 
-        if results[i]['pharmacies']
-          - for( var j = 0, len = results[i]['pharmacies'].length; j < len; j++ ) {
+        if medicines[i]['pharmacies']
+          - for( var j = 0, len = medicines[i]['pharmacies'].length; j < len; j++ ) {
               tr
-                td #{results[i]['pharmacies'][j].NAME}
-                td.highlight #{results[i]['pharmacies'][j].PHONE_NUMBER} 
-                td #{results[i]['pharmacies'][j].EMAIL}
-                td.highlight #{results[i]['pharmacies'][j].STREET}
-                td #{results[i]['pharmacies'][j].CITY}
-                td.highlight #{results[i]['pharmacies'][j].STATE}
-                td #{results[i]['pharmacies'][j].ZIP}
-                td.highlight #{results[i]['pharmacies'][j].OPEN_FROM}
-                td #{results[i]['pharmacies'][j].OPEN_TO} 
-                td.highlight #{results[i]['pharmacies'][j].PRICE_PER_PACK}
-                td #{results[i]['pharmacies'][j].EXPIRY_DATE}
-                td.highlight #{results[i]['pharmacies'][j].PACK_SIZE}
-                td #{results[i]['pharmacies'][j].LAST_UPDATE}
+                td #{medicines[i]['pharmacies'][j].NAME}
+                td.highlight #{medicines[i]['pharmacies'][j].PHONE_NUMBER} 
+                td #{medicines[i]['pharmacies'][j].EMAIL}
+                td.highlight #{medicines[i]['pharmacies'][j].STREET}
+                td #{medicines[i]['pharmacies'][j].CITY}
+                td.highlight #{medicines[i]['pharmacies'][j].STATE}
+                td #{medicines[i]['pharmacies'][j].ZIP}
+                td.highlight #{medicines[i]['pharmacies'][j].OPEN_FROM}
+                td #{medicines[i]['pharmacies'][j].OPEN_TO} 
+                td.highlight #{medicines[i]['pharmacies'][j].PRICE_PER_PACK}
+                td #{medicines[i]['pharmacies'][j].EXPIRY_DATE}
+                td.highlight #{medicines[i]['pharmacies'][j].PACK_SIZE}
+                td #{medicines[i]['pharmacies'][j].LAST_UPDATE}
           - }
     - }
 
 block scripts
   script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js')
   script(type='text/javascript', src=base+'/scripts/doctor/search_results.js')  
-  - for(i in results) {
+  - for(i in medicines) {
       script.
         $( function() {
           $('#pharmaciesTable'+ "#{i}").DataTable({
