@@ -1355,7 +1355,8 @@ td.highlight {
     visibility: hidden;
     display:block;
   }
-  .dataTable, .medicine-title,.welcome__branding,.page__subtitle 
+
+  .dataTable, .medicine-title,.welcome__branding,.page__subtitle,.div_search,.table-title 
   {
     visibility: visible;
   }
