@@ -22,21 +22,21 @@ block content
   - }
   .row
     .col-xs-6.col-md-4 
-      button.form-control.btn.btn-primary.mg-btm-5(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewMedicine') Add New Medicine
+      button.form-control.btn.btn-primary.mg-btm-10(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewMedicine') Add New Medicine
     .col-xs-6.col-md-4 
-      button.form-control.btn.btn-primary.mg-btm-5(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewApprovedMedicine') Add New Approved Medicine  
+      button.form-control.btn.btn-primary.mg-btm-10(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewApprovedMedicine') Add New Approved Medicine  
     .col-xs-6.col-md-4
       form#uploadForm(ref='uploadForm', action= base + '/pharmacy/uploadstocklist', method='post', enctype='multipart/form-data')
-        .fileUpload.btn.btn-primary.mg-btm-5
+        .fileUpload.btn.btn-primary.mg-btm-10
           span Upload Stock List
           input.upload(type='file', name="sampleFile", onchange='$("#loadingModal").modal("show");this.form.submit()')
-        //- input.form-control.btn.btn-primary.mg-btm-5(type='file', onchange='this.form.submit()', value='Upload Medicines')
+        //- input.form-control.btn.btn-primary.mg-btm-10(type='file', onchange='this.form.submit()', value='Upload Medicines')
     .col-xs-6.col-md-6
       form#downloadForm(ref='downloadForm', action= base + '/pharmacy/downloadtemplate', method='get', enctype='multipart/form-data')
-        button.form-control.btn.btn-primary.mg-btm-5(type="submit") Download Stock Template
+        button.form-control.btn.btn-primary.mg-btm-10(type="submit") Download Stock Template
     .col-xs-6.col-xs-push-3.col-md-push-0.col-md-6
       form#downloadLastStockForm(ref='downloadLastStockForm', action= base + '/pharmacy/downloadlaststock', method='get', enctype='multipart/form-data')
-        button.form-control.btn.btn-primary.mg-btm-5(type="submit") Download My Last Stock        
+        button.form-control.btn.btn-primary.mg-btm-10(type="submit") Download My Last Stock        
   hr  
   .welcome__home-buttons
     h4.table-title Approved Medicines     

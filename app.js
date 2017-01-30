@@ -2609,12 +2609,164 @@ function parsingStockList(req, callback) {
         i++;
     }
 }
+app.post('/getavailablepharmacies', function(req, res) {
+    var valid = true;
 
-app.get('/doctor/getsearchresults', checkSignIn, function(req, res){
+    //validate generic name
+    if(!req.body.generic_name)
+    {
+        jsonObj['generic_name_error'] = "Generic Name is required";
+        valid = false;
+    }
+
+    //validate brand name
+    if(!req.body.brand_name)
+    {
+        jsonObj['brand_name_error'] = "Brand Name is required";
+        valid = false;
+    }
+
+    //validate name
+    if(!req.body.form)
+    {
+        jsonObj['form_error'] = "Form is required";
+        valid = false;
+    }
+
+    //validate type
+    if(!req.body.strength)
+    {
+        jsonObj['strength_error'] = "Strength is required";
+        valid = false;
+    }
+
+    //validate type
+    if(!req.body.strength_unit)
+    {
+        jsonObj['strength_unit_error'] = "Strength Unit is required";
+        valid = false;
+    }
+
+    //validate type
+    if(!req.body.manufacturer)
+    {
+        jsonObj['manufacturer_error'] = "Manufacturer is required";
+        valid = false;
+    }
+
+    if(valid) {
+        var query = "SELECT * from DASH5082.MEDICINE WHERE GENERIC_NAME ='" + req.body.generic_name + "' AND BRAND_NAME = '" + req.body.brand_name + "' AND FORM = '" + req.body.form + "' AND STRENGTH = '" + req.body.strength + "' AND STRENGTH_UNIT = '" + req.body.strength_unit + "' AND MANUFACTURER = '" + req.body.manufacturer + "';";           
+        var medicineResult = dbQuerySync(query);
+        console.log(medicineResult[0].ID);
+        var query = "SELECT U.ID AS ID, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, S.LAST_UPDATE FROM DASH5082.MEDICINE M JOIN STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE S.APPROVAL ='1' AND M.ID =" + medicineResult[0].ID + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)";
+        var pharmacies = dbQuerySync(query);
+        var result = {message: "success"};
+        result['pharmacies'] = pharmacies; 
+        res.send(result);
+    }
+    else {
+        res.send({message: "failed"});
+    }
+});
+
+app.get('/doctor/choosetreatmentcenter', checkSignIn, function(req, res){
     if(req.param('ids') && req.param('qs'))
     {
         idsArray = req.param('ids').split('-');
         qsArray = req.param('qs').split('-');
+        var vaildIds = idsArray.every(function checkInteger(id) { return Number.isInteger(parseInt(id));});
+        var vaildQs = qsArray.every(function checkInteger(quantity) { return Number.isInteger(parseInt(quantity));});
+        if(idsArray.length > 0 && (idsArray.length == qsArray.length) && vaildIds && vaildQs)
+        {
+            var medicines = [];
+            for (var i = 0; i < idsArray.length; i++) {
+                
+                var query = "SELECT * FROM DASH5082.MEDICINE WHERE ID =" + parseInt(idsArray[i]); 
+                var medicine = dbQuerySync(query);
+                if(medicine.length != 0) {
+                    var obj = {}
+                    obj['quantity'] = qsArray[i];
+                    obj['medicine'] = medicine[0];
+                    medicines.push(obj);   
+                }
+            }
+            var base = req.protocol + '://' + req.get('host');
+            var query = "SELECT * FROM DASH5082.USER WHERE TYPE = 'TREATMENT CENTER'";
+            var treatmentCenters = dbQuerySync(query);
+            res.render('doctor/choose_treatment_center', { base: base, medicines: medicines, treatmentCenters: treatmentCenters});
+        }
+        else
+        {
+            res.send("404 Not Found");
+        }
+    }
+    else
+    {
+        res.send("404 Not Found");
+    }
+});
+
+app.post('/doctor/gettreatmentcentermedicines', function(req, res) {
+    if(req.param('ids') && req.param('qs'))
+    {
+        var idsArray = req.param('ids').split('-');
+        var qsArray = req.param('qs').split('-');
+        var vaildIds = idsArray.every(function checkInteger(id) { return Number.isInteger(parseInt(id));});
+        var vaildQs = qsArray.every(function checkInteger(quantity) { return Number.isInteger(parseInt(quantity));});
+        if(idsArray.length > 0 && (idsArray.length == qsArray.length) && vaildIds && vaildQs)
+        {
+            var query = "SELECT * FROM DASH5082.USER WHERE ID =" + req.body.id + " AND TYPE = 'TREATMENT CENTER'"; 
+            var treatmentCenter = dbQuerySync(query);
+            if(treatmentCenter.length != 0) {
+                var medicines = [];
+                for (var i = 0; i < idsArray.length; i++) {
+                    var query = "SELECT M.GENERIC_NAME, M.BRAND_NAME, M.FORM, M.STRENGTH, M.STRENGTH_UNIT, M.MANUFACTURER, SL.LAST_UPDATE FROM USER U JOIN STOCK_LIST SL ON U.ID = SL.PHARMACY_ID JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE U.ID =" + req.body.id + " AND M.ID =" + parseInt(idsArray[i]) + " AND SL.AVAILABLE_STOCK >=" + qsArray[i]; 
+                    var medicine = dbQuerySync(query);
+                    if(medicine.length != 0) {
+                        var obj = {}
+                        obj['quantity'] = qsArray[i];
+                        obj['medicine'] = medicine[0];
+                        medicines.push(obj);   
+                    }
+                }
+                res.send({message:'success', treatmentCenter: treatmentCenter, medicines: medicines});
+            }
+            else {
+                res.send({message:'failed'});
+            }
+        }
+        else
+        {
+            res.send({message:'failed'});
+        }
+    }
+    else
+    {
+        res.send({message:'failed'});
+    }
+});
+
+app.get('/doctor/selectpharmacies', function(req, res) {
+    if(req.param('ids') && req.param('qs') && req.param('t'))
+    {
+        var idsArray = req.param('ids').split('-');
+        var qsArray = req.param('qs').split('-');
+        var treatmentCenter = req.param('t');
+        var vaildIds = idsArray.every(function checkInteger(id) { return Number.isInteger(parseInt(id));});
+        var vaildQs = qsArray.every(function checkInteger(quantity) { return Number.isInteger(parseInt(quantity));});
+        var validTreatmentCenter = Number.isInteger(parseInt(treatmentCenter));
+    }
+    else
+    {
+        res.send("404 Not Found");
+    }
+});
+
+app.get('/doctor/getsearchresults', checkSignIn, function(req, res){
+    if(req.param('ids') && req.param('qs'))
+    {
+        var idsArray = req.param('ids').split('-');
+        var qsArray = req.param('qs').split('-');
         var vaildIds = idsArray.every(function checkInteger(id) { return Number.isInteger(parseInt(id));});
         var vaildQs = qsArray.every(function checkInteger(quantity) { return Number.isInteger(parseInt(quantity));});
         if(idsArray.length == qsArray.length && vaildIds && vaildQs)
@@ -2622,7 +2774,7 @@ app.get('/doctor/getsearchresults', checkSignIn, function(req, res){
             var medicines = [];
             for (var i = 0; i < idsArray.length; i++) {
                 // idsArray[i]
-                var obj = {}
+                var obj = {};
                 
                 obj['quantity'] = qsArray[i];
                 var query = "SELECT * FROM DASH5082.MEDICINE  WHERE ID =" + parseInt(idsArray[i]); 

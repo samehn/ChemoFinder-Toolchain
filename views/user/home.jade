@@ -2,14 +2,41 @@ extends ../layout
 
 block stylesheets
   link(href=base+'/style/bootstrap-timepicker.min.css', rel='stylesheet')
+  link(rel='stylesheet', href='https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css')  
+block headers
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Login", onclick="loginModal()")
+    i.glyphicon.glyphicon-log-in
+    span.main-actions|                         Login
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Register", , onclick="registerModal()")
+    i.glyphicon.glyphicon-user
+    span.main-actions|                         Register    
 block content
   img.welcome__home-image(src=base+'/images/homeicon.svg')
   .welcome__home-message.ng-binding Welcome to ChemoFinder
   .welcome__home-buttons
-    button.button.btn-outline.ng-binding(ng-click='welcomeCtrl.importForecast()', data-toggle='modal', data-target='#Login')
-      | Login
-    button.button.btn-outline.ng-binding(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#Register')
-      | Register
+    section#section-search.section-search.search-bar
+      .div-search.search-bar
+         input#tags.input-search.search-bar(type='text', placeholder='Search For Medicines...', style='width:100%')
+         p.search_hint hint: use the autocomplete to search for your medicine      
+      .div-search.search-bar
+        button#search-btn.button-search.search-bar.btn.btn-primary(onclick="search()", style='height:60px; color: white;') Search
+    #search-result-table.div_search.hidden
+      table#table_search
+        thead
+          tr.tr_search
+            th.th_search Name
+            th.th_search Phone
+            th.th_search Email
+            th.th_search Street
+            th.th_search City
+            th.th_search State
+            th.th_search ZIP
+            th.th_search Open From
+            th.th_search Open To
+            th.th_search Price
+            th.th_search Last Update
+        tbody#search-result       
 block modals             
   #Login.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
     .modal-dialog
@@ -166,5 +193,6 @@ block modals
     // /.modal-dialog
   // /.modal          
 block scripts
+  script(src='https://code.jquery.com/ui/1.12.1/jquery-ui.js')
   script(type='text/javascript', src=base+'/scripts/bootstrap-timepicker.min.js')
   script(type='text/javascript', src=base+'/scripts/home.js')

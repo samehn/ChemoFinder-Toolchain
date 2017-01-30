@@ -19,6 +19,21 @@ block headers
 block content
   .page__subtitle.ng-binding Search Medicines
   .welcome__home-buttons
+    tab-bar.ng-isolate-scope
+      .tab-bar.mg-btm-30
+        // ngRepeat: tab in tabBarCtrl.tabs
+        button.tab-bar__tab.ng-binding.ng-scope.tab-bar__aval-tab.tab-bar__active-tab
+          | 1. Create Prescription
+        // end ngRepeat: tab in tabBarCtrl.tabs
+        button.tab-bar__tab.ng-binding.ng-scope
+          | 2. Treatment Center
+        // end ngRepeat: tab in tabBarCtrl.tabs
+        button.tab-bar__tab.ng-binding.ng-scope
+          | 3. Search Pharmacy
+        // end ngRepeat: tab in tabBarCtrl.tabs
+        button.tab-bar__tab.ng-binding.ng-scope
+          | 4. Shopping List
+        // end ngRepeat: tab in tabBarCtrl.tabs
     section#section-search.section-search.search-bar
       .div-search.search-bar
          select#quantity-search.qty-20.quantity-search.search-bar
@@ -68,7 +83,8 @@ block content
           tbody#itemsToSearch
             tr.tr_search
               td#empty_search.td_search(style="text-align: center;", valign="top", colspan="8") No medicines are added yet
-    button.btn.btn-primary(onclick="searchForResults()") Search
+    button#next-btn.btn.btn-primary.pull-right.mg-btm-70(onclick="nextStep()") Next
+    //- button.btn.btn-primary(onclick="searchForResults()") Search
               
 block scripts
   script(src='https://code.jquery.com/ui/1.12.1/jquery-ui.js')

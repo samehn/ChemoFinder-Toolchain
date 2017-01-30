@@ -8,6 +8,11 @@ $(".button-search").click(function(e) {
     return false;
 });
 
+$("#next-btn").click(function(e) {
+    e.stopPropagation();
+    return false;
+});
+
 $( function() {
     $('#myTable').DataTable({
         "scrollX": true,
@@ -123,7 +128,30 @@ function removeMedicine(element) {
     }
 }
 
-function searchForResults() {
+// function searchForResults() {
+//     if($('.table-result-search').length > 0)
+//     {
+//         var ids = '?ids=';
+//         var quantities = '&qs=';
+//         $('.table-result-search').each(function(i, obj) {
+//             console.log(obj.getAttribute('data-id'));
+//             console.log(obj.getAttribute('data-quantity'));
+//             ids = ids + obj.getAttribute('data-id');
+//             quantities = quantities + obj.getAttribute('data-quantity');
+//             if($('.table-result-search').length - 1 != i)
+//             {
+//                 ids = ids + '-';
+//                 quantities = quantities + '-';
+//             }
+//         });
+//         var query = ids + quantities;
+//         console.log( url + "/doctor/getsearchresults" + query);
+//         window.location.href = url + "/doctor/getsearchresults" + query;
+//     }
+// }
+
+function nextStep() {
+    
     if($('.table-result-search').length > 0)
     {
         var ids = '?ids=';
@@ -141,6 +169,11 @@ function searchForResults() {
         });
         var query = ids + quantities;
         console.log( url + "/doctor/getsearchresults" + query);
-        window.location.href = url + "/doctor/getsearchresults" + query;
+        window.location.href = url + "/doctor/choosetreatmentcenter" + query;
+    }
+    else {        
+        alert('No medicines are added to the search list');
+        var html = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>No medicines are added to the search list</div>';
+        $(html).insertBefore('#section-search');
     }
 }

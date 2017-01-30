@@ -22,6 +22,14 @@ $('#register-form').keydown(function(event){
   }
 });
 
+$('#tags').keydown(function(event){
+  if(event.keyCode == 13) {
+    event.preventDefault();
+    search();
+    return false;
+  }
+});
+
 $('#login-form').keydown(function(event){
   if(event.keyCode == 13) {
     event.preventDefault();
@@ -35,6 +43,11 @@ $(document).click(function() {
 });
 
 $("#signup-btn").click(function(e) {
+    e.stopPropagation();
+    return false;
+});
+
+$("#search-btn").click(function(e) {
     e.stopPropagation();
     return false;
 });
@@ -56,6 +69,39 @@ $("#Login").on("show.bs.modal", function () {
   $("html").removeClass("modal-open");
 });
 
+$( function() {
+  $('#loadingModal').modal('show');
+  $.ajax({
+      type: "get",
+      url: url + '/getapprovedmedicines',
+      success:  function(data){
+        $('#loadingModal').modal('hide');
+        // console.log(data);
+        var availableTags = [];
+        //console.log(data.medicines[0].GENERIC_NAME);
+        for (i = 0; i < data.medicines.length; i++) 
+        {
+            var tag = data.medicines[i].GENERIC_NAME + " - " + data.medicines[i].BRAND_NAME + " - " + data.medicines[i].FORM + " - " + data.medicines[i].STRENGTH + " - " + data.medicines[i].STRENGTH_UNIT + " - " + data.medicines[i].MANUFACTURER;
+            // console.log(tag);
+            availableTags.push(tag);
+        }
+        $( "#tags" ).autocomplete({
+            source: availableTags
+        });
+        // console.log(data.random);
+        // element.parentNode.parentNode.childNodes[0].childNodes[0].childNodes[0].childNodes[0].value = data.random;
+      }
+  });
+} );
+
+function loginModal() {
+   $('#Login').modal('show');
+}
+
+function registerModal() {
+   $('#Register').modal('show');
+}
+
 function login() {
     
     var type = $('#login-type');
@@ -71,8 +117,8 @@ function login() {
         data : user_array,
         success:  function(data){
           $('#loadingModal').modal('hide');    
-          console.log(data);
-          console.log(data.message);
+          // console.log(data);
+          // console.log(data.message);
           $('.error-form').remove();
           $('.message-form').remove();
           if(data.message == "failed")
@@ -130,7 +176,7 @@ function register() {
         user_array[open_from.attr('name')] = open_from.val();
         user_array[open_to.attr('name')] = open_to.val();
     }
-    console.log(user_array);
+    // console.log(user_array);
     $('#loadingModal').modal('show');
     $.ajax({
       type: "post",
@@ -138,8 +184,8 @@ function register() {
       data : user_array,
       success:  function(data){        
         $('#loadingModal').modal('hide');
-        console.log(data);
-        console.log(data.message);
+        // console.log(data);
+        // console.log(data.message);
         $('.error-form').remove();
         $('.message-form').remove();
         if(data.message == "success")
@@ -212,4 +258,66 @@ function register() {
         }
       }
   });
+}
+
+function search() {
+  $('#search-result-table').addClass('hidden');
+  $('#search-result').html();
+  $('.error-form').remove();
+  var searchData = $('#tags').val();
+  var splitedData = searchData.split(' - ');
+  if(splitedData.length == 6) {
+    var data = {};
+    data['generic_name'] = splitedData[0];
+    data['brand_name'] = splitedData[1];
+    data['form'] = splitedData[2];
+    data['strength'] = splitedData[3];
+    data['strength_unit'] = splitedData[4];
+    data['manufacturer'] = splitedData[5];
+    // console.log(data);
+    $.ajax({
+      type: "post",
+      url: url + '/getavailablepharmacies',
+      data : data,
+      success:  function(result){  
+        console.log(result);
+        if(result.message == "success") {
+          if(result.pharmacies.length > 0) {
+            $('#search-result-table').removeClass('hidden');
+            var html = '';
+            for (var i = 0; i < result.pharmacies.length; i++) {
+              var html = html + '<tr class="tr_search_row table-result-search">' +
+                '<td class="td_search">' + result.pharmacies[i].NAME + '</td>' +
+                '<td class="td_search">' + result.pharmacies[i].PHONE_NUMBER + '</td>' +
+                '<td class="td_search">' + result.pharmacies[i].EMAIL + '</td>' +
+                '<td class="td_search">' + result.pharmacies[i].STREET + '</td>' +
+                '<td class="td_search">' + result.pharmacies[i].CITY + '</td>' +
+                '<td class="td_search">' + result.pharmacies[i].STATE + '</td>' +
+                '<td class="td_search">' + result.pharmacies[i].ZIP + '</td>' +
+                '<td class="td_search">' + result.pharmacies[i].OPEN_FROM + '</td>' +
+                '<td class="td_search">' + result.pharmacies[i].OPEN_TO + '</td>' +
+                '<td class="td_search">' + result.pharmacies[i].PRICE_PER_PACK + '</td>' +
+                '<td class="td_search">' + result.pharmacies[i].LAST_UPDATE + '</td>' +
+              '</tr>';
+            }
+            $('#search-result').html(html); 
+          }
+          else {
+            var message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>This medicine is not available in any pharmacy currently</div>';
+            $(message).insertBefore($('#section-search'));
+          }
+        }
+        else {
+          var message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>This is not a valid medicine</div>';
+          $(message).insertBefore($('#section-search'));            
+        }
+      }
+    });
+  }
+  else{
+    var message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>This is not a valid medicine</div>';
+    $(message).insertBefore($('#section-search'));
+    console.log('failed');
+  }
+
 }

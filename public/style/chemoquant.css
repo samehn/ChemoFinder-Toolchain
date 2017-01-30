@@ -451,7 +451,7 @@ welcome {
     margin-bottom: 45px;
 }
 .welcome__home-buttons button {
-    margin-right: 11px;
+    /*margin-right: 11px;*/
     padding: 15px;
     padding-top: 8px;
     padding-bottom: 8px;
@@ -986,7 +986,7 @@ report {
 }
 .tab-bar__tab:after {
     content: "";
-    background-image: url(../assets/images/chevron.svg);
+    background-image: url(../images/chevron.svg);
     position: absolute;
     height: 20px;
     width: 20px;
@@ -1259,12 +1259,35 @@ regimen-dist {
   margin-bottom: 20px;
   color: #56a3fc;
 }
+.large-form-control {
+    margin: 20px 0 20px;
+    display: block;
+    width: 100%;
+    height: 50px;
+    padding: 6px 12px;
+    font-size: 20px;
+    line-height: 1.42857143;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+    -webkit-transition: border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+    -o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+}
+.search_hint{text-align: left; color: gray; margin: 10 10}
 .wrapping{word-wrap: break-word;}
 .btn-gray{background-color: lightgray;}
 .btn-gray:hover{background-color: darkgray;}
 .word-wrapping{ word-wrap: break-word; }
 .mg-top-20{ margin-top: 20px; }
-.mg-btm-5{ margin-bottom: 10px; }
+.mg-btm-5{ margin-bottom: 5px; }
+.mg-btm-10{ margin-bottom: 10px; }
+.mg-btm-30{ margin-bottom: 30px; }
+.mg-btm-70{ margin-bottom: 70px; }
 .search-bar { box-sizing: border-box; }
 .section-search { width: 100%; display: table; padding: 1em 0 0; margin-bottom: 60px; }
 .div-search { display: table-cell; width: 100%; }
@@ -1307,6 +1330,13 @@ regimen-dist {
     border: 1px solid #ddd;
 }
 
+.table_search {
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 100%;
+    border: 1px solid #ddd;
+}
+
 .th_search, .td_search {
     border: none;
     text-align: left;
@@ -1314,13 +1344,14 @@ regimen-dist {
 }
 
 .tr_search:nth-child(even){background-color: #f2f2f2}
+.tr_search_row:nth-child(odd){background-color: #f2f2f2}
 .tr_history:nth-child(odd){background-color: #f2f2f2}
 .div_search{
     overflow-x:auto;
     margin-top: 20px;
 }
 #empty_search{background-color: #f2f2f2}
-
+.empty_table{background-color: #f2f2f2}
 input[type=number] {
   font-size: 16px;
   padding: 0 8px;
