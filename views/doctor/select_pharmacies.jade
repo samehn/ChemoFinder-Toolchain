@@ -31,7 +31,7 @@ block content
         button.tab-bar__tab.ng-binding.ng-scope
           | 4. Shopping List
         // end ngRepeat: tab in tabBarCtrl.tabs
-    h4.table-title Items To Search   
+    h4.table-title Medicines List   
       div.div_search
         table.table_search
           thead
@@ -133,44 +133,8 @@ block content
                   - }
               -  }
               -  else {    
-                    td.empty_table.td_search(style="text-align: center;", valign="top", colspan="14") No medicines are available in your treatment center
+                    td.empty_table.td_search(style="text-align: center;", valign="top", colspan="14") There are no available pharmacies that had this medicine with this quantity
               -  }      
-    //-   table.display(id="pharmaciesTable" + i, cellspacing="0", width="100%")
-    //-     thead
-    //-       tr
-    //-         th(colspan="9") Pharmacy Info 
-    //-         th(colspan="4") Stock Info
-    //-       tr
-    // -         th Name
-    // -         th Phone
-    // -         th Email
-    // -         th Street
-    // -         th City
-    // -         th State
-    // -         th ZIP
-    // -         th Open Form
-    // -         th Open To
-    // -         th Price/Pack
-    // -         th Expiry Date
-    // -         th Pack Size
-    // -         th Last Update 
-         //- if medicines[i]['pharmacies']
-         //-   - for( var j = 0, len = medicines[i]['pharmacies'].length; j < len; j++ ) {
-    //-           tr
-    //-             td #{medicines[i]['pharmacies'][j].NAME}
-    //-             td.highlight #{medicines[i]['pharmacies'][j].PHONE_NUMBER} 
-    //-             td #{medicines[i]['pharmacies'][j].EMAIL}
-    //-             td.highlight #{medicines[i]['pharmacies'][j].STREET}
-    //-             td #{medicines[i]['pharmacies'][j].CITY}
-    //-             td.highlight #{medicines[i]['pharmacies'][j].STATE}
-    //-             td #{medicines[i]['pharmacies'][j].ZIP}
-    //-             td.highlight #{medicines[i]['pharmacies'][j].OPEN_FROM}
-    //-             td #{medicines[i]['pharmacies'][j].OPEN_TO} 
-    //-             td.highlight #{medicines[i]['pharmacies'][j].PRICE_PER_PACK}
-    //-             td #{medicines[i]['pharmacies'][j].EXPIRY_DATE}
-    //-             td.highlight #{medicines[i]['pharmacies'][j].PACK_SIZE}
-    //-             td #{medicines[i]['pharmacies'][j].LAST_UPDATE}
-    //-       - }
     - }         
     button#next-btn.btn.btn-primary.pull-right.mg-btm-70.mg-top-10(onclick="nextStep()") Next
               

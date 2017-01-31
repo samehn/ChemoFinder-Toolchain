@@ -2674,9 +2674,9 @@ app.get('/doctor/choosetreatmentcenter', checkSignIn, function(req, res){
     {
         idsArray = req.param('ids').split('-');
         qsArray = req.param('qs').split('-');
-        var vaildIds = idsArray.every(function checkInteger(id) { return Number.isInteger(parseInt(id));});
-        var vaildQs = qsArray.every(function checkInteger(quantity) { return Number.isInteger(parseInt(quantity));});
-        if(idsArray.length > 0 && (idsArray.length == qsArray.length) && vaildIds && vaildQs)
+        var validIds = idsArray.every(function checkInteger(id) { return Number.isInteger(parseInt(id));});
+        var validQs = qsArray.every(function checkInteger(quantity) { return Number.isInteger(parseInt(quantity));});
+        if(idsArray.length > 0 && (idsArray.length == qsArray.length) && validIds && validQs)
         {
             var medicines = [];
             for (var i = 0; i < idsArray.length; i++) {
@@ -2711,9 +2711,9 @@ app.post('/doctor/gettreatmentcentermedicines', function(req, res) {
     {
         var idsArray = req.param('ids').split('-');
         var qsArray = req.param('qs').split('-');
-        var vaildIds = idsArray.every(function checkInteger(id) { return Number.isInteger(parseInt(id));});
-        var vaildQs = qsArray.every(function checkInteger(quantity) { return Number.isInteger(parseInt(quantity));});
-        if(idsArray.length > 0 && (idsArray.length == qsArray.length) && vaildIds && vaildQs)
+        var validIds = idsArray.every(function checkInteger(id) { return Number.isInteger(parseInt(id));});
+        var validQs = qsArray.every(function checkInteger(quantity) { return Number.isInteger(parseInt(quantity));});
+        if(idsArray.length > 0 && (idsArray.length == qsArray.length) && validIds && validQs)
         {
             var query = "SELECT * FROM DASH5082.USER WHERE ID =" + req.body.id + " AND TYPE = 'TREATMENT CENTER'"; 
             var treatmentCenter = dbQuerySync(query);
@@ -2752,10 +2752,10 @@ app.get('/doctor/selectpharmacies', function(req, res) {
         var idsArray = req.param('ids').split('-');
         var qsArray = req.param('qs').split('-');
         var treatmentCenter = req.param('t');
-        var vaildIds = idsArray.every(function checkInteger(id) { return Number.isInteger(parseInt(id));});
-        var vaildQs = qsArray.every(function checkInteger(quantity) { return Number.isInteger(parseInt(quantity));});
+        var validIds = idsArray.every(function checkInteger(id) { return Number.isInteger(parseInt(id));});
+        var validQs = qsArray.every(function checkInteger(quantity) { return Number.isInteger(parseInt(quantity));});
         var validTreatmentCenter = Number.isInteger(parseInt(treatmentCenter));
-        if(idsArray.length == qsArray.length && vaildIds && vaildQs && validTreatmentCenter)
+        if(idsArray.length == qsArray.length && validIds && validQs && validTreatmentCenter)
         {
             var treatmentCenterMedicines = [];
             var missingMedicines = [];
@@ -2804,7 +2804,66 @@ app.get('/doctor/selectpharmacies', function(req, res) {
 });
 
 app.get('/doctor/shoppinglist', function(req, res) {
-    res.send({message: 'success'});
+    if(req.param('ids') && req.param('qs') && req.param('t'))
+    {
+        var idsArray = req.param('ids').split('-');
+        var qsArray = req.param('qs').split('-');
+        var medicinePharmacyIds =[];
+        var treatmentCenter = req.param('t');
+
+        var validIds = idsArray.every(function checkInteger(id) { return Number.isInteger(parseInt(id));});
+        var validQs = qsArray.every(function checkInteger(quantity) { return Number.isInteger(parseInt(quantity));});
+        var validTreatmentCenter = Number.isInteger(parseInt(treatmentCenter));
+        var validmedicinePharmacyIds = true;
+        if(req.param('p')) {
+            medicinePharmacyIds = req.param('p').split('-');
+            validmedicinePharmacyIds = medicinePharmacyIds.every(function checkInteger(record) { return Number.isInteger(parseInt(record.split('_')[0])) && Number.isInteger(parseInt(record.split('_')[1]));});
+        }
+        var query = "SELECT * FROM DASH5082.USER  WHERE ID =" + parseInt(treatmentCenter) + " AND TYPE='TREATMENT CENTER'";
+        var treatmentCenterDetails = dbQuerySync(query);
+        if(idsArray.length == qsArray.length && validIds && validQs && validTreatmentCenter && validmedicinePharmacyIds) {
+            var medicines = [];
+            var treatmentCenterMedicines = [];
+            var pharmacyDetails = [];
+            for (var i = 0; i < idsArray.length; i++) {
+                var query = "SELECT * FROM DASH5082.MEDICINE  WHERE ID =" + parseInt(idsArray[i]); 
+                var medicine = dbQuerySync(query);
+                var obj = {}
+                obj['quantity'] = qsArray[i];
+                obj['medicine'] = medicine[0];
+                medicines.push(obj);
+                var query = "SELECT M.GENERIC_NAME, M.BRAND_NAME, M.FORM, M.STRENGTH, M.STRENGTH_UNIT, M.MANUFACTURER, SL.PRICE_PER_PACK, SL.EXPIRY_DATE, SL.PACK_SIZE, SL.LAST_UPDATE FROM USER U JOIN STOCK_LIST SL ON U.ID = SL.PHARMACY_ID JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE U.ID =" + treatmentCenter + " AND M.ID =" + parseInt(idsArray[i]) + " AND SL.AVAILABLE_STOCK >=" + qsArray[i]; 
+                var treatmentMedicine = dbQuerySync(query);
+                if(treatmentMedicine.length != 0) {
+                    var obj = {}
+                    obj['quantity'] = qsArray[i];
+                    obj['medicine'] = treatmentMedicine[0];
+                    treatmentCenterMedicines.push(obj);   
+                }
+            }
+            for (var i = 0; i < medicinePharmacyIds.length; i++) {
+                var medicineId = medicinePharmacyIds[i].split('_')[0];
+                var pharmacyId = medicinePharmacyIds[i].split('_')[1];
+                var query = "SELECT M.GENERIC_NAME, M.BRAND_NAME, M.FORM, M.STRENGTH, M.STRENGTH_UNIT, M.MANUFACTURER, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, SL.PRICE_PER_PACK, SL.EXPIRY_DATE, SL.PACK_SIZE, SL.LAST_UPDATE FROM USER U JOIN STOCK_LIST SL ON U.ID = SL.PHARMACY_ID JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE U.ID =" + pharmacyId + " AND M.ID =" + medicineId;
+                var pharmacy = dbQuerySync(query);
+                if(pharmacy.length != 0) {
+                    var obj = {};
+                    obj['details'] = pharmacy[0];
+                    pharmacyDetails.push(obj);   
+                }
+            }
+            var base = req.protocol + '://' + req.get('host');
+            res.render('doctor/shopping_list',{base:base, medicines:medicines, treatmentCenterDetails: treatmentCenterDetails[0], treatmentCenterMedicines: treatmentCenterMedicines, pharmacyDetails: pharmacyDetails});  
+        }
+        else
+        {
+            res.send("404 Not Found");
+        }
+    }
+    else 
+    {
+        res.send("404 Not Found");
+    }    
 });
 
 app.get('/doctor/getsearchresults', checkSignIn, function(req, res){
@@ -2812,9 +2871,9 @@ app.get('/doctor/getsearchresults', checkSignIn, function(req, res){
     {
         var idsArray = req.param('ids').split('-');
         var qsArray = req.param('qs').split('-');
-        var vaildIds = idsArray.every(function checkInteger(id) { return Number.isInteger(parseInt(id));});
-        var vaildQs = qsArray.every(function checkInteger(quantity) { return Number.isInteger(parseInt(quantity));});
-        if(idsArray.length == qsArray.length && vaildIds && vaildQs)
+        var validIds = idsArray.every(function checkInteger(id) { return Number.isInteger(parseInt(id));});
+        var validQs = qsArray.every(function checkInteger(quantity) { return Number.isInteger(parseInt(quantity));});
+        if(idsArray.length == qsArray.length && validIds && validQs)
         {
             var medicines = [];
             for (var i = 0; i < idsArray.length; i++) {
