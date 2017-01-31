@@ -2755,11 +2755,56 @@ app.get('/doctor/selectpharmacies', function(req, res) {
         var vaildIds = idsArray.every(function checkInteger(id) { return Number.isInteger(parseInt(id));});
         var vaildQs = qsArray.every(function checkInteger(quantity) { return Number.isInteger(parseInt(quantity));});
         var validTreatmentCenter = Number.isInteger(parseInt(treatmentCenter));
+        if(idsArray.length == qsArray.length && vaildIds && vaildQs && validTreatmentCenter)
+        {
+            var treatmentCenterMedicines = [];
+            var missingMedicines = [];
+            var medicines = [];
+            for (var i = 0; i < idsArray.length; i++) {
+                var query = "SELECT * FROM DASH5082.MEDICINE  WHERE ID =" + parseInt(idsArray[i]); 
+                var medicine = dbQuerySync(query);
+                var obj = {}
+                obj['quantity'] = qsArray[i];
+                obj['medicine'] = medicine[0];
+                medicines.push(obj);
+                var query = "SELECT M.GENERIC_NAME, M.BRAND_NAME, M.FORM, M.STRENGTH, M.STRENGTH_UNIT, M.MANUFACTURER, SL.LAST_UPDATE FROM USER U JOIN STOCK_LIST SL ON U.ID = SL.PHARMACY_ID JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE U.ID =" + treatmentCenter + " AND M.ID =" + parseInt(idsArray[i]) + " AND SL.AVAILABLE_STOCK >=" + qsArray[i]; 
+                var treatmentMedicine = dbQuerySync(query);
+                if(treatmentMedicine.length != 0) {
+                    var obj = {}
+                    obj['quantity'] = qsArray[i];
+                    obj['medicine'] = treatmentMedicine[0];
+                    treatmentCenterMedicines.push(obj);   
+                }
+                else {
+                    var obj = {};
+                
+                    obj['quantity'] = qsArray[i];
+                    obj['medicine'] = medicine[0];
+                    var query = "SELECT U.ID AS ID, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, S.LAST_UPDATE FROM DASH5082.MEDICINE M JOIN STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE S.APPROVAL ='1' AND M.ID =" + parseInt(idsArray[i]) + " AND S.AVAILABLE_STOCK >=" + qsArray[i] + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)"; 
+                    var pharmacies = dbQuerySync(query);
+                    if(pharmacies.length > 0)
+                    {
+                        obj['pharmacies'] = pharmacies;
+                    }
+                    missingMedicines.push(obj);
+                }
+            }
+            var base = req.protocol + '://' + req.get('host');
+            res.render('doctor/select_pharmacies',{base:base, medicines:medicines, treatmentCenterMedicines: treatmentCenterMedicines, missingMedicines: missingMedicines});
+        }
+        else 
+        {
+            res.send("404 Not Found");
+        }
     }
     else
     {
         res.send("404 Not Found");
     }
+});
+
+app.get('/doctor/shoppinglist', function(req, res) {
+    res.send({message: 'success'});
 });
 
 app.get('/doctor/getsearchresults', checkSignIn, function(req, res){

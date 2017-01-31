@@ -1283,6 +1283,7 @@ regimen-dist {
 .btn-gray{background-color: lightgray;}
 .btn-gray:hover{background-color: darkgray;}
 .word-wrapping{ word-wrap: break-word; }
+.mg-top-10{ margin-top: 10px; }
 .mg-top-20{ margin-top: 20px; }
 .mg-btm-5{ margin-bottom: 5px; }
 .mg-btm-10{ margin-bottom: 10px; }
@@ -1371,7 +1372,7 @@ input[type=number]::-webkit-inner-spin-button {
     text-align: center;
     margin: 30px;
     font-weight: 900;
-    font-size: x-large;
+    font-size: large;
 }
 
 td.highlight {
