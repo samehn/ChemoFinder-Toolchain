@@ -15,6 +15,7 @@
     "debug": "~2.2.0",
     "ejs": "2.4.x",
     "errorhandler": "1.4.x",
+    "exceljs": "^0.2.39",
     "express": "4.13.x",
     "express-fileupload": "0.0.5",
     "express-session": "^1.14.2",

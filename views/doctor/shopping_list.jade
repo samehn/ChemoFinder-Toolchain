@@ -135,22 +135,22 @@ block content
                   thead
                     tr.tr_search
                       th.th_search(style="text-align: center;", valign="top", colspan="12")
-                        h5.medicine-title #{pharmacyDetails[i]['details'].GENERIC_NAME} #{pharmacyDetails[i]['details'].BRAND_NAME} #{pharmacyDetails[i]['details'].FORM} #{pharmacyDetails[i]['details'].STRENGTH} #{pharmacyDetails[i]['details'].STRENGTH_UNIT} #{pharmacyDetails[i]['details'].MANUFACTURER}
-                    tr.tr_search
-                      th.th_search Name
-                      th.th_search Phone
-                      th.th_search Email
-                      th.th_search Street
-                      th.th_search City
-                      th.th_search State
-                      th.th_search ZIP
-                      th.th_search Open Form
-                      th.th_search Open To
-                      th.th_search Expiry Date
-                      th.th_search Pack Size
-                      th.th_search Price/Pack    
+                        h5.medicine-title #{pharmacyDetails[i]['details'].GENERIC_NAME} #{pharmacyDetails[i]['details'].BRAND_NAME} #{pharmacyDetails[i]['details'].FORM} #{pharmacyDetails[i]['details'].STRENGTH} #{pharmacyDetails[i]['details'].STRENGTH_UNIT} #{pharmacyDetails[i]['details'].MANUFACTURER}    
                    tbody
-                    tr.tr_search.table-result-search
+                    tr.tr_search_row
+                      td.td_search.td_bold Name
+                      td.td_search.td_bold Phone
+                      td.td_search.td_bold Email
+                      td.td_search.td_bold Street
+                      td.td_search.td_bold City
+                      td.td_search.td_bold State
+                      td.td_search.td_bold ZIP
+                      td.td_search.td_bold Open Form
+                      td.td_search.td_bold Open To
+                      td.td_search.td_bold Expiry Date
+                      td.td_search.td_bold Pack Size
+                      td.td_search.td_bold Price/Pack
+                    tr.tr_search_row.table-result-search
                       td.td_search #{pharmacyDetails[i]['details'].NAME}
                       td.td_search #{pharmacyDetails[i]['details'].PHONE_NUMBER}
                       td.td_search #{pharmacyDetails[i]['details'].EMAIL}

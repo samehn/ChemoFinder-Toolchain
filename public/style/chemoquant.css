@@ -1283,6 +1283,7 @@ regimen-dist {
 .btn-gray{background-color: lightgray;}
 .btn-gray:hover{background-color: darkgray;}
 .word-wrapping{ word-wrap: break-word; }
+.td_bold{ font-weight: bold; }
 .mg-left-10{ margin-left: 10px }
 .mg-top-10{ margin-top: 10px; }
 .mg-top-20{ margin-top: 20px; }
@@ -1388,7 +1389,7 @@ td.highlight {
     visibility: hidden;
     display:block;
   }
-
+  thead {display: table-header-group;}
   .dataTable, .medicine-title,.welcome__branding,.page__subtitle,.div_search,.table-title 
   {
     visibility: visible;

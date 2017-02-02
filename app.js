@@ -19,6 +19,7 @@ var hbs = require('nodemailer-express-handlebars');
 var dateFormat = require('dateformat');
 var RandExp = require('randexp');
 var fileUpload = require('express-fileupload');
+var Excel = require("exceljs");
 if(typeof require !== 'undefined') XLSX = require('xlsx');
 
 
@@ -1775,16 +1776,71 @@ console.log(err);
 });
 
 app.get('/pharmacy/downloadlaststock', checkSignIn, function(req, res){
-  var path = '/public/uploads/stocks/stock_list_' + req.session.user_id + '.xlsx';
-  var file = __dirname + path;
-  if (fs.existsSync('.' + path)) {
-    res.download(file); // Set disposition and send it.
-  }
-  else{
-    req.session.format_error = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button> You have no previous stocks to be downloaded </div>';
-    res.redirect('/pharmacy');
-  }
-  
+
+    // create workbook by api.
+    var workbook = new Excel.Workbook();
+
+    // must create one more sheet.
+    var worksheet = workbook.addWorksheet("Sheet1");
+    
+    worksheet.views = [
+        {zoomScale:66}
+    ];
+    // Add a row by contiguous Array (assign to columns A, B & C)
+    worksheet.addRow(['ID', 'Generic Name', 'Form', 'Strength', 'Strength unit', 'Brand name', 'Manufacturer', 'Batch Number', 'Expiry Date (dd-mm-yyyy)', 'Current Stringent Regulatory Authority (SRA) Approvals', 'Pack Size', 'Price per Pack', 'Available Stock (Packs)', 'Average Monthly Consumption (AMC) in Packs']);
+    
+    var str = "ABCDEFGHIJKLMN";
+    for(var i=0; i<str.length; i++)
+    {
+        var char = str.charAt(i);
+        worksheet.getCell(char + '1').fill = {
+            type: 'pattern',
+            pattern:'solid',
+            // fgColor:{argb:'0001'},
+            fgColor:{argb:'FF203764'}
+        };
+        // for the wannabe graphic designers out there
+        worksheet.getCell(char + '1').font = {
+            name: 'Arial',
+            color: { argb: 'FFFFFFFF' },
+            // family: 4,
+            size: 10,
+            bold: true
+        };
+        worksheet.getCell(char + '1').alignment = { wrapText: true }; 
+        var dobCol = worksheet.getColumn(char);
+        if(char == 'B' || char == 'E' || char == 'F'|| char == 'I'|| char == 'J'|| char == 'N') {
+            dobCol.width = 30; 
+        }
+        else {
+            dobCol.width = 20;
+        }       
+    }
+    var query = "SELECT *, SL.ID AS STOCK_LIST_ID FROM STOCK_LIST SL JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE SL.PHARMACY_ID =" + req.session.user_id;
+
+    var stock_list = dbQuerySync(query);
+    
+    if(stock_list.length > 0) {
+        for (var i = 0; i < stock_list.length; i++) {
+            worksheet.addRow([stock_list[i].ID, stock_list[i].GENERIC_NAME, stock_list[i].FORM, stock_list[i].STRENGTH, stock_list[i].STRENGTH_UNIT, stock_list[i].BRAND_NAME, stock_list[i].MANUFACTURER, stock_list[i].BATCH_NUMBER, stock_list[i].EXPIRY_DATE, stock_list[i].SRA, stock_list[i].PACK_SIZE, stock_list[i].PRICE_PER_PACK, stock_list[i].AVAILABLE_STOCK, stock_list[i].AVG_MONTHLY_CONSUMPTION]);
+        }
+        var path = './public/uploads/stocks/stock_list_' + req.session.user_id + '_' + Date.now() + '.xlsx';
+        if(fs.existsSync(path)) {
+            fs.unlinkSync(path);
+        }
+        // you can create xlsx file now.
+        workbook.xlsx.writeFile(path).then(function() {
+            console.log("xlsx file is written.");
+            res.download(path, 'stock_list.xlsx', function(err){
+              //CHECK FOR ERROR
+              fs.unlink(path);
+            });
+        });
+    }    
+    else {
+        req.session.format_error = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button> You have no previous stocks to be downloaded </div>';
+        res.redirect('/pharmacy');
+    }
 });
 
 app.get('/pharmacy/downloadtemplate', checkSignIn, function(req, res){
@@ -2706,7 +2762,7 @@ app.get('/doctor/choosetreatmentcenter', checkSignIn, function(req, res){
     }
 });
 
-app.post('/doctor/gettreatmentcentermedicines', function(req, res) {
+app.post('/doctor/gettreatmentcentermedicines', checkSignIn, function(req, res) {
     if(req.param('ids') && req.param('qs'))
     {
         var idsArray = req.param('ids').split('-');
@@ -2746,7 +2802,7 @@ app.post('/doctor/gettreatmentcentermedicines', function(req, res) {
     }
 });
 
-app.get('/doctor/selectpharmacies', function(req, res) {
+app.get('/doctor/selectpharmacies', checkSignIn, function(req, res) {
     if(req.param('ids') && req.param('qs') && req.param('t'))
     {
         var idsArray = req.param('ids').split('-');
@@ -2780,7 +2836,7 @@ app.get('/doctor/selectpharmacies', function(req, res) {
                 
                     obj['quantity'] = qsArray[i];
                     obj['medicine'] = medicine[0];
-                    var query = "SELECT U.ID AS ID, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, S.LAST_UPDATE FROM DASH5082.MEDICINE M JOIN STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE S.APPROVAL ='1' AND M.ID =" + parseInt(idsArray[i]) + " AND S.AVAILABLE_STOCK >=" + qsArray[i] + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)"; 
+                    var query = "SELECT U.ID AS ID, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, S.LAST_UPDATE FROM DASH5082.MEDICINE M JOIN STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE U.TYPE='PHARMACY' AND S.APPROVAL ='1' AND M.ID =" + parseInt(idsArray[i]) + " AND S.AVAILABLE_STOCK >=" + qsArray[i] + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)"; 
                     var pharmacies = dbQuerySync(query);
                     if(pharmacies.length > 0)
                     {
@@ -2803,7 +2859,7 @@ app.get('/doctor/selectpharmacies', function(req, res) {
     }
 });
 
-app.get('/doctor/shoppinglist', function(req, res) {
+app.get('/doctor/shoppinglist', checkSignIn, function(req, res) {
     if(req.param('ids') && req.param('qs') && req.param('t'))
     {
         var idsArray = req.param('ids').split('-');
