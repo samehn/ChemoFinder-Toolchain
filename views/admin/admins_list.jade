@@ -28,18 +28,60 @@ block content
         tr
           th Username
           th Email
+          th Type
+          -  if(admin_type) {
+              th Change
+              th Action
+          -  }
       tbody
-        if admins && admins.length > 0
+        if admins && admins.length > 1
           - for( var i = 0, len = admins.length; i < len; i++ ) {
-          tr
-            td #{admins[i].USERNAME} 
-            td #{admins[i].EMAIL}
+          if admins[i].ID != admin_id  
+            tr
+              td #{admins[i].USERNAME} 
+              td #{admins[i].EMAIL}
+              if admins[i].TYPE
+                td Super
+              else
+                td Normal
+              -  if(admin_type) {
+                  td
+                    button.form-control.btn.btn-primary(data-toggle='modal', data-target='#changeAdminType', onclick='changeType('+admins[i].ID+')') Change Type
+                  td
+                    if admins[i].ACTIVE == 1
+                      button.form-control.btn.btn-gray(onclick='suspend('+admins[i].ID+')') Suspend
+                    else
+                      button.form-control.btn.btn-success(onclick='activate('+admins[i].ID+')') Activate
+              -  }      
           - }
+block modals
+  #changeAdminType.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          h4#myModalLabel.modal-title Change Admin Type
+        // /.modal-header
+        .modal-body
+          form(role='form')
+            #typeAdminForm.form-group
+              .input-group
+                select#typeAdmin.form-control(name='type')
+                  option.form-control(value='') Select Admin Type
+                  option.form-control(value='0') Normal
+                  option.form-control(value='1') Super
+                span.input-group-addon
+                  i.glyphicon.glyphicon-briefcase
+              // /.input-group
+            // /.form-group      
+        // /.modal-body
+        .modal-footer
+          button#change-type-btn.form-control.btn.btn-primary Change
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal          
 block scripts
   script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js')
-  script.
-    $(function() {
-        $('#adminsTable').DataTable({
-          "scrollX": true
-        });
-    });  
+  script(type='text/javascript', src=base+'/scripts/admin/admins_list.js')  
+  

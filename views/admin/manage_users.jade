@@ -27,8 +27,9 @@ block content
   .row
     .col-xs-6.col-md-2 
       button.form-control.btn.btn-primary(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewUser') Add New User
-    .col-xs-6.col-md-2
-      button.form-control.btn.btn-primary(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewAdmin') Add New Admin
+    if admin_type  
+      .col-xs-6.col-md-2
+        button.form-control.btn.btn-primary(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewAdmin') Add New Admin
   hr  
   .welcome__home-buttons
     h4.table-title New Account Requests     
@@ -98,7 +99,7 @@ block modals
             #typeUserForm.form-group
               .input-group
                 select#typeUser.form-control(name='type')
-                  option.form-control(value='') Select Your Type
+                  option.form-control(value='') Select User Type
                   option.form-control(value='DOCTOR') Doctor
                   option.form-control(value='NAVIGATOR') Navigator
                   option.form-control(value='PHARMACY') Pharmacy
@@ -183,44 +184,55 @@ block modals
       // /.modal-content
     // /.modal-dialog
   // /.modal
-  #addNewAdmin.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
-    .modal-dialog
-      .modal-content
-        .modal-header
-          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
-          h4#myModalLabel.modal-title Add New Admin
-        // /.modal-header
-        .modal-body
-          form(role='form')
-            #nameAdminForm.form-group
-              .input-group
-                input#nameAdmin.form-control(name='name', type='text', placeholder='Name')
-                span.input-group-addon
-                  i.glyphicon.glyphicon-user
-            // /.form-group
-            #emailAdminForm.form-group
-              .input-group
-                input#emailAdmin.form-control(name='email', type='text', placeholder='Email')
-                span.input-group-addon
-                  i.glyphicon.glyphicon-envelope
-            // /.form-group
-            .row
-              .col-xs-8
-                #passwordAdminForm.form-group
-                  .input-group
-                    input#passwordAdmin.form-control(name='password', type='password', placeholder='Password')
-                    span.input-group-addon
-                      i.glyphicon.glyphicon-lock
-                  // /.input-group
-                // /.form-group
-              .col-xs-4
-                 button.form-control.btn.btn-primary(type='button' onclick='generate_password(this)') Generate Password
-        .modal-footer
-          button.form-control.btn.btn-primary(onclick='add_new_admin();') Submit
-        // /.modal-footer
-      // /.modal-content
-    // /.modal-dialog
-  // /.modal
+  if admin_type
+    #addNewAdmin.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+      .modal-dialog
+        .modal-content
+          .modal-header
+            button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+            h4#myModalLabel.modal-title Add New Admin
+          // /.modal-header
+          .modal-body
+            form(role='form')
+              #nameAdminForm.form-group
+                .input-group
+                  input#nameAdmin.form-control(name='name', type='text', placeholder='Name')
+                  span.input-group-addon
+                    i.glyphicon.glyphicon-user
+              // /.form-group
+              #emailAdminForm.form-group
+                .input-group
+                  input#emailAdmin.form-control(name='email', type='text', placeholder='Email')
+                  span.input-group-addon
+                    i.glyphicon.glyphicon-envelope
+              // /.form-group
+              #typeAdminForm.form-group
+                .input-group
+                  select#typeAdmin.form-control(name='type')
+                    option.form-control(value='') Select Admin Type
+                    option.form-control(value='0') Normal
+                    option.form-control(value='1') Super
+                  span.input-group-addon
+                    i.glyphicon.glyphicon-briefcase
+                // /.input-group
+              // /.form-group
+              .row
+                .col-xs-8
+                  #passwordAdminForm.form-group
+                    .input-group
+                      input#passwordAdmin.form-control(name='password', type='password', placeholder='Password')
+                      span.input-group-addon
+                        i.glyphicon.glyphicon-lock
+                    // /.input-group
+                  // /.form-group
+                .col-xs-4
+                   button.form-control.btn.btn-primary(type='button' onclick='generate_password(this)') Generate Password
+          .modal-footer
+            button.form-control.btn.btn-primary(onclick='add_new_admin();') Submit
+          // /.modal-footer
+        // /.modal-content
+      // /.modal-dialog
+    // /.modal
   #history.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
     .modal-dialog
       .modal-content

@@ -24,6 +24,10 @@ $(document).ready(function(){
 	});
 });
 
+$(document).click(function() {
+    $('.error-form').remove();
+});
+
 function approve(id) {
 	if (confirm("Are you sure you want to approve this user ?") == true) {
         var data_array={};
@@ -256,12 +260,13 @@ function add_new_admin() {
     var name = $('#nameAdmin');
     var email = $('#emailAdmin');
     var password = $('#passwordAdmin');
-
+    var type = $('#typeAdmin');
    
     user_array[name.attr('name')] = name.val();
     user_array[email.attr('name')] = email.val();
     user_array[password.attr('name')] = password.val();
-  
+    user_array[type.attr('name')] = type.val();
+
     console.log(user_array);
      $.ajax({
         type: "post",
@@ -294,6 +299,12 @@ function add_new_admin() {
                {
                   var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.name_error + '</div>';
                   $(error_message).insertBefore($('#nameAdminForm'));
+               }
+
+               if(data.type_error)
+               {
+                  var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.type_error + '</div>';
+                  $(error_message).insertBefore($('#typeAdminForm'));
                }
             }
         }

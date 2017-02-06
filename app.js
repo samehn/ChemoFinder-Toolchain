@@ -136,11 +136,20 @@ require('./routes/home')(app);
 //     console.log('second passed'); 
 // }, 1000);
 
-app.get('/admin/dashboard', function(req, res){
-    var base = req.protocol + '://' + req.get('host');
-    res.render('admin/dashboard', { base: base });
-});
+// app.get('/admin/dashboard', checkAdminSignIn, function(req, res){
+//     var base = req.protocol + '://' + req.get('host');
+//     res.render('admin/dashboard', { base: base });
+// });
 
+function checkAdminSignIn(req, res, next){
+
+    if(req.session.admin_id){
+        next();     //If session exists, proceed to page 
+    } else {
+        var err = new Error("Not logged in!");
+        next(err);  //Error, trying to access unauthorized page!
+    }
+}
 
 function validateWithRegex(regex, email) {
     return regex.test(email);
@@ -308,7 +317,7 @@ app.post('/user/signup', function(req, res){
     });              
 });
 
-app.post('/admin/addnewuser', function(req, res){
+app.post('/admin/addnewuser', checkAdminSignIn, function(req, res){
     var jsonObj = {};
     var valid = true;
 
@@ -459,7 +468,7 @@ app.post('/admin/addnewuser', function(req, res){
     });              
 });
 
-app.post('/admin/updatemedicine', function(req, res){
+app.post('/admin/updatemedicine', checkAdminSignIn, function(req, res){
     var jsonObj = {};
     var valid = true;
 
@@ -563,7 +572,7 @@ app.post('/admin/updatemedicine', function(req, res){
     });              
 });
 
-app.post('/admin/addnewmedicine', function(req, res){
+app.post('/admin/addnewmedicine', checkAdminSignIn, function(req, res){
     var jsonObj = {};
     var valid = true;
 
@@ -660,7 +669,7 @@ app.post('/admin/addnewmedicine', function(req, res){
     });              
 });
 
-app.post('/admin/addnewadmin', function(req, res){
+app.post('/admin/addnewadmin', checkAdminSignIn, function(req, res){
     var jsonObj = {};
     var valid = true;
 
@@ -698,6 +707,12 @@ app.post('/admin/addnewadmin', function(req, res){
         valid = false;
     }
 
+    //validate type
+    if(!(parseInt(req.body.type) == 1 || parseInt(req.body.type) == 0)) {
+        jsonObj['type_error'] = "This is not a valid type";
+        valid = false;
+    }
+
     var query = "SELECT * from DASH5082.ADMIN WHERE EMAIL ='" + req.body.email + "';";           
         
     var result = dbQuery(query, function(result) {
@@ -731,7 +746,7 @@ app.post('/admin/addnewadmin', function(req, res){
                             // enter new doctor to the db
                             
                             
-                            var query = "INSERT INTO DASH5082.ADMIN (EMAIL, PASSWORD, USERNAME) VALUES ('" + req.body.email + "','" + hash + "','" + req.body.name + "');";
+                            var query = "INSERT INTO DASH5082.ADMIN (EMAIL, PASSWORD, USERNAME, TYPE) VALUES ('" + req.body.email + "','" + hash + "','" + req.body.name + "', " + req.body.type + ");";
                             
                             dbQuery(query, function(newResult) {
                                 //Send Confirmation Email
@@ -841,8 +856,15 @@ app.post('/admin/login', function(req, res){
                     // res == true
                     if(cmp)
                     {
-                        req.session.user = result[0];
-                        res.send({message: "success"});
+                        if(result[0].ACTIVE == '0')
+                        {
+                            res.send({message: "failed", login_error: "Your account is suspended"});
+                        }
+                        else {
+                            req.session.admin_id = result[0].ID;
+                            req.session.admin_type = result[0].TYPE;
+                            res.send({message: "success"});    
+                        }
                     }
                     else
                     {
@@ -1219,7 +1241,7 @@ app.post('/admin/resetpassword', function(req, res){
     });
 });
 
-app.get('/admin/manage_users', function(req, res) {
+app.get('/admin/manage_users', checkAdminSignIn, function(req, res) {
     var query = "SELECT ID, EMAIL, NAME, TYPE from DASH5082.USER WHERE APPROVE='0'";
     dbQuery(query, function(result) {
         var query = "SELECT ID, EMAIL, NAME, TYPE, ACTIVE, SUSPENSION_REASON from DASH5082.USER WHERE APPROVE='1'";
@@ -1228,13 +1250,13 @@ app.get('/admin/manage_users', function(req, res) {
             var base = req.protocol + '://' + req.get('host');
             // redirect with data
             //res.send({data: result});
-            res.render('admin/manage_users', {base: base, non_approved_users: result, approved_users: result2});  
+            res.render('admin/manage_users', {base: base, non_approved_users: result, approved_users: result2, admin_type: req.session.admin_type});  
         });
         
     });
 });
 
-app.post('/admin/get_user_history', function(req, res) {
+app.post('/admin/get_user_history', checkAdminSignIn, function(req, res) {
     var query = "SELECT * from DASH5082.USER_SUSPENSION WHERE USER_ID = " + req.body.id ;
     dbQuery(query, function(result) {
         if(result.length > 0){
@@ -1246,7 +1268,7 @@ app.post('/admin/get_user_history', function(req, res) {
     });
 });
 
-app.get('/admin/manage_medicines', function(req, res) {
+app.get('/admin/manage_medicines', checkAdminSignIn, function(req, res) {
 
     var query = "SELECT * from DASH5082.MEDICINE WHERE SRA IS NOT NULL";
     dbQuery(query, function(result) {
@@ -1278,7 +1300,7 @@ app.get('/admin/manage_medicines', function(req, res) {
     });
 });
 
-app.get('/admin/admins_list', function(req, res) {
+app.get('/admin/admins_list', checkAdminSignIn, function(req, res) {
 
     var query = "SELECT * from DASH5082.ADMIN";
     dbQuery(query, function(result) {
@@ -1286,15 +1308,15 @@ app.get('/admin/admins_list', function(req, res) {
         var base = req.protocol + '://' + req.get('host');
         // redirect with data
         //res.send({data: result});
-        var data = {base: base, admins: result};  
+        var data = {base: base, admins: result, admin_type: req.session.admin_type, admin_id: req.session.admin_id};  
         res.render('admin/admins_list', data);
     });
 });
 
-app.post('/admin/approveuser', function(req, res){
-    var query = "UPDATE USER SET APPROVE='1' WHERE ID=" + req.body.id + ";";
+app.post('/admin/approveuser', checkAdminSignIn, function(req, res){
+    var query = "UPDATE DASH5082.USER SET APPROVE='1' WHERE ID=" + req.body.id + ";";
     dbQuery(query, function(newResult) {
-        var query = "SELECT EMAIL FROM USER WHERE ID=" + req.body.id + ";";
+        var query = "SELECT EMAIL FROM DASH5082.USER WHERE ID=" + req.body.id + ";";
         dbQuery(query, function(result) 
         {
             if(result.length > 0)
@@ -1322,7 +1344,39 @@ app.post('/admin/approveuser', function(req, res){
     });
 });
 
-app.post('/admin/suspenduser', function(req, res){
+app.post('/admin/activateadmin', checkAdminSignIn, function(req, res){
+    var id = req.body.id;
+    var active = req.body.active;
+
+    if(Number.isInteger(parseInt(id)) && (active == 0 || active == 1)) {
+        var query = "UPDATE DASH5082.ADMIN SET ACTIVE='" + active + "' WHERE ID=" + id + ";";
+        dbQuery(query, function(result) {
+        
+                res.send({message: "success"});  
+        });
+    }
+    else {
+        res.send({message: "failed", id:id, active:active}); 
+    }
+});
+
+app.post('/admin/changetype', checkAdminSignIn, function(req, res){
+    var id = req.body.id;
+    var type = req.body.type;
+
+    if(Number.isInteger(parseInt(id)) && (type == 0 || type == 1)) {
+        var query = "UPDATE DASH5082.ADMIN SET TYPE='" + type + "' WHERE ID=" + id + ";";
+        dbQuery(query, function(result) {
+        
+                res.send({message: "success"});  
+        });
+    }
+    else {
+        res.send({message: "failed"}); 
+    }
+});
+
+app.post('/admin/suspenduser', checkAdminSignIn, function(req, res){
 
     var query = "UPDATE USER SET ACTIVE='0' WHERE ID=" + req.body.id + ";";
     dbQuery(query, function(newResult) {
@@ -1360,7 +1414,7 @@ app.post('/admin/suspenduser', function(req, res){
 });
 
 
-app.post('/admin/activateuser', function(req, res){
+app.post('/admin/activateuser', checkAdminSignIn, function(req, res){
 
     var query = "UPDATE USER SET ACTIVE='1' WHERE ID=" + req.body.id + ";";
     dbQuery(query, function(newResult) {
@@ -1393,7 +1447,7 @@ app.post('/admin/activateuser', function(req, res){
     });
 });
 
-app.post('/admin/deleteuser', function(req, res){
+app.post('/admin/deleteuser', checkAdminSignIn, function(req, res){
 
     var query = "DELETE FROM USER WHERE ID=" + req.body.id + ";";
     dbQuery(query, function(newResult) {
@@ -1675,7 +1729,7 @@ function parsingApprovedMedicines(req, callback) {
 }
 
 
-app.post('/admin/uploadmedicines', function(req, res) {
+app.post('/admin/uploadmedicines', checkAdminSignIn, function(req, res) {
     var sampleFile;
  
     if (!req.files) {
@@ -2212,7 +2266,7 @@ app.post('/pharmacy/deletemedicine', function(req, res){
     }                  
 });
 
-app.post('/admin/deletemedicine', function(req, res){
+app.post('/admin/deletemedicine', checkAdminSignIn, function(req, res){
     var jsonObj = {};
     var valid = true;
 
@@ -2252,7 +2306,7 @@ app.post('/admin/deletemedicine', function(req, res){
     }                  
 });
 
-app.post('/admin/uploadstocklist', function(req, res) {
+app.post('/admin/uploadstocklist', checkAdminSignIn, function(req, res) {
     var sampleFile;
  
     if (!req.files) {
@@ -3538,6 +3592,12 @@ app.use('/protected_page', function(err, req, res, next){
 console.log(err);
     //User should be authenticated! Redirect him to log in.
     res.redirect('/login');
+});
+
+app.use('/admin/*', function(err, req, res, next){
+console.log(err);
+    //User should be authenticated! Redirect him to log in.
+    res.redirect('/admin/login');
 });
 
 http.createServer(app).listen(app.get('port'),
