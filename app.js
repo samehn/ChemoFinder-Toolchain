@@ -9,7 +9,7 @@ var cookieParser = require('cookie-parser');
 var routes = require('./routes');
 var http = require('http');
 var path = require('path');
-var ibmdb = require('ibm_db');
+
 var morgan = require('morgan');
 var errorhandler = require('errorhandler');
 var bcrypt = require('bcrypt');
@@ -21,7 +21,7 @@ var RandExp = require('randexp');
 var fileUpload = require('express-fileupload');
 var Excel = require("exceljs");
 if(typeof require !== 'undefined') XLSX = require('xlsx');
-
+var db = require('./models/model');
 
 require('cf-deployment-tracker-client').track();
 
@@ -43,8 +43,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(morgan('combined'));
 
 app.use(express.static(path.join(__dirname, 'public')));
-var db2;
-var hasConnect = false;
+
 
 const saltRounds = 10;
 
@@ -71,63 +70,7 @@ var options = {
 };
 transporter.use('compile', hbs(options));
 
-if (process.env.VCAP_SERVICES) {
-    var env = JSON.parse(process.env.VCAP_SERVICES);
-    if (env['dashDB']) {
-        hasConnect = true;
-        db2 = env['dashDB'][0].credentials;
-    }
-    
-}
 
-if ( hasConnect == false ) {
-
-   db2 = {
-        db: "BLUDB",
-        hostname: "dashdb-entry-yp-dal09-10.services.dal.bluemix.net",
-        port: 50000,
-        username: "dash5082",
-        password: "XphM9lInA9M8"
-     };
-}
-
-var connString = "DRIVER={DB2};DATABASE=" + db2.db + ";UID=" + db2.username + ";PWD=" + db2.password + ";HOSTNAME=" + db2.hostname + ";port=" + db2.port;
-
-function dbQuery(query, callback) {
-    var result;
-    ibmdb.open(connString, function(err, conn) {
-        console.log(query);
-            if (err ) {
-             return "error occurred " + err.message;
-            }
-            else {
-                conn.query(query, function(err, tables, moreResultSets) {
-                    result = tables;        
-                    /*
-                        Close the connection to the database
-                        param 1: The callback function to execute on completion of close function.
-                    */
-                    // console.log(err);
-                    // console.log(result);
-                    conn.close(function(){
-                        console.log("Connection Closed");
-                        });
-                    // console.log(result);
-                    return callback(result);     
-                });
-
-            }
-        } );
-}
-
-function dbQuerySync(query) {
-    var option = { connectTimeout : 3000000 };// Connection Timeout after 40 seconds. 
-    var conn = ibmdb.openSync(connString, option);
-    var rows = conn.querySync(query);
-    // console.log(query);
-    // console.log(rows);
-    return rows;
-}
 
 
 require('./routes/home')(app);
@@ -263,7 +206,7 @@ app.post('/user/signup', function(req, res){
 
     var query = "SELECT * from DASH5082.USER WHERE EMAIL ='" + req.body.email + "';";           
         
-    var result = dbQuery(query, function(result) {
+    var result = db.dbQuery(query, function(result) {
         console.log(result);
         if(result.length != 0)
         {
@@ -288,7 +231,7 @@ app.post('/user/signup', function(req, res){
                     {
                         query = "INSERT INTO DASH5082.USER (EMAIL, PASSWORD, NAME, STREET, CITY, STATE, ZIP, TYPE, FIRST_LOGIN, ACTIVE, APPROVE) VALUES ('" + req.body.email + "','" + hash + "','" + req.body.name + "','" + req.body.street + "','" + req.body.city + "','" + req.body.state + "','" + req.body.zip + "','" + req.body.type + "', '0', '1', '0');";
                     }
-                    dbQuery(query, function(newResult) {
+                    db.dbQuery(query, function(newResult) {
                         //Send Confirmation Email
                         var link = req.protocol + '://' + req.get('host') + '/admin/manage_users';
                         var mailOptions = {
@@ -413,7 +356,7 @@ app.post('/admin/addnewuser', checkAdminSignIn, function(req, res){
 
     var query = "SELECT * from DASH5082.USER WHERE EMAIL ='" + req.body.email + "';";           
         
-    var result = dbQuery(query, function(result) {
+    var result = db.dbQuery(query, function(result) {
         console.log(result);
         if(result.length != 0)
         {
@@ -438,7 +381,7 @@ app.post('/admin/addnewuser', checkAdminSignIn, function(req, res){
                     {
                         query = "INSERT INTO DASH5082.USER (EMAIL, PASSWORD, NAME, STREET, CITY, STATE, ZIP, TYPE, FIRST_LOGIN, ACTIVE, APPROVE) VALUES ('" + req.body.email + "','" + hash + "','" + req.body.name + "','" + req.body.street + "','" + req.body.city + "','" + req.body.state + "','" + req.body.zip + "','" + req.body.type + "', '1', '1', '1');";
                     }
-                    dbQuery(query, function(newResult) {
+                    db.dbQuery(query, function(newResult) {
                         //Send Confirmation Email
                         var link = req.protocol + '://' + req.get('host');
                         var mailOptions = {
@@ -542,7 +485,7 @@ app.post('/admin/updatemedicine', checkAdminSignIn, function(req, res){
 
     var query = "SELECT * from DASH5082.MEDICINE WHERE ID =" + req.body.medicine_id + ";";           
         
-    var result = dbQuery(query, function(result) {
+    var result = db.dbQuery(query, function(result) {
         console.log(result);
         if(result.length == 0)
         {
@@ -557,7 +500,7 @@ app.post('/admin/updatemedicine', checkAdminSignIn, function(req, res){
             {    
                 var query = "UPDATE DASH5082.MEDICINE SET GENERIC_NAME = '" + req.body.generic_name + "', BRAND_NAME = '" + req.body.brand_name + "', FORM = '" + req.body.form + "', STRENGTH = '" + req.body.strength + "', STRENGTH_UNIT = '" + req.body.strength_unit + "', ROUTE = '" + req.body.route + "', MANUFACTURER = '" + req.body.manufacturer + "', SRA = '" + req.body.sra + "', APPROVAL_DATE = TIMESTAMP_FORMAT(" + req.body.approval_date + ", 'DD-Month-YY'), SOURCE = '" + req.body.source + "', EXTRACT_DATE = TIMESTAMP_FORMAT(" + req.body.extract_date + ", 'DD-Month-YY') WHERE ID = " + req.body.medicine_id + ";";
                 console.log(query);
-                dbQuery(query, function(newResult) {
+                db.dbQuery(query, function(newResult) {
 
                     jsonObj['message'] = "success";
                     res.send(jsonObj);
@@ -640,7 +583,7 @@ app.post('/admin/addnewmedicine', checkAdminSignIn, function(req, res){
 
     var query = "SELECT * from DASH5082.MEDICINE WHERE GENERIC_NAME ='" + req.body.generic_name + "' AND BRAND_NAME = '" + req.body.brand_name + "' AND FORM = '" + req.body.form + "' AND STRENGTH = '" + req.body.strength + "' AND STRENGTH_UNIT = '" + req.body.strength_unit + "' AND MANUFACTURER = '" + req.body.manufacturer + "';";           
         
-    var result = dbQuery(query, function(result) {
+    var result = db.dbQuery(query, function(result) {
         console.log(result);
         if(result.length != 0)
         {
@@ -654,7 +597,7 @@ app.post('/admin/addnewmedicine', checkAdminSignIn, function(req, res){
             if(valid)
             {    
                 var query = "INSERT INTO DASH5082.MEDICINE (GENERIC_NAME, BRAND_NAME, FORM, STRENGTH, STRENGTH_UNIT, ROUTE, MANUFACTURER, SRA, APPROVAL_DATE, SOURCE, EXTRACT_DATE) VALUES ('" + req.body.generic_name + "','" + req.body.brand_name + "','" + req.body.form + "','" + req.body.strength + "','" + req.body.strength_unit + "','" + req.body.route + "','" + req.body.manufacturer + "','" + req.body.sra + "','" + req.body.approval_date + "','" + req.body.source + "','" + req.body.extract_date + "');"; 
-                dbQuery(query, function(newResult) {
+                db.dbQuery(query, function(newResult) {
 
                     jsonObj['message'] = "success";
                     res.send(jsonObj);
@@ -715,7 +658,7 @@ app.post('/admin/addnewadmin', checkAdminSignIn, function(req, res){
 
     var query = "SELECT * from DASH5082.ADMIN WHERE EMAIL ='" + req.body.email + "';";           
         
-    var result = dbQuery(query, function(result) {
+    var result = db.dbQuery(query, function(result) {
         console.log(result);
         if(result.length != 0)
         {
@@ -728,7 +671,7 @@ app.post('/admin/addnewadmin', checkAdminSignIn, function(req, res){
         {
             var query = "SELECT * from DASH5082.ADMIN WHERE USERNAME ='" + req.body.name + "';";           
         
-            var result = dbQuery(query, function(result2) {
+            var result = db.dbQuery(query, function(result2) {
                 console.log(result2);
                 if(result2.length != 0)
                 {
@@ -748,7 +691,7 @@ app.post('/admin/addnewadmin', checkAdminSignIn, function(req, res){
                             
                             var query = "INSERT INTO DASH5082.ADMIN (EMAIL, PASSWORD, USERNAME, TYPE) VALUES ('" + req.body.email + "','" + hash + "','" + req.body.name + "', " + req.body.type + ");";
                             
-                            dbQuery(query, function(newResult) {
+                            db.dbQuery(query, function(newResult) {
                                 //Send Confirmation Email
                                 var link = req.protocol + '://' + req.get('host');
                                 var mailOptions = {
@@ -789,7 +732,7 @@ app.post('/user/login', function(req, res){
     }
     else{
             var query = "SELECT * from DASH5082.USER WHERE EMAIL ='" + req.body.email + "';";
-            var result = dbQuery(query, function(result) {
+            var result = db.dbQuery(query, function(result) {
                 //console.log(result[0].ID);
 
                 if(result.length > 0)
@@ -847,7 +790,7 @@ app.post('/admin/login', function(req, res){
     else
     {
         var query = "SELECT * from DASH5082.ADMIN WHERE USERNAME ='" + req.body.email + "' OR EMAIL ='" + req.body.email + "';";
-        var result = dbQuery(query, function(result) {
+        var result = db.dbQuery(query, function(result) {
             console.log(result[0].ID);
 
             if(result.length != 0)
@@ -902,7 +845,7 @@ app.post('/user/forgotpassword', function(req, res){
     else
     {
         var query = "SELECT * from DASH5082.USER WHERE EMAIL ='" + req.body.email + "';";
-        var result = dbQuery(query, function(result) {
+        var result = db.dbQuery(query, function(result) {
             //console.log(result[0].ID);
 
             if(result.length > 0)
@@ -913,10 +856,10 @@ app.post('/user/forgotpassword', function(req, res){
 
                 //Delete old tokens if exists
                 var query = "DELETE from DASH5082.USER_FORGOT_PASSWORD WHERE USER_ID ='" + result[0].ID + "';";
-                dbQuery(query, function(result2) {
+                db.dbQuery(query, function(result2) {
                     //insert new token into the database
                     var query = "INSERT INTO DASH5082.USER_FORGOT_PASSWORD (USER_ID, TOKEN, CREATED_AT) values ('" + result[0].ID + "', '" + token + "', TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));";
-                    dbQuery(query, function(result3) {
+                    db.dbQuery(query, function(result3) {
                         res.send({message: "success"});
                         var base = req.protocol + '://' + req.get('host');
                         var link = base + '/user/resetpassword/' + token;
@@ -952,7 +895,7 @@ app.post('/admin/forgotpassword', function(req, res){
     else
     {
         var query = "SELECT * from DASH5082.ADMIN WHERE EMAIL ='" + req.body.email + "';";
-        var result = dbQuery(query, function(result) {
+        var result = db.dbQuery(query, function(result) {
             //console.log(result[0].ID);
 
             if(result.length > 0)
@@ -963,10 +906,10 @@ app.post('/admin/forgotpassword', function(req, res){
 
                 //Delete old tokens if exists
                 var query = "DELETE from DASH5082.ADMIN_FORGOT_PASSWORD WHERE ADMIN_ID ='" + result[0].ID + "';";
-                dbQuery(query, function(result2) {
+                db.dbQuery(query, function(result2) {
                     //insert new token into the database
                     var query = "INSERT INTO DASH5082.ADMIN_FORGOT_PASSWORD (ADMIN_ID, TOKEN, CREATED_AT) values ('" + result[0].ID + "', '" + token + "', TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));";
-                    dbQuery(query, function(result3) {
+                    db.dbQuery(query, function(result3) {
                         res.send({message: "success"});
                         var base = req.protocol + '://' + req.get('host');
                         var link = base + '/admin/resetpassword/' + token;
@@ -1009,7 +952,7 @@ app.get('/user/resetpassword/:token', function(req, res){
 
     // check if the token exists
     var query = "SELECT * from DASH5082.USER_FORGOT_PASSWORD WHERE TOKEN ='" + req.params.token + "';";
-    dbQuery(query, function(result) {
+    db.dbQuery(query, function(result) {
         if(result.length > 0)
         {
             // check the expiration date of the token
@@ -1050,7 +993,7 @@ app.get('/admin/resetpassword/:token', function(req, res){
 
     // check if the token exists
     var query = "SELECT * from DASH5082.ADMIN_FORGOT_PASSWORD WHERE TOKEN ='" + req.params.token + "';";
-    dbQuery(query, function(result) {
+    db.dbQuery(query, function(result) {
         if(result.length > 0)
         {
             // check the expiration date of the token
@@ -1090,7 +1033,7 @@ app.get('/admin/resetpassword/:token', function(req, res){
 app.post('/user/resetpassword', function(req, res){
     // check if the token exists
     var query = "SELECT * from DASH5082.USER_FORGOT_PASSWORD WHERE TOKEN ='" + req.body.token + "';";
-    dbQuery(query, function(result) {
+    db.dbQuery(query, function(result) {
         if(result.length > 0)
         {
             // check the expiration date of the token
@@ -1142,7 +1085,7 @@ app.post('/user/resetpassword', function(req, res){
                       // Store hash in your password DB.
                       // enter new pharmacy to the db
                       var query = "UPDATE DASH5082.USER SET PASSWORD ='" + hash + "' WHERE ID =" + result[0].USER_ID + ";";
-                      dbQuery(query, function(newResult) {
+                      db.dbQuery(query, function(newResult) {
                           console.log(newResult);
                           jsonObj['message'] = "success";
                           res.send(jsonObj);
@@ -1166,7 +1109,7 @@ app.post('/user/resetpassword', function(req, res){
 app.post('/admin/resetpassword', function(req, res){
     // check if the token exists
     var query = "SELECT * from DASH5082.ADMIN_FORGOT_PASSWORD WHERE TOKEN ='" + req.body.token + "';";
-    dbQuery(query, function(result) {
+    db.dbQuery(query, function(result) {
         if(result.length > 0)
         {
             // check the expiration date of the token
@@ -1220,7 +1163,7 @@ app.post('/admin/resetpassword', function(req, res){
                       // Store hash in your password DB.
                       // enter new pharmacy to the db
                       var query = "UPDATE DASH5082.ADMIN SET PASSWORD ='" + hash + "' WHERE ID =" + result[0].ADMIN_ID + ";";
-                      dbQuery(query, function(newResult) {
+                      db.dbQuery(query, function(newResult) {
                           console.log(newResult);
                           jsonObj['message'] = "success";
                           res.send(jsonObj);
@@ -1243,9 +1186,9 @@ app.post('/admin/resetpassword', function(req, res){
 
 app.get('/admin/manage_users', checkAdminSignIn, function(req, res) {
     var query = "SELECT ID, EMAIL, NAME, TYPE from DASH5082.USER WHERE APPROVE='0'";
-    dbQuery(query, function(result) {
+    db.dbQuery(query, function(result) {
         var query = "SELECT ID, EMAIL, NAME, TYPE, ACTIVE, SUSPENSION_REASON from DASH5082.USER WHERE APPROVE='1'";
-        dbQuery(query, function(result2) {
+        db.dbQuery(query, function(result2) {
             //console.log(result[0].ID);
             var base = req.protocol + '://' + req.get('host');
             // redirect with data
@@ -1258,7 +1201,7 @@ app.get('/admin/manage_users', checkAdminSignIn, function(req, res) {
 
 app.post('/admin/get_user_history', checkAdminSignIn, function(req, res) {
     var query = "SELECT * from DASH5082.USER_SUSPENSION WHERE USER_ID = " + req.body.id ;
-    dbQuery(query, function(result) {
+    db.dbQuery(query, function(result) {
         if(result.length > 0){
             res.send({message:'success', results:result});
         }
@@ -1271,9 +1214,9 @@ app.post('/admin/get_user_history', checkAdminSignIn, function(req, res) {
 app.get('/admin/manage_medicines', checkAdminSignIn, function(req, res) {
 
     var query = "SELECT * from DASH5082.MEDICINE WHERE SRA IS NOT NULL";
-    dbQuery(query, function(result) {
+    db.dbQuery(query, function(result) {
         var query = "SELECT * from DASH5082.MEDICINE WHERE SRA IS NULL";
-        dbQuery(query, function(result2) {
+        db.dbQuery(query, function(result2) {
             //console.log(result[0].ID);
             var base = req.protocol + '://' + req.get('host');
             // redirect with data
@@ -1303,7 +1246,7 @@ app.get('/admin/manage_medicines', checkAdminSignIn, function(req, res) {
 app.get('/admin/admins_list', checkAdminSignIn, function(req, res) {
 
     var query = "SELECT * from DASH5082.ADMIN";
-    dbQuery(query, function(result) {
+    db.dbQuery(query, function(result) {
         //console.log(result[0].ID);
         var base = req.protocol + '://' + req.get('host');
         // redirect with data
@@ -1315,9 +1258,9 @@ app.get('/admin/admins_list', checkAdminSignIn, function(req, res) {
 
 app.post('/admin/approveuser', checkAdminSignIn, function(req, res){
     var query = "UPDATE DASH5082.USER SET APPROVE='1' WHERE ID=" + req.body.id + ";";
-    dbQuery(query, function(newResult) {
+    db.dbQuery(query, function(newResult) {
         var query = "SELECT EMAIL FROM DASH5082.USER WHERE ID=" + req.body.id + ";";
-        dbQuery(query, function(result) 
+        db.dbQuery(query, function(result) 
         {
             if(result.length > 0)
             {
@@ -1350,7 +1293,7 @@ app.post('/admin/activateadmin', checkAdminSignIn, function(req, res){
 
     if(Number.isInteger(parseInt(id)) && (active == 0 || active == 1)) {
         var query = "UPDATE DASH5082.ADMIN SET ACTIVE='" + active + "' WHERE ID=" + id + ";";
-        dbQuery(query, function(result) {
+        db.dbQuery(query, function(result) {
         
                 res.send({message: "success"});  
         });
@@ -1366,7 +1309,7 @@ app.post('/admin/changetype', checkAdminSignIn, function(req, res){
 
     if(Number.isInteger(parseInt(id)) && (type == 0 || type == 1)) {
         var query = "UPDATE DASH5082.ADMIN SET TYPE='" + type + "' WHERE ID=" + id + ";";
-        dbQuery(query, function(result) {
+        db.dbQuery(query, function(result) {
         
                 res.send({message: "success"});  
         });
@@ -1379,11 +1322,11 @@ app.post('/admin/changetype', checkAdminSignIn, function(req, res){
 app.post('/admin/suspenduser', checkAdminSignIn, function(req, res){
 
     var query = "UPDATE USER SET ACTIVE='0' WHERE ID=" + req.body.id + ";";
-    dbQuery(query, function(newResult) {
+    db.dbQuery(query, function(newResult) {
         var query = "INSERT INTO DASH5082.USER_SUSPENSION (USER_ID, SUSPENSION_REASON, CREATED_AT) VALUES (" + req.body.id + ", '" + req.body.suspension_reason + "', TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));";
-        dbQuerySync(query);
+        db.dbQuerySync(query);
         var query = "SELECT EMAIL FROM USER WHERE ID=" + req.body.id + ";";
-        dbQuery(query, function(result) 
+        db.dbQuery(query, function(result) 
         {
             if(result.length > 0)
             {
@@ -1417,11 +1360,11 @@ app.post('/admin/suspenduser', checkAdminSignIn, function(req, res){
 app.post('/admin/activateuser', checkAdminSignIn, function(req, res){
 
     var query = "UPDATE USER SET ACTIVE='1' WHERE ID=" + req.body.id + ";";
-    dbQuery(query, function(newResult) {
+    db.dbQuery(query, function(newResult) {
         var query = "INSERT INTO DASH5082.USER_SUSPENSION (USER_ID, SUSPENSION_REASON, TYPE, CREATED_AT) VALUES (" + req.body.id + ", '" + req.body.suspension_reason + "', 1, TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));";
-        dbQuerySync(query);
+        db.dbQuerySync(query);
         var query = "SELECT EMAIL FROM USER WHERE ID=" + req.body.id + ";";
-        dbQuery(query, function(result) 
+        db.dbQuery(query, function(result) 
         {
             if(result.length > 0)
             {
@@ -1450,7 +1393,7 @@ app.post('/admin/activateuser', checkAdminSignIn, function(req, res){
 app.post('/admin/deleteuser', checkAdminSignIn, function(req, res){
 
     var query = "DELETE FROM USER WHERE ID=" + req.body.id + ";";
-    dbQuery(query, function(newResult) {
+    db.dbQuery(query, function(newResult) {
         res.send({message: "success"});
     });
 });
@@ -1695,11 +1638,11 @@ function parsingApprovedMedicines(req, callback) {
         }
 
         var query = "SELECT * from DASH5082.MEDICINE WHERE GENERIC_NAME ='" + generic_name + "' AND BRAND_NAME = '" + brand_name + "' AND FORM = '" + form + "' AND STRENGTH = '" + strength + "' AND STRENGTH_UNIT = '" + strength_unit + "' AND MANUFACTURER = '" + manufacturer + "';";           
-        var result = dbQuerySync(query);    
+        var result = db.dbQuerySync(query);    
         if(result.length != 0)
         {
             var query = "UPDATE DASH5082.MEDICINE SET ROUTE = '" + route + "', MANUFACTURER = '" + manufacturer + "', SRA = '" + sra + "', APPROVAL_DATE = TIMESTAMP_FORMAT(" + approval_date + ", 'DD-Month-YY'), SOURCE = '" + source + "', EXTRACT_DATE = TIMESTAMP_FORMAT(" + extract_date + ", 'DD-Month-YY') WHERE ID = " + result[0].ID + ";";
-            var result = dbQuerySync(query);
+            var result = db.dbQuerySync(query);
         }
         else
         {
@@ -1707,7 +1650,7 @@ function parsingApprovedMedicines(req, callback) {
             if(valid)
             {    
                 var query = "INSERT INTO DASH5082.MEDICINE (GENERIC_NAME, BRAND_NAME, FORM, STRENGTH, STRENGTH_UNIT, ROUTE, MANUFACTURER, SRA, APPROVAL_DATE, SOURCE, EXTRACT_DATE) VALUES ('" + generic_name + "','" + brand_name + "','" + form + "','" + strength + "','" + strength_unit + "','" + route + "','" + manufacturer + "','" + sra + "', TIMESTAMP_FORMAT(" + approval_date + ", 'DD-Month-YY'),'" + source + "', TIMESTAMP_FORMAT(" + extract_date + ", 'DD-Month-YY'));"; 
-                dbQuerySync(query);       
+                db.dbQuerySync(query);       
                 jsonObj['message'] = "success";
                     //res.send(jsonObj);
             }
@@ -1765,22 +1708,59 @@ app.post('/admin/uploadmedicines', checkAdminSignIn, function(req, res) {
 });
 
 app.get('/getapprovedmedicines', function(req, res){
-    var query = "SELECT * from DASH5082.MEDICINE WHERE SRA IS NOT NULL";
-    dbQuery(query, function(result) {
+    var query = "SELECT DISTINCT GENERIC_NAME, FORM from DASH5082.MEDICINE WHERE SRA IS NOT NULL";
+    db.dbQuery(query, function(result) {
         res.send({medicines: result});    
     });
 });
 
+app.get('/doctor/getapprovedmedicines', function(req, res){
+    var query = "SELECT * from DASH5082.MEDICINE WHERE SRA IS NOT NULL";
+    db.dbQuery(query, function(result) {
+        res.send({medicines: result});    
+    });
+});
+
+app.post('/getmedicinebygenericandform', function(req, res){
+   var jsonObj = {};
+   var valid = true;
+
+    //validate generic name
+    if(!req.body.generic_name)
+    {
+        jsonObj['generic_name_error'] = "Generic Name is required";
+        valid = false;
+    }
+
+    //validate name
+    if(!req.body.form)
+    {
+        jsonObj['form_error'] = "Form is required";
+        valid = false;
+    }
+
+    if(valid) {
+        var query = "SELECT * from DASH5082.MEDICINE WHERE GENERIC_NAME ='" + req.body.generic_name + "' AND FORM = '" + req.body.form + "';";           
+        var medicines = db.dbQuerySync(query);
+        var result = {message: "success"};
+        result['medicines'] = medicines; 
+        res.send(result);
+    }
+    else {
+        res.send({message: "failed"});
+    } 
+});
+
 app.get('/getmedicinebyid/:id', function(req, res){
     var query = "SELECT * from DASH5082.MEDICINE WHERE ID =" + req.params.id;
-    dbQuery(query, function(result) {
+    db.dbQuery(query, function(result) {
         res.send({medicine: result});    
     });
 });
 
 app.post('/getmedicineid', function(req, res) {
     var query = "SELECT ID from DASH5082.MEDICINE WHERE GENERIC_NAME ='" + req.body.generic_name + "' AND BRAND_NAME = '" + req.body.brand_name + "' AND FORM = '" + req.body.form + "' AND STRENGTH = '" + req.body.strength + "' AND STRENGTH_UNIT = '" + req.body.strength_unit + "' AND MANUFACTURER = '" + req.body.manufacturer + "';";
-    dbQuery(query, function(result) {
+    db.dbQuery(query, function(result) {
         if(result.length != 0)
         {
             res.send({message:"success", medicine_id: result[0].ID});
@@ -1794,9 +1774,9 @@ app.post('/getmedicineid', function(req, res) {
 
 app.get('/pharmacy', checkSignIn, function(req, res){
     var query = "SELECT *, SL.ID AS STOCK_LIST_ID FROM STOCK_LIST SL JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE SL.PHARMACY_ID = " + req.session.user_id;
-    dbQuery(query, function(result) {
+    db.dbQuery(query, function(result) {
         var query = "SELECT * from DASH5082.MEDICINE WHERE SRA IS NOT NULL";
-        var result2 = dbQuerySync(query);
+        var result2 = db.dbQuerySync(query);
         //console.log(result[0].ID);
         var base = req.protocol + '://' + req.get('host');
         // redirect with data
@@ -1872,7 +1852,7 @@ app.get('/pharmacy/downloadlaststock', checkSignIn, function(req, res){
     }
     var query = "SELECT *, SL.ID AS STOCK_LIST_ID FROM STOCK_LIST SL JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE SL.PHARMACY_ID =" + req.session.user_id;
 
-    var stock_list = dbQuerySync(query);
+    var stock_list = db.dbQuerySync(query);
     
     if(stock_list.length > 0) {
         for (var i = 0; i < stock_list.length; i++) {
@@ -2004,13 +1984,13 @@ app.post('/pharmacy/addnewmedicine', function(req, res){
     // }
 
     var query = "SELECT * from DASH5082.MEDICINE WHERE GENERIC_NAME ='" + req.body.generic_name + "' AND BRAND_NAME = '" + req.body.brand_name + "' AND FORM = '" + req.body.form + "' AND STRENGTH = '" + req.body.strength + "' AND STRENGTH_UNIT = '" + req.body.strength_unit + "' AND MANUFACTURER = '" + req.body.manufacturer + "';";           
-    var medicineResult = dbQuerySync(query);
+    var medicineResult = db.dbQuerySync(query);
     if(medicineResult.length != 0)
     {
         if(valid)
         {   
             var query = "SELECT * FROM DASH5082.STOCK_LIST WHERE MEDICINE_ID = " + medicineResult[0].ID + " AND PHARMACY_ID = " + req.session.user_id;
-            var stockListResult = dbQuerySync(query);
+            var stockListResult = db.dbQuerySync(query);
             if(stockListResult.length != 0)
             {
                 jsonObj['generic_name_error'] = "This Medicine is already exists in your stock"
@@ -2023,12 +2003,12 @@ app.post('/pharmacy/addnewmedicine', function(req, res){
                 if(medicineResult[0].SRA == 'NULL')
                 {
                     var query = "INSERT INTO DASH5082.STOCK_LIST (MEDICINE_ID, BATCH_NUMBER, EXPIRY_DATE, APPROVAL, PACK_SIZE, PRICE_PER_PACK, AVAILABLE_STOCK, AVG_MONTHLY_CONSUMPTION, PHARMACY_ID, LAST_UPDATE) VALUES (" + medicineResult[0].ID + ",'" + req.body.batch_number + "', '" + req.body.expiry_date + "', '0','" + req.body.pack_size + "','" + req.body.price + "','" + req.body.quantity + "', '" + req.body.avg_monthly_consumption + "', " + req.session.user_id + ",  TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));"; 
-                    dbQuerySync(query);
+                    db.dbQuerySync(query);
                 }
                 else
                 {
                     var query = "INSERT INTO DASH5082.STOCK_LIST (MEDICINE_ID, BATCH_NUMBER, EXPIRY_DATE, APPROVAL, PACK_SIZE, PRICE_PER_PACK, AVAILABLE_STOCK, AVG_MONTHLY_CONSUMPTION, PHARMACY_ID, LAST_UPDATE) VALUES (" + medicineResult[0].ID + ",'" + req.body.batch_number + "', '" + req.body.expiry_date + "', '1','" + req.body.pack_size + "','" + req.body.price + "','" + req.body.quantity + "', '" + req.body.avg_monthly_consumption + "', " + req.session.user_id + ",  TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));"; 
-                    dbQuerySync(query);
+                    db.dbQuerySync(query);
                 }
                 jsonObj['message'] = "success";
                 res.send(jsonObj);
@@ -2045,13 +2025,13 @@ app.post('/pharmacy/addnewmedicine', function(req, res){
         if(valid)
         {    
             var query = "INSERT INTO DASH5082.MEDICINE (GENERIC_NAME, BRAND_NAME, FORM, STRENGTH, STRENGTH_UNIT, MANUFACTURER, SRA) VALUES ('" + req.body.generic_name + "','" + req.body.brand_name + "','" + req.body.form + "','" + req.body.strength + "','" + req.body.strength_unit + "','" + req.body.manufacturer + "', NULL);"; 
-            dbQuerySync(query);
+            db.dbQuerySync(query);
 
             var query = "SELECT ID from DASH5082.MEDICINE WHERE GENERIC_NAME ='" + req.body.generic_name + "' AND BRAND_NAME = '" + req.body.brand_name + "' AND FORM = '" + req.body.form + "' AND STRENGTH = '" + req.body.strength + "' AND STRENGTH_UNIT = '" + req.body.strength_unit + "' AND MANUFACTURER = '" + req.body.manufacturer + "';";           
-            var medicineIdResult = dbQuerySync(query);
+            var medicineIdResult = db.dbQuerySync(query);
 
             var query = "INSERT INTO DASH5082.STOCK_LIST (MEDICINE_ID, BATCH_NUMBER, EXPIRY_DATE, APPROVAL, PACK_SIZE, PRICE_PER_PACK, AVAILABLE_STOCK, AVG_MONTHLY_CONSUMPTION, PHARMACY_ID, LAST_UPDATE) VALUES (" + medicineIdResult[0].ID + ",'" + req.body.batch_number + "', '" + req.body.expiry_date + "', '0','" + req.body.pack_size + "','" + req.body.price + "','" + req.body.quantity + "', '" + req.body.avg_monthly_consumption + "', " + req.session.user_id + ",  TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));"; 
-            dbQuerySync(query);
+            db.dbQuerySync(query);
 
             jsonObj['message'] = "success";
             res.send(jsonObj);
@@ -2122,7 +2102,7 @@ app.post('/pharmacy/addnewapprovedmedicine', function(req, res){
     {
         var query = "SELECT * FROM DASH5082.STOCK_LIST WHERE MEDICINE_ID = " + req.body.medicine + " AND PHARMACY_ID = " + req.session.user_id;
         console.log(query);
-        var stockListResult = dbQuerySync(query);
+        var stockListResult = db.dbQuerySync(query);
         if(stockListResult.length != 0)
         {
             jsonObj['medicine_error'] = "This Medicine is already exists in your stock"
@@ -2133,7 +2113,7 @@ app.post('/pharmacy/addnewapprovedmedicine', function(req, res){
         else
         {
             var query = "INSERT INTO DASH5082.STOCK_LIST (MEDICINE_ID, BATCH_NUMBER, EXPIRY_DATE, APPROVAL, PACK_SIZE, PRICE_PER_PACK, AVAILABLE_STOCK, AVG_MONTHLY_CONSUMPTION, PHARMACY_ID, LAST_UPDATE) VALUES (" + req.body.medicine + ",'" + req.body.batch_number + "', '" + req.body.expiry_date + "', '1','" + req.body.pack_size + "','" + req.body.price + "','" + req.body.quantity + "', '" + req.body.avg_monthly_consumption + "', " + req.session.user_id + ",  TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));"; 
-            dbQuerySync(query);
+            db.dbQuerySync(query);
             jsonObj['message'] = "success";
             res.send(jsonObj);
         }
@@ -2202,7 +2182,7 @@ app.post('/pharmacy/updatemedicine', function(req, res){
     {
         var query = "SELECT * FROM DASH5082.STOCK_LIST WHERE ID =" + req.body.stock_id + " AND PHARMACY_ID =" + req.session.user_id;
         console.log(query);
-        var stockListResult = dbQuerySync(query);
+        var stockListResult = db.dbQuerySync(query);
         
         if(stockListResult.length == 0)
         {
@@ -2214,7 +2194,7 @@ app.post('/pharmacy/updatemedicine', function(req, res){
         else
         {
             var query = "UPDATE DASH5082.STOCK_LIST SET BATCH_NUMBER = '" + req.body.batch_number + "', EXPIRY_DATE = '" + req.body.expiry_date + "', PACK_SIZE = '" + req.body.pack_size + "', PRICE_PER_PACK = '" + req.body.price + "', AVAILABLE_STOCK = '" + req.body.quantity + "', AVG_MONTHLY_CONSUMPTION = '" + req.body.avg_monthly_consumption + "', LAST_UPDATE = CURRENT_TIMESTAMP WHERE ID =" + req.body.stock_id + " AND PHARMACY_ID =" + req.session.user_id; 
-            dbQuerySync(query);
+            db.dbQuerySync(query);
             jsonObj['message'] = "success";
             res.send(jsonObj);
         }
@@ -2242,7 +2222,7 @@ app.post('/pharmacy/deletemedicine', function(req, res){
     {
         var query = "SELECT * FROM DASH5082.STOCK_LIST WHERE ID =" + req.body.stock_id + " AND PHARMACY_ID =" + req.session.user_id;
         console.log(query);
-        var stockListResult = dbQuerySync(query);
+        var stockListResult = db.dbQuerySync(query);
         
         if(stockListResult.length == 0)
         {
@@ -2254,7 +2234,7 @@ app.post('/pharmacy/deletemedicine', function(req, res){
         else
         {
             var query = "DELETE FROM DASH5082.STOCK_LIST WHERE ID =" + req.body.stock_id + " AND PHARMACY_ID =" + req.session.user_id; 
-            dbQuerySync(query);
+            db.dbQuerySync(query);
             jsonObj['message'] = "success";
             res.send(jsonObj);
         }
@@ -2282,7 +2262,7 @@ app.post('/admin/deletemedicine', checkAdminSignIn, function(req, res){
     {
         var query = "SELECT * FROM DASH5082.MEDICINE WHERE ID =" + req.body.medicine_id;
         console.log(query);
-        var result = dbQuerySync(query);
+        var result = db.dbQuerySync(query);
         
         if(result.length == 0)
         {
@@ -2294,7 +2274,7 @@ app.post('/admin/deletemedicine', checkAdminSignIn, function(req, res){
         else
         {
             var query = "DELETE FROM DASH5082.MEDICINE WHERE ID =" + req.body.medicine_id; 
-            dbQuerySync(query);
+            db.dbQuerySync(query);
             jsonObj['message'] = "success";
             res.send(jsonObj);
         }
@@ -2653,7 +2633,7 @@ function parsingStockList(req, callback) {
 
         ////////////////////////////////////////////
         var query = "SELECT * from DASH5082.MEDICINE WHERE GENERIC_NAME ='" + generic_name + "' AND BRAND_NAME = '" + brand_name + "' AND FORM = '" + form + "' AND STRENGTH = '" + strength + "' AND STRENGTH_UNIT = '" + strength_unit + "' AND MANUFACTURER = '" + manufacturer + "';";           
-        var medicineResult = dbQuerySync(query);
+        var medicineResult = db.dbQuerySync(query);
         if(medicineResult.length != 0)
         {
             if(valid)
@@ -2664,17 +2644,17 @@ function parsingStockList(req, callback) {
                     approval = 1;
                 }
                 var query = "SELECT * FROM DASH5082.STOCK_LIST WHERE MEDICINE_ID =" + medicineResult[0].ID;
-                var stockListResult = dbQuerySync(query);
+                var stockListResult = db.dbQuerySync(query);
                 if(stockListResult.length != 0)
                 {
                     var query = "UPDATE DASH5082.STOCK_LIST SET MEDICINE_ID =" + medicineResult[0].ID + ", BATCH_NUMBER ='" + batch_number + "', EXPIRY_DATE = TIMESTAMP_FORMAT(" + expiry_date + ", 'DD-MM-YY'), APPROVAL = '" + approval + "', PACK_SIZE = '" + pack_size + "', PRICE_PER_PACK = '" + price + "', AVAILABLE_STOCK = '" + quantity + "', AVG_MONTHLY_CONSUMPTION = '" + avg_monthly_consumption + "', PHARMACY_ID =" + req.session.user_id + ", LAST_UPDATE = TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS') WHERE ID = " + stockListResult[0].ID + ";";
-                    var result = dbQuerySync(query);
+                    var result = db.dbQuerySync(query);
 
                 }
                 else
                 {
                     var query = "INSERT INTO DASH5082.STOCK_LIST (MEDICINE_ID, BATCH_NUMBER, EXPIRY_DATE, APPROVAL, PACK_SIZE, PRICE_PER_PACK, AVAILABLE_STOCK, AVG_MONTHLY_CONSUMPTION, PHARMACY_ID, LAST_UPDATE) VALUES (" + medicineResult[0].ID + ",'" + batch_number + "', TIMESTAMP_FORMAT(" + expiry_date + ", 'DD-MM-YY'), '" + approval + "','" + pack_size + "','" + price + "','" + quantity + "', '" + avg_monthly_consumption + "', " + req.session.user_id + ",  TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));"; 
-                    dbQuerySync(query);
+                    db.dbQuerySync(query);
                     jsonObj['message'] = "success";
                     // res.send(jsonObj);
                 } 
@@ -2693,13 +2673,13 @@ function parsingStockList(req, callback) {
             if(valid)
             {    
                 var query = "INSERT INTO DASH5082.MEDICINE (GENERIC_NAME, BRAND_NAME, FORM, STRENGTH, STRENGTH_UNIT, MANUFACTURER, SRA) VALUES ('" + generic_name + "','" + brand_name + "','" + form + "','" + strength + "','" + strength_unit + "','" + manufacturer + "', NULL);"; 
-                dbQuerySync(query);
+                db.dbQuerySync(query);
 
                 var query = "SELECT ID from DASH5082.MEDICINE WHERE GENERIC_NAME ='" + generic_name + "' AND BRAND_NAME = '" + brand_name + "' AND FORM = '" + form + "' AND STRENGTH = '" + strength + "' AND STRENGTH_UNIT = '" + strength_unit + "' AND MANUFACTURER = '" + manufacturer + "';";           
-                var medicineIdResult = dbQuerySync(query);
+                var medicineIdResult = db.dbQuerySync(query);
 
                 var query = "INSERT INTO DASH5082.STOCK_LIST (MEDICINE_ID, BATCH_NUMBER, EXPIRY_DATE, APPROVAL, PACK_SIZE, PRICE_PER_PACK, AVAILABLE_STOCK, AVG_MONTHLY_CONSUMPTION, PHARMACY_ID, LAST_UPDATE) VALUES (" + medicineIdResult[0].ID + ",'" + batch_number + "', TIMESTAMP_FORMAT(" + expiry_date + ", 'DD-MM-YY'), '0','" + pack_size + "','" + price + "','" + quantity + "', '" + avg_monthly_consumption + "', " + req.session.user_id + ",  TIMESTAMP_FORMAT('" + dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss") + "', 'YYYY-MM-DD HH24:MI:SS'));"; 
-                dbQuerySync(query);
+                db.dbQuerySync(query);
 
                 jsonObj['message'] = "success";
                 // res.send(jsonObj);
@@ -2719,60 +2699,19 @@ function parsingStockList(req, callback) {
         i++;
     }
 }
-app.post('/getavailablepharmacies', function(req, res) {
-    var valid = true;
-
-    //validate generic name
-    if(!req.body.generic_name)
-    {
-        jsonObj['generic_name_error'] = "Generic Name is required";
-        valid = false;
-    }
-
-    //validate brand name
-    if(!req.body.brand_name)
-    {
-        jsonObj['brand_name_error'] = "Brand Name is required";
-        valid = false;
-    }
-
-    //validate name
-    if(!req.body.form)
-    {
-        jsonObj['form_error'] = "Form is required";
-        valid = false;
-    }
-
-    //validate type
-    if(!req.body.strength)
-    {
-        jsonObj['strength_error'] = "Strength is required";
-        valid = false;
-    }
-
-    //validate type
-    if(!req.body.strength_unit)
-    {
-        jsonObj['strength_unit_error'] = "Strength Unit is required";
-        valid = false;
-    }
-
-    //validate type
-    if(!req.body.manufacturer)
-    {
-        jsonObj['manufacturer_error'] = "Manufacturer is required";
-        valid = false;
-    }
-
-    if(valid) {
-        var query = "SELECT * from DASH5082.MEDICINE WHERE GENERIC_NAME ='" + req.body.generic_name + "' AND BRAND_NAME = '" + req.body.brand_name + "' AND FORM = '" + req.body.form + "' AND STRENGTH = '" + req.body.strength + "' AND STRENGTH_UNIT = '" + req.body.strength_unit + "' AND MANUFACTURER = '" + req.body.manufacturer + "';";           
-        var medicineResult = dbQuerySync(query);
-        console.log(medicineResult[0].ID);
-        var query = "SELECT U.ID AS ID, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, S.LAST_UPDATE FROM DASH5082.MEDICINE M JOIN STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE S.APPROVAL ='1' AND M.ID =" + medicineResult[0].ID + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)";
-        var pharmacies = dbQuerySync(query);
-        var result = {message: "success"};
-        result['pharmacies'] = pharmacies; 
-        res.send(result);
+app.post('/getavailablepharmaciesbyid', function(req, res) {
+    if(Number.isInteger(parseInt(req.body.id))) {
+        var query = "SELECT U.ID AS ID, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, S.LAST_UPDATE FROM DASH5082.MEDICINE M JOIN STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE S.APPROVAL ='1' AND M.ID =" + req.body.id + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)";
+        var pharmacies = db.dbQuerySync(query);
+        if(pharmacies.length != 0)
+        {
+            var result = {message: "success"};
+            result['pharmacies'] = pharmacies; 
+            res.send(result);
+        }
+        else {
+            res.send({message: "failed"});    
+        }
     }
     else {
         res.send({message: "failed"});
@@ -2792,7 +2731,7 @@ app.get('/doctor/choosetreatmentcenter', checkSignIn, function(req, res){
             for (var i = 0; i < idsArray.length; i++) {
                 
                 var query = "SELECT * FROM DASH5082.MEDICINE WHERE ID =" + parseInt(idsArray[i]); 
-                var medicine = dbQuerySync(query);
+                var medicine = db.dbQuerySync(query);
                 if(medicine.length != 0) {
                     var obj = {}
                     obj['quantity'] = qsArray[i];
@@ -2802,7 +2741,7 @@ app.get('/doctor/choosetreatmentcenter', checkSignIn, function(req, res){
             }
             var base = req.protocol + '://' + req.get('host');
             var query = "SELECT * FROM DASH5082.USER WHERE TYPE = 'TREATMENT CENTER'";
-            var treatmentCenters = dbQuerySync(query);
+            var treatmentCenters = db.dbQuerySync(query);
             res.render('doctor/choose_treatment_center', { base: base, medicines: medicines, treatmentCenters: treatmentCenters});
         }
         else
@@ -2826,12 +2765,12 @@ app.post('/doctor/gettreatmentcentermedicines', checkSignIn, function(req, res) 
         if(idsArray.length > 0 && (idsArray.length == qsArray.length) && validIds && validQs)
         {
             var query = "SELECT * FROM DASH5082.USER WHERE ID =" + req.body.id + " AND TYPE = 'TREATMENT CENTER'"; 
-            var treatmentCenter = dbQuerySync(query);
+            var treatmentCenter = db.dbQuerySync(query);
             if(treatmentCenter.length != 0) {
                 var medicines = [];
                 for (var i = 0; i < idsArray.length; i++) {
                     var query = "SELECT M.GENERIC_NAME, M.BRAND_NAME, M.FORM, M.STRENGTH, M.STRENGTH_UNIT, M.MANUFACTURER, SL.LAST_UPDATE FROM USER U JOIN STOCK_LIST SL ON U.ID = SL.PHARMACY_ID JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE U.ID =" + req.body.id + " AND M.ID =" + parseInt(idsArray[i]) + " AND SL.AVAILABLE_STOCK >=" + qsArray[i]; 
-                    var medicine = dbQuerySync(query);
+                    var medicine = db.dbQuerySync(query);
                     if(medicine.length != 0) {
                         var obj = {}
                         obj['quantity'] = qsArray[i];
@@ -2872,13 +2811,13 @@ app.get('/doctor/selectpharmacies', checkSignIn, function(req, res) {
             var medicines = [];
             for (var i = 0; i < idsArray.length; i++) {
                 var query = "SELECT * FROM DASH5082.MEDICINE  WHERE ID =" + parseInt(idsArray[i]); 
-                var medicine = dbQuerySync(query);
+                var medicine = db.dbQuerySync(query);
                 var obj = {}
                 obj['quantity'] = qsArray[i];
                 obj['medicine'] = medicine[0];
                 medicines.push(obj);
                 var query = "SELECT M.GENERIC_NAME, M.BRAND_NAME, M.FORM, M.STRENGTH, M.STRENGTH_UNIT, M.MANUFACTURER, SL.LAST_UPDATE FROM USER U JOIN STOCK_LIST SL ON U.ID = SL.PHARMACY_ID JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE U.ID =" + treatmentCenter + " AND M.ID =" + parseInt(idsArray[i]) + " AND SL.AVAILABLE_STOCK >=" + qsArray[i]; 
-                var treatmentMedicine = dbQuerySync(query);
+                var treatmentMedicine = db.dbQuerySync(query);
                 if(treatmentMedicine.length != 0) {
                     var obj = {}
                     obj['quantity'] = qsArray[i];
@@ -2891,7 +2830,7 @@ app.get('/doctor/selectpharmacies', checkSignIn, function(req, res) {
                     obj['quantity'] = qsArray[i];
                     obj['medicine'] = medicine[0];
                     var query = "SELECT U.ID AS ID, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, S.LAST_UPDATE FROM DASH5082.MEDICINE M JOIN STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE U.TYPE='PHARMACY' AND S.APPROVAL ='1' AND M.ID =" + parseInt(idsArray[i]) + " AND S.AVAILABLE_STOCK >=" + qsArray[i] + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)"; 
-                    var pharmacies = dbQuerySync(query);
+                    var pharmacies = db.dbQuerySync(query);
                     if(pharmacies.length > 0)
                     {
                         obj['pharmacies'] = pharmacies;
@@ -2930,20 +2869,20 @@ app.get('/doctor/shoppinglist', checkSignIn, function(req, res) {
             validmedicinePharmacyIds = medicinePharmacyIds.every(function checkInteger(record) { return Number.isInteger(parseInt(record.split('_')[0])) && Number.isInteger(parseInt(record.split('_')[1]));});
         }
         var query = "SELECT * FROM DASH5082.USER  WHERE ID =" + parseInt(treatmentCenter) + " AND TYPE='TREATMENT CENTER'";
-        var treatmentCenterDetails = dbQuerySync(query);
+        var treatmentCenterDetails = db.dbQuerySync(query);
         if(idsArray.length == qsArray.length && validIds && validQs && validTreatmentCenter && validmedicinePharmacyIds) {
             var medicines = [];
             var treatmentCenterMedicines = [];
             var pharmacyDetails = [];
             for (var i = 0; i < idsArray.length; i++) {
                 var query = "SELECT * FROM DASH5082.MEDICINE  WHERE ID =" + parseInt(idsArray[i]); 
-                var medicine = dbQuerySync(query);
+                var medicine = db.dbQuerySync(query);
                 var obj = {}
                 obj['quantity'] = qsArray[i];
                 obj['medicine'] = medicine[0];
                 medicines.push(obj);
                 var query = "SELECT M.GENERIC_NAME, M.BRAND_NAME, M.FORM, M.STRENGTH, M.STRENGTH_UNIT, M.MANUFACTURER, SL.PRICE_PER_PACK, SL.EXPIRY_DATE, SL.PACK_SIZE, SL.LAST_UPDATE FROM USER U JOIN STOCK_LIST SL ON U.ID = SL.PHARMACY_ID JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE U.ID =" + treatmentCenter + " AND M.ID =" + parseInt(idsArray[i]) + " AND SL.AVAILABLE_STOCK >=" + qsArray[i]; 
-                var treatmentMedicine = dbQuerySync(query);
+                var treatmentMedicine = db.dbQuerySync(query);
                 if(treatmentMedicine.length != 0) {
                     var obj = {}
                     obj['quantity'] = qsArray[i];
@@ -2955,7 +2894,7 @@ app.get('/doctor/shoppinglist', checkSignIn, function(req, res) {
                 var medicineId = medicinePharmacyIds[i].split('_')[0];
                 var pharmacyId = medicinePharmacyIds[i].split('_')[1];
                 var query = "SELECT M.GENERIC_NAME, M.BRAND_NAME, M.FORM, M.STRENGTH, M.STRENGTH_UNIT, M.MANUFACTURER, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, SL.PRICE_PER_PACK, SL.EXPIRY_DATE, SL.PACK_SIZE, SL.LAST_UPDATE FROM USER U JOIN STOCK_LIST SL ON U.ID = SL.PHARMACY_ID JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE U.ID =" + pharmacyId + " AND M.ID =" + medicineId;
-                var pharmacy = dbQuerySync(query);
+                var pharmacy = db.dbQuerySync(query);
                 if(pharmacy.length != 0) {
                     var obj = {};
                     obj['details'] = pharmacy[0];
@@ -2992,10 +2931,10 @@ app.get('/doctor/getsearchresults', checkSignIn, function(req, res){
                 
                 obj['quantity'] = qsArray[i];
                 var query = "SELECT * FROM DASH5082.MEDICINE  WHERE ID =" + parseInt(idsArray[i]); 
-                var medicine = dbQuerySync(query);
+                var medicine = db.dbQuerySync(query);
                 obj['medicine'] = medicine[0];
                 var query = "SELECT U.ID AS ID, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, S.LAST_UPDATE FROM DASH5082.MEDICINE M JOIN STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE S.APPROVAL ='1' AND M.ID =" + parseInt(idsArray[i]) + " AND S.AVAILABLE_STOCK >=" + qsArray[i] + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)"; 
-                var pharmacies = dbQuerySync(query);
+                var pharmacies = db.dbQuerySync(query);
                 if(pharmacies.length > 0)
                 {
                     obj['pharmacies'] = pharmacies;
@@ -3164,7 +3103,7 @@ app.post('/doctor/updateprofile', function(req, res){
 
     var query = "SELECT * from DASH5082.USER WHERE EMAIL ='" + req.body.email + "';";           
         
-    var result = dbQuery(query, function(result) {
+    var result = db.dbQuery(query, function(result) {
         console.log(result);
         if(result.length != 0 && result[0].ID != req.session.user_id)
         {
@@ -3179,7 +3118,7 @@ app.post('/doctor/updateprofile', function(req, res){
             {
                 query = "UPDATE DASH5082.USER SET EMAIL='" + req.body.email + "', NAME ='" + req.body.name + "', STREET ='" + req.body.street + "', CITY ='" + req.body.city + "', STATE ='" + req.body.state + "', ZIP ='" + req.body.zip + "' WHERE ID =" + req.session.user_id;
                 
-                dbQuery(query, function(newResult) {
+                db.dbQuery(query, function(newResult) {
                     jsonObj['message'] = "success";
                     res.send(jsonObj);
                 });
@@ -3269,7 +3208,7 @@ app.post('/pharmacy/updateprofile', function(req, res){
 
     var query = "SELECT * from DASH5082.USER WHERE EMAIL ='" + req.body.email + "';";           
         
-    var result = dbQuery(query, function(result) {
+    var result = db.dbQuery(query, function(result) {
         console.log(result);
         if(result.length != 0 && result[0].ID != req.session.user_id)
         {
@@ -3284,7 +3223,7 @@ app.post('/pharmacy/updateprofile', function(req, res){
             {
                 query = "UPDATE DASH5082.USER SET EMAIL='" + req.body.email + "', NAME ='" + req.body.name + "', STREET ='" + req.body.street + "', CITY ='" + req.body.city + "', STATE ='" + req.body.state + "', ZIP ='" + req.body.zip + "', PHONE_NUMBER ='" + req.body.phone_number + "', OPEN_FROM='" + req.body.open_from + "', OPEN_TO='" + req.body.open_to + "' WHERE ID =" + req.session.user_id;
                 
-                dbQuery(query, function(newResult) {
+                db.dbQuery(query, function(newResult) {
                     jsonObj['message'] = "success";
                     res.send(jsonObj);
                 });
@@ -3337,7 +3276,7 @@ app.post('/user/changepassword', function(req, res){
     }
     if(valid)
     {   var query = "SELECT * FROM DASH5082.USER WHERE ID =" + req.session.user_id + ";";
-        dbQuery(query, function(result) {
+        db.dbQuery(query, function(result) {
             console.log(result);
             bcrypt.compare(req.body.old_password, result[0].PASSWORD, function(err, cmp) {
                 // res == true
@@ -3347,7 +3286,7 @@ app.post('/user/changepassword', function(req, res){
                       // Store hash in your password DB.
                       // enter new pharmacy to the db
                       var query = "UPDATE DASH5082.USER SET PASSWORD ='" + hash + "' WHERE ID =" + req.session.user_id + ";";
-                      dbQuery(query, function(newResult) {
+                      db.dbQuery(query, function(newResult) {
                           jsonObj['message'] = "success";
                           res.send(jsonObj);
                       });
@@ -3373,7 +3312,7 @@ app.post('/user/changepassword', function(req, res){
 app.post('/pharmacy/getstockrecord', function (req, res) {
     if(req.body.stock_id, Number.isInteger(parseInt(req.body.stock_id))) {
         var query = "SELECT * FROM DASH5082.STOCK_LIST SL JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE SL.ID =" + req.body.stock_id + " AND SL.PHARMACY_ID =" + req.session.user_id + ";";
-        dbQuery(query, function(result) {
+        db.dbQuery(query, function(result) {
             console.log(result);
             if(result.length != 0){
                 res.send({message:"success", result:result});
@@ -3434,7 +3373,7 @@ app.get('/doctor', checkSignIn, function(req, res){
     // req.session.user_id = "1000";
     // console.log(req.session);
     var query = "SELECT * from DASH5082.MEDICINE WHERE SRA IS NOT NULL";
-    dbQuery(query, function(result) {
+    db.dbQuery(query, function(result) {
         //console.log(result[0].ID);
         var base = req.protocol + '://' + req.get('host');
         // redirect with data
@@ -3517,7 +3456,7 @@ app.post('/user/first_changepassword', checkFirstLogin, function(req, res){
           // Store hash in your password DB.
           // enter new pharmacy to the db
           var query = "UPDATE DASH5082.USER SET PASSWORD ='" + hash + "', FIRST_LOGIN = '0' WHERE ID =" + req.session.user_id + ";";
-          dbQuery(query, function(newResult) {
+          db.dbQuery(query, function(newResult) {
               req.session.user_first_login = '0';  
               console.log(newResult);
               jsonObj['message'] = "success";
@@ -3534,7 +3473,7 @@ app.post('/user/first_changepassword', checkFirstLogin, function(req, res){
 
 app.get('/doctor/profile', checkSignIn, function(req, res){
     var query = "SELECT * from DASH5082.USER WHERE ID=" + req.session.user_id;
-    dbQuery(query, function(result) {
+    db.dbQuery(query, function(result) {
         var base = req.protocol + '://' + req.get('host');
         res.render('doctor/profile', { base: base, info: result });  
     });
@@ -3555,7 +3494,7 @@ console.log(err);
 
 app.get('/pharmacy/profile', checkSignIn, function(req, res){
     var query = "SELECT * from DASH5082.USER WHERE ID=" + req.session.user_id;
-    dbQuery(query, function(result) {
+    db.dbQuery(query, function(result) {
         var base = req.protocol + '://' + req.get('host');
         res.render('pharmacy/profile', { base: base, info: result });  
     });

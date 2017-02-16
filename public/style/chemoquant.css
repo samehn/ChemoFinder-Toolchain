@@ -1284,6 +1284,7 @@ regimen-dist {
 .btn-gray:hover{background-color: darkgray;}
 .word-wrapping{ word-wrap: break-word; }
 .td_bold{ font-weight: bold; }
+.ovf-auto{ overflow: auto;}
 .mg-left-10{ margin-left: 10px }
 .mg-top-10{ margin-top: 10px; }
 .mg-top-20{ margin-top: 20px; }

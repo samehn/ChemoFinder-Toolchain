@@ -75,13 +75,13 @@ $( function() {
       type: "get",
       url: url + '/getapprovedmedicines',
       success:  function(data){
-        $('#loadingModal').modal('hide');
         // console.log(data);
+        $('#loadingModal').modal('hide');
         var availableTags = [];
         //console.log(data.medicines[0].GENERIC_NAME);
         for (i = 0; i < data.medicines.length; i++) 
         {
-            var tag = data.medicines[i].GENERIC_NAME + " - " + data.medicines[i].BRAND_NAME + " - " + data.medicines[i].FORM + " - " + data.medicines[i].STRENGTH + " - " + data.medicines[i].STRENGTH_UNIT + " - " + data.medicines[i].MANUFACTURER;
+            var tag = data.medicines[i].GENERIC_NAME + " " + data.medicines[i].FORM;
             // console.log(tag);
             availableTags.push(tag);
         }
@@ -265,39 +265,32 @@ function search() {
   $('#search-result').html();
   $('.error-form').remove();
   var searchData = $('#tags').val();
-  var splitedData = searchData.split(' - ');
-  if(splitedData.length == 6) {
+  var splitedData = searchData.split(' ');
+  if(splitedData.length == 2) {
     var data = {};
     data['generic_name'] = splitedData[0];
-    data['brand_name'] = splitedData[1];
-    data['form'] = splitedData[2];
-    data['strength'] = splitedData[3];
-    data['strength_unit'] = splitedData[4];
-    data['manufacturer'] = splitedData[5];
+    data['form'] = splitedData[1];
     // console.log(data);
     $.ajax({
       type: "post",
-      url: url + '/getavailablepharmacies',
+      url: url + '/getmedicinebygenericandform',
       data : data,
       success:  function(result){  
         console.log(result);
         if(result.message == "success") {
-          if(result.pharmacies.length > 0) {
+          if(result.medicines.length > 0) {
             $('#search-result-table').removeClass('hidden');
             var html = '';
-            for (var i = 0; i < result.pharmacies.length; i++) {
+            for (var i = 0; i < result.medicines.length; i++) {
               var html = html + '<tr class="tr_search_row table-result-search">' +
-                '<td class="td_search">' + result.pharmacies[i].NAME + '</td>' +
-                '<td class="td_search">' + result.pharmacies[i].PHONE_NUMBER + '</td>' +
-                '<td class="td_search">' + result.pharmacies[i].EMAIL + '</td>' +
-                '<td class="td_search">' + result.pharmacies[i].STREET + '</td>' +
-                '<td class="td_search">' + result.pharmacies[i].CITY + '</td>' +
-                '<td class="td_search">' + result.pharmacies[i].STATE + '</td>' +
-                '<td class="td_search">' + result.pharmacies[i].ZIP + '</td>' +
-                '<td class="td_search">' + result.pharmacies[i].OPEN_FROM + '</td>' +
-                '<td class="td_search">' + result.pharmacies[i].OPEN_TO + '</td>' +
-                '<td class="td_search">' + result.pharmacies[i].PRICE_PER_PACK + '</td>' +
-                '<td class="td_search">' + result.pharmacies[i].LAST_UPDATE + '</td>' +
+                '<td class="td_search">' + result.medicines[i].GENERIC_NAME + '</td>' +
+                '<td class="td_search">' + result.medicines[i].BRAND_NAME + '</td>' +
+                '<td class="td_search">' + result.medicines[i].FORM + '</td>' +
+                '<td class="td_search">' + result.medicines[i].STRENGTH + '</td>' +
+                '<td class="td_search">' + result.medicines[i].STRENGTH_UNIT + '</td>' +
+                '<td class="td_search">' + result.medicines[i].STRENGTH +' ' + result.medicines[i].STRENGTH_UNIT + '</td>' +
+                '<td class="td_search">' + result.medicines[i].MANUFACTURER + '</td>' +
+                '<td class="td_search"><button class="btn btn-primary" onclick="showPharmacies(' + result.medicines[i].ID + ')"> Show Pharmacies </button></td>' +
               '</tr>';
             }
             $('#search-result').html(html); 
@@ -320,4 +313,50 @@ function search() {
     console.log('failed');
   }
 
+}
+
+function showPharmacies(id) {
+  $('#pharmacies-result').html();
+  $('.error-form').remove();
+  var data = {};
+  $('#loadingModal').modal('show');
+  $.ajax({
+    type: "post",
+    url: url + '/getavailablepharmaciesbyid',
+    data : {id: id},
+    success:  function(data){
+      console.log(data);        
+      $('#loadingModal').modal('hide');
+      $('#showPharmacies').modal('show');
+      if(data.message == "success") {
+          if(data.pharmacies.length > 0) {
+            var html = '';
+            for (var i = 0; i < data.pharmacies.length; i++) {
+              var html = html + '<tr class="tr_search_row table-result-search">' +
+                '<td class="td_search">' + data.pharmacies[i].NAME + '</td>' +
+                '<td class="td_search">' + data.pharmacies[i].PHONE_NUMBER + '</td>' +
+                '<td class="td_search">' + data.pharmacies[i].EMAIL + '</td>' +
+                '<td class="td_search">' + data.pharmacies[i].STREET + '</td>' +
+                '<td class="td_search">' + data.pharmacies[i].CITY + '</td>' +
+                '<td class="td_search">' + data.pharmacies[i].STATE + '</td>' +
+                '<td class="td_search">' + data.pharmacies[i].ZIP + '</td>' +
+                '<td class="td_search">' + data.pharmacies[i].OPEN_FROM + '</td>' +
+                '<td class="td_search">' + data.pharmacies[i].OPEN_TO + '</td>' +
+                '<td class="td_search">' + data.pharmacies[i].PRICE_PER_PACK + '</td>' +
+                '<td class="td_search">' + data.pharmacies[i].LAST_UPDATE + '</td>' +
+              '</tr>';
+            }
+            $('#pharmacies-result').html(html); 
+          }
+          else {
+            var html = '<td style="text-align: center;" valign="top" colspan="11" class="empty_table td_search">No available pharmacies currently</td>';
+            $('#pharmacies-result').html(html); 
+          }
+        }
+        else {
+          var html = '<td style="text-align: center;" valign="top" colspan="11" class="empty_table td_search">No available pharmacies currently</td>';
+          $('#pharmacies-result').html(html);             
+        }
+    }
+  });
 }

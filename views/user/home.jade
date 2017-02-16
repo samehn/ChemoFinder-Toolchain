@@ -25,17 +25,14 @@ block content
       table#table_search
         thead
           tr.tr_search
-            th.th_search Name
-            th.th_search Phone
-            th.th_search Email
-            th.th_search Street
-            th.th_search City
-            th.th_search State
-            th.th_search ZIP
-            th.th_search Open From
-            th.th_search Open To
-            th.th_search Price
-            th.th_search Last Update
+            th.th_search Generic Name
+            th.th_search Brand Name
+            th.th_search Form
+            th.th_search Strength
+            th.th_search Strength Unit
+            th.th_search Pack Type
+            th.th_search Manufacturer
+            th.th_search Pharmacies
         tbody#search-result       
 block modals             
   #Login.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
@@ -188,6 +185,37 @@ block modals
         // /.modal-body
         .modal-footer
           button.form-control.btn.btn-primary(onclick='location.reload();') OK
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal
+  #showPharmacies.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          h4#myModalLabel.modal-title Pharmacies
+        // /.modal-header
+        .modal-body.ovf-auto
+          table#table_pharmacies
+            thead
+              tr.tr_search
+                th.th_search Name
+                th.th_search Phone
+                th.th_search Email
+                th.th_search Street
+                th.th_search City
+                th.th_search State
+                th.th_search ZIP
+                th.th_search Open From
+                th.th_search Open To
+                th.th_search Price
+                th.th_search Last Update
+            tbody#pharmacies-result
+              td.empty_table.td_search(style="text-align: center;", valign="top", colspan="11") No available pharmacies currently
+        // /.modal-body
+        .modal-footer
+          button.form-control.btn.btn-primary(type='button', data-dismiss='modal', aria-hidden='true') OK
         // /.modal-footer
       // /.modal-content
     // /.modal-dialog

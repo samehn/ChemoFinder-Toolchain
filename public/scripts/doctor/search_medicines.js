@@ -25,7 +25,7 @@ $( function() {
     });
     $.ajax({
         type: "get",
-        url: url + '/getapprovedmedicines',
+        url: url + '/doctor/getapprovedmedicines',
         success:  function(data){
             console.log(data);
             var availableTags = [];
