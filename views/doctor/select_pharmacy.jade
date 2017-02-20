@@ -1,0 +1,143 @@
+extends ../layout
+
+block headers
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Search Medicines", onclick="location.href='" + base + "/doctor';")
+    i.glyphicon.glyphicon-search
+    span.main-actions|                         Search Medicines
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Profile", onclick="location.href='" + base + "/doctor/profile';")
+    i.glyphicon.glyphicon-user
+    span.main-actions|                         Profile
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Logout", onclick="location.href='" + base + "/logout';")
+    i.glyphicon.glyphicon-log-out
+    span.main-actions|                         Logout
+
+block content
+  .page__subtitle.ng-binding Search Medicines
+  .welcome__home-buttons
+    tab-bar.ng-isolate-scope
+      .tab-bar.mg-btm-30
+        // ngRepeat: tab in tabBarCtrl.tabs
+        button.tab-bar__tab.ng-binding.ng-scope.tab-bar__aval-tab
+          | 1. Treatment Center
+        // end ngRepeat: tab in tabBarCtrl.tabs
+        button.tab-bar__tab.ng-binding.ng-scope.tab-bar__aval-tab
+          | 2. Select Medicine
+        // end ngRepeat: tab in tabBarCtrl.tabs
+        button.tab-bar__tab.ng-binding.ng-scope.tab-bar__aval-tab.tab-bar__active-tab
+          | 3. Select Pharmacy
+        // end ngRepeat: tab in tabBarCtrl.tabs
+        button.tab-bar__tab.ng-binding.ng-scope
+          | 4. Shopping List
+        // end ngRepeat: tab in tabBarCtrl.tabs
+    h4.table-title Select Pharmacy
+    p You have selected 
+      strong #{medicine[0].GENERIC_NAME} #{medicine[0].FORM} #{medicine[0].STRENGTH} #{medicine[0].STRENGTH_UNIT} 
+      | from 
+      strong #{medicine[0].MANUFACTURER} 
+      | this is available in the following pharmacies
+    div.div_search
+      table.table_search
+        thead
+          tr.tr_search
+            th.th_search Select
+            th.th_search Name
+            th.th_search Phone
+            th.th_search Email
+            th.th_search Street
+            th.th_search City
+            th.th_search State
+            th.th_search ZIP
+            th.th_search Open Form
+            th.th_search Open To
+            th.th_search Price/Pack
+            th.th_search Expiry Date
+            th.th_search Pack Size
+            th.th_search Last Update
+        tbody#unselected-pharmacy-body
+        -  if(pharmacies.length > 0) {
+            -  for( var i = 0, len = pharmacies.length; i < len; i++ ) {
+                  tr.tr_search_row.unselected-pharmacy(data-id=pharmacies[i].ID)
+                    td.td_search
+                      button.form-control.btn.btn-primary(onclick='addMedicine(this)') Add
+                    td.td_search #{pharmacies[i].NAME}
+                    td.td_search #{pharmacies[i].PHONE_NUMBER}
+                    td.td_search.break-words #{pharmacies[i].EMAIL}
+                    td.td_search #{pharmacies[i].STREET}
+                    td.td_search #{pharmacies[i].CITY}
+                    td.td_search #{pharmacies[i].STATE}
+                    td.td_search #{pharmacies[i].ZIP}
+                    td.td_search #{pharmacies[i].OPEN_FROM}
+                    td.td_search #{pharmacies[i].OPEN_TO}
+                    td.td_search #{pharmacies[i].PRICE_PER_PACK}
+                    td.td_search #{pharmacies[i].EXPIRY_DATE}
+                    td.td_search #{pharmacies[i].PACK_SIZE}
+                    td.td_search #{pharmacies[i].LAST_UPDATE}
+            - }
+        -  }
+        -  else {    
+              td.empty_table.td_search(style="text-align: center;", valign="top", colspan="14") There are no available pharmacies that had this medicine with this quantity
+        -  }
+    h4.table-title.mg-top-20 Selected Pharmacies
+    div.div_search
+      table#pharmacies_table.table_search
+        thead
+          tr.tr_search
+            th.th_search Action
+            th.th_search Name
+            th.th_search Phone
+            th.th_search Email
+            th.th_search Street
+            th.th_search City
+            th.th_search State
+            th.th_search ZIP
+            th.th_search Open Form
+            th.th_search Open To
+            th.th_search Price/Pack
+            th.th_search Expiry Date
+            th.th_search Pack Size
+            th.th_search Last Update
+        tbody#selected-pharmacy-body
+          tr.tr_search
+            td.empty_table.td_search(style="text-align: center;", valign="top", colspan="14") No pharmacy has been chosen yet        
+    button#next-btn.btn.btn-primary.pull-right.mg-btm-70.mg-top-20(onclick="nextStep()") Next              
+block modals
+  #noPharmacies.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h4#myModalLabel.modal-title Search Medicines
+        // /.modal-header
+        .modal-body
+          p Unfortunately your medicine is not avaliable in any pharmacy, Do you want to add it to the shopping list anyway ?
+        // /.modal-body
+        .modal-footer
+          button.btn.btn-primary(type='button', onclick='saveMedicine()') Yes
+          button.btn.btn-primary(type='button', onclick='continueSearch()') No
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal
+  #completeSearch.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h4#myModalLabel.modal-title Search Medicines
+        // /.modal-header
+        .modal-body
+          p Do you want to select another medicine ? 
+        // /.modal-body
+        .modal-footer
+          button.btn.btn-primary(type='button', onclick='selectAnotherMedicine()') Yes
+          button.btn.btn-primary(type='button', onclick='goShoppingList()') No
+  #loadingModal.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog.modal-sm
+      .modal-content
+        .modal-body
+          h2
+            span.glyphicon.glyphicon-refresh.glyphicon-refresh-animate
+            |   Loading...        
+block scripts
+  script(type='text/javascript', src=base+'/scripts/doctor/select_pharmacy.js')
+    

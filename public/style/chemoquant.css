@@ -1278,6 +1278,8 @@ regimen-dist {
     -o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
     transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
 }
+.break-words{word-break: break-all;}
+.qty-box{    width: 80px; float: right;}
 .search_hint{text-align: left; color: gray; margin: 10 10}
 .wrapping{word-wrap: break-word;}
 .btn-gray{background-color: lightgray;}

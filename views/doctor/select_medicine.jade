@@ -1,0 +1,66 @@
+extends ../layout
+
+block headers
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Search Medicines", onclick="location.href='" + base + "/doctor';")
+    i.glyphicon.glyphicon-search
+    span.main-actions|                         Search Medicines
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Profile", onclick="location.href='" + base + "/doctor/profile';")
+    i.glyphicon.glyphicon-user
+    span.main-actions|                         Profile
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Logout", onclick="location.href='" + base + "/logout';")
+    i.glyphicon.glyphicon-log-out
+    span.main-actions|                         Logout
+
+block content
+  .page__subtitle.ng-binding Search Medicines
+  .welcome__home-buttons
+    tab-bar.ng-isolate-scope
+      .tab-bar.mg-btm-30
+        // ngRepeat: tab in tabBarCtrl.tabs
+        button.tab-bar__tab.ng-binding.ng-scope.tab-bar__aval-tab
+          | 1. Treatment Center
+        // end ngRepeat: tab in tabBarCtrl.tabs
+        button.tab-bar__tab.ng-binding.ng-scope.tab-bar__aval-tab.tab-bar__active-tab
+          | 2. Select Medicine
+        // end ngRepeat: tab in tabBarCtrl.tabs
+        button.tab-bar__tab.ng-binding.ng-scope
+          | 3. Select Pharmacy
+        // end ngRepeat: tab in tabBarCtrl.tabs
+        button.tab-bar__tab.ng-binding.ng-scope
+          | 4. Shopping List
+        // end ngRepeat: tab in tabBarCtrl.tabs
+    h4.table-title Select Medicine
+    p.search_hint Note: the list of medicines below are the medicines that are not available in your treatment center currently
+    .row
+      .col-xs-4
+        select#quantity-select.qty-20.qty-box.large-form-control
+      .col-md-4.col-xs-6
+        select#medicine-select.large-form-control(onchange="selectMedicine(this)")
+          option(value='') Select Medicine
+          -  if(medicines.length > 0) { 
+            -  for (var i = 0; i < medicines.length; i++) {
+                option #{medicines[i].GENERIC_NAME} #{medicines[i].FORM} 
+            - } 
+        - }
+    h4.table-title Medicine Options
+    div.div_search
+      table#medicine_details_table.table_search
+        thead
+          tr
+            th.th_search #
+            th.th_search Standardized Name
+            th.th_search Brand Name
+            th.th_search Form
+            th.th_search Strength
+            th.th_search Strength Unit
+            th.th_search Manufacturer
+        tbody#medicinesDetails
+          tr.tr_search
+            td.empty_table.td_search(style="text-align: center;", valign="top", colspan="7") No medicines are chosen yet
+    button#next-btn.btn.btn-primary.pull-right.mg-btm-70.mg-top-20(onclick="nextStep()") Next              
+
+block scripts
+  script(type='text/javascript', src=base+'/scripts/doctor/select_medicine.js')
+    

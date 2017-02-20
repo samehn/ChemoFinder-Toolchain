@@ -2852,68 +2852,68 @@ app.get('/doctor/selectpharmacies', checkSignIn, function(req, res) {
     }
 });
 
-app.get('/doctor/shoppinglist', checkSignIn, function(req, res) {
-    if(req.param('ids') && req.param('qs') && req.param('t'))
-    {
-        var idsArray = req.param('ids').split('-');
-        var qsArray = req.param('qs').split('-');
-        var medicinePharmacyIds =[];
-        var treatmentCenter = req.param('t');
+// app.get('/doctor/shoppinglist', checkSignIn, function(req, res) {
+//     if(req.param('ids') && req.param('qs') && req.param('t'))
+//     {
+//         var idsArray = req.param('ids').split('-');
+//         var qsArray = req.param('qs').split('-');
+//         var medicinePharmacyIds =[];
+//         var treatmentCenter = req.param('t');
 
-        var validIds = idsArray.every(function checkInteger(id) { return Number.isInteger(parseInt(id));});
-        var validQs = qsArray.every(function checkInteger(quantity) { return Number.isInteger(parseInt(quantity));});
-        var validTreatmentCenter = Number.isInteger(parseInt(treatmentCenter));
-        var validmedicinePharmacyIds = true;
-        if(req.param('p')) {
-            medicinePharmacyIds = req.param('p').split('-');
-            validmedicinePharmacyIds = medicinePharmacyIds.every(function checkInteger(record) { return Number.isInteger(parseInt(record.split('_')[0])) && Number.isInteger(parseInt(record.split('_')[1]));});
-        }
-        var query = "SELECT * FROM DASH5082.USER  WHERE ID =" + parseInt(treatmentCenter) + " AND TYPE='TREATMENT CENTER'";
-        var treatmentCenterDetails = db.dbQuerySync(query);
-        if(idsArray.length == qsArray.length && validIds && validQs && validTreatmentCenter && validmedicinePharmacyIds) {
-            var medicines = [];
-            var treatmentCenterMedicines = [];
-            var pharmacyDetails = [];
-            for (var i = 0; i < idsArray.length; i++) {
-                var query = "SELECT * FROM DASH5082.MEDICINE  WHERE ID =" + parseInt(idsArray[i]); 
-                var medicine = db.dbQuerySync(query);
-                var obj = {}
-                obj['quantity'] = qsArray[i];
-                obj['medicine'] = medicine[0];
-                medicines.push(obj);
-                var query = "SELECT M.GENERIC_NAME, M.BRAND_NAME, M.FORM, M.STRENGTH, M.STRENGTH_UNIT, M.MANUFACTURER, SL.PRICE_PER_PACK, SL.EXPIRY_DATE, SL.PACK_SIZE, SL.LAST_UPDATE FROM USER U JOIN STOCK_LIST SL ON U.ID = SL.PHARMACY_ID JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE U.ID =" + treatmentCenter + " AND M.ID =" + parseInt(idsArray[i]) + " AND SL.AVAILABLE_STOCK >=" + qsArray[i]; 
-                var treatmentMedicine = db.dbQuerySync(query);
-                if(treatmentMedicine.length != 0) {
-                    var obj = {}
-                    obj['quantity'] = qsArray[i];
-                    obj['medicine'] = treatmentMedicine[0];
-                    treatmentCenterMedicines.push(obj);   
-                }
-            }
-            for (var i = 0; i < medicinePharmacyIds.length; i++) {
-                var medicineId = medicinePharmacyIds[i].split('_')[0];
-                var pharmacyId = medicinePharmacyIds[i].split('_')[1];
-                var query = "SELECT M.GENERIC_NAME, M.BRAND_NAME, M.FORM, M.STRENGTH, M.STRENGTH_UNIT, M.MANUFACTURER, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, SL.PRICE_PER_PACK, SL.EXPIRY_DATE, SL.PACK_SIZE, SL.LAST_UPDATE FROM USER U JOIN STOCK_LIST SL ON U.ID = SL.PHARMACY_ID JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE U.ID =" + pharmacyId + " AND M.ID =" + medicineId;
-                var pharmacy = db.dbQuerySync(query);
-                if(pharmacy.length != 0) {
-                    var obj = {};
-                    obj['details'] = pharmacy[0];
-                    pharmacyDetails.push(obj);   
-                }
-            }
-            var base = req.protocol + '://' + req.get('host');
-            res.render('doctor/shopping_list',{base:base, medicines:medicines, treatmentCenterDetails: treatmentCenterDetails[0], treatmentCenterMedicines: treatmentCenterMedicines, pharmacyDetails: pharmacyDetails});  
-        }
-        else
-        {
-            res.send("404 Not Found");
-        }
-    }
-    else 
-    {
-        res.send("404 Not Found");
-    }    
-});
+//         var validIds = idsArray.every(function checkInteger(id) { return Number.isInteger(parseInt(id));});
+//         var validQs = qsArray.every(function checkInteger(quantity) { return Number.isInteger(parseInt(quantity));});
+//         var validTreatmentCenter = Number.isInteger(parseInt(treatmentCenter));
+//         var validmedicinePharmacyIds = true;
+//         if(req.param('p')) {
+//             medicinePharmacyIds = req.param('p').split('-');
+//             validmedicinePharmacyIds = medicinePharmacyIds.every(function checkInteger(record) { return Number.isInteger(parseInt(record.split('_')[0])) && Number.isInteger(parseInt(record.split('_')[1]));});
+//         }
+//         var query = "SELECT * FROM DASH5082.USER  WHERE ID =" + parseInt(treatmentCenter) + " AND TYPE='TREATMENT CENTER'";
+//         var treatmentCenterDetails = db.dbQuerySync(query);
+//         if(idsArray.length == qsArray.length && validIds && validQs && validTreatmentCenter && validmedicinePharmacyIds) {
+//             var medicines = [];
+//             var treatmentCenterMedicines = [];
+//             var pharmacyDetails = [];
+//             for (var i = 0; i < idsArray.length; i++) {
+//                 var query = "SELECT * FROM DASH5082.MEDICINE  WHERE ID =" + parseInt(idsArray[i]); 
+//                 var medicine = db.dbQuerySync(query);
+//                 var obj = {}
+//                 obj['quantity'] = qsArray[i];
+//                 obj['medicine'] = medicine[0];
+//                 medicines.push(obj);
+//                 var query = "SELECT M.GENERIC_NAME, M.BRAND_NAME, M.FORM, M.STRENGTH, M.STRENGTH_UNIT, M.MANUFACTURER, SL.PRICE_PER_PACK, SL.EXPIRY_DATE, SL.PACK_SIZE, SL.LAST_UPDATE FROM USER U JOIN STOCK_LIST SL ON U.ID = SL.PHARMACY_ID JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE U.ID =" + treatmentCenter + " AND M.ID =" + parseInt(idsArray[i]) + " AND SL.AVAILABLE_STOCK >=" + qsArray[i]; 
+//                 var treatmentMedicine = db.dbQuerySync(query);
+//                 if(treatmentMedicine.length != 0) {
+//                     var obj = {}
+//                     obj['quantity'] = qsArray[i];
+//                     obj['medicine'] = treatmentMedicine[0];
+//                     treatmentCenterMedicines.push(obj);   
+//                 }
+//             }
+//             for (var i = 0; i < medicinePharmacyIds.length; i++) {
+//                 var medicineId = medicinePharmacyIds[i].split('_')[0];
+//                 var pharmacyId = medicinePharmacyIds[i].split('_')[1];
+//                 var query = "SELECT M.GENERIC_NAME, M.BRAND_NAME, M.FORM, M.STRENGTH, M.STRENGTH_UNIT, M.MANUFACTURER, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, SL.PRICE_PER_PACK, SL.EXPIRY_DATE, SL.PACK_SIZE, SL.LAST_UPDATE FROM USER U JOIN STOCK_LIST SL ON U.ID = SL.PHARMACY_ID JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE U.ID =" + pharmacyId + " AND M.ID =" + medicineId;
+//                 var pharmacy = db.dbQuerySync(query);
+//                 if(pharmacy.length != 0) {
+//                     var obj = {};
+//                     obj['details'] = pharmacy[0];
+//                     pharmacyDetails.push(obj);   
+//                 }
+//             }
+//             var base = req.protocol + '://' + req.get('host');
+//             res.render('doctor/shopping_list',{base:base, medicines:medicines, treatmentCenterDetails: treatmentCenterDetails[0], treatmentCenterMedicines: treatmentCenterMedicines, pharmacyDetails: pharmacyDetails});  
+//         }
+//         else
+//         {
+//             res.send("404 Not Found");
+//         }
+//     }
+//     else 
+//     {
+//         res.send("404 Not Found");
+//     }    
+// });
 
 app.get('/doctor/getsearchresults', checkSignIn, function(req, res){
     if(req.param('ids') && req.param('qs'))
@@ -3310,7 +3310,7 @@ app.post('/user/changepassword', function(req, res){
 });
 
 app.post('/pharmacy/getstockrecord', function (req, res) {
-    if(req.body.stock_id, Number.isInteger(parseInt(req.body.stock_id))) {
+    if(Number.isInteger(parseInt(req.body.stock_id))) {
         var query = "SELECT * FROM DASH5082.STOCK_LIST SL JOIN MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE SL.ID =" + req.body.stock_id + " AND SL.PHARMACY_ID =" + req.session.user_id + ";";
         db.dbQuery(query, function(result) {
             console.log(result);
@@ -3368,18 +3368,188 @@ app.get('/protected_page', checkSignIn, function(req, res){
 });
 
 
+// app.get('/doctor', checkSignIn, function(req, res){    
+//     var query = "SELECT * from DASH5082.MEDICINE WHERE SRA IS NOT NULL";
+//     db.dbQuery(query, function(result) {
+//         var base = req.protocol + '://' + req.get('host');
+//         res.render('doctor/search_medicines', { base: base, medicines:result });  
+//     });
+// });
+app.get('/doctor/shoppinglist', checkSignIn, function(req, res) {
+    var treatmentCenter = req.param('t');
+   if(Number.isInteger(parseInt(treatmentCenter))) {
+        var query = "SELECT * FROM DASH5082.USER WHERE TYPE = 'TREATMENT CENTER' AND ID=" + treatmentCenter;
+        var treatmentCenterDetails = db.dbQuerySync(query);
+        if(treatmentCenterDetails.length > 0) {
+            var base = req.protocol + '://' + req.get('host');
+            res.render('doctor/medicines_shopping_list', {base:base, treatmentCenter:treatmentCenter, shoppinglist: req.session.shoppinglist});
+        }
+        else {
+            res.send("404 Not Found");
+        }
+   }
+   else {
+        res.send("404 Not Found");
+   }
+});
+app.post('/doctor/savemedicinesession', checkSignIn, function(req, res) {
+    var jsonObj = {};
+    var valid = true;
+    
+    if(!req.body.medicine && Number.isInteger(parseInt(req.body.medicine)))
+    {
+        jsonObj['medicine_error'] = "Medicine is required";
+        valid = false;
+    }
+
+    if(!req.body.quantity && Number.isInteger(parseInt(req.body.quantity)))
+    {
+        jsonObj['quantity_error'] = "Quantity is required";
+        valid = false;
+    }
+    if(req.body.pharmacies) 
+    {
+        if(req.body.pharmacies.length > 0){
+            var validPharmacies = req.body.pharmacies.every(function checkInteger(pharmacy) { return Number.isInteger(parseInt(pharmacy));});
+            if(!validPharmacies) {
+                jsonObj['pharmacies_error'] = "Pharmacies have to be integer";
+                valid = false;
+            }   
+        }
+    }
+
+    if(valid) {
+        var query = "SELECT * FROM DASH5082.MEDICINE WHERE SRA IS NOT NULL AND ID=" + req.body.medicine;
+        var medicine = db.dbQuerySync(query);
+        if(medicine.length > 0) {
+            var item = {};
+            item['medicine'] = medicine[0];
+            item['quantity'] = req.body.quantity;
+            if(req.body.pharmacies) {
+                var pharmacies = [];
+                for (var i = 0; i < req.body.pharmacies.length; i++) {
+                    var query = "SELECT U.ID AS ID, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, S.LAST_UPDATE FROM DASH5082.MEDICINE M JOIN STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE M.SRA IS NOT NULL AND U.TYPE='PHARMACY' AND M.ID =" + parseInt(req.body.medicine) + " AND U.ID =" + parseInt(req.body.pharmacies[i]);
+                    var pharmacy = db.dbQuerySync(query);
+                    if(pharmacy.length > 0) {
+                        pharmacies.push(pharmacy[0]);
+                    }
+                }
+                item['pharmacies'] = pharmacies;    
+            }
+            
+            if(req.session.shoppinglist == null) {
+                req.session.shoppinglist = [];
+            }
+            req.session.shoppinglist.push(item);
+            res.send({message:"success", shoppinglist: req.session.shoppinglist});
+        }
+        else {
+            jsonObj['message'] = "failed";
+            res.send(jsonObj);    
+        }
+    }
+    else {
+        jsonObj['message'] = "failed";
+        res.send(jsonObj);
+    } 
+});
+
+app.get('/doctor/selectpharmacy', checkSignIn, function(req, res) {
+   var treatmentCenter = req.param('t');
+   var quantity = req.param('q');
+   var medicine = req.param('m');
+   if(Number.isInteger(parseInt(treatmentCenter)) && Number.isInteger(parseInt(quantity)) && Number.isInteger(parseInt(medicine))) {
+        var query = "SELECT * FROM DASH5082.USER WHERE TYPE = 'TREATMENT CENTER' AND ID=" + treatmentCenter;
+        var treatmentCenterDetails = db.dbQuerySync(query);
+        var query = "SELECT * FROM DASH5082.MEDICINE WHERE SRA IS NOT NULL AND ID=" + medicine;
+        var medicineInfo = db.dbQuerySync(query);
+        if(treatmentCenterDetails.length > 0 && medicineInfo.length > 0) {
+            var query = "SELECT U.ID AS ID, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, S.LAST_UPDATE FROM DASH5082.MEDICINE M JOIN STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE M.SRA IS NOT NULL AND U.TYPE='PHARMACY' AND M.ID =" + parseInt(medicine) + " AND S.AVAILABLE_STOCK >=" + parseInt(quantity) + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)";
+            var pharmacies = db.dbQuerySync(query);
+            var base = req.protocol + '://' + req.get('host');
+            res.render('doctor/select_pharmacy', { base: base, medicine:medicineInfo, pharmacies:pharmacies });
+        }
+        else {
+            res.send("404 Not Found");
+        }
+    }
+    else {
+        res.send("404 Not Found");
+    }  
+});
+
+app.post('/doctor/selectmedicinedetails', checkSignIn, function(req, res) {
+    var jsonObj = {};
+    var valid = true;
+    
+    if(!req.body.generic_name)
+    {
+        jsonObj['generic_name_error'] = "Generic Name is required";
+        valid = false;
+    }
+
+    if(!req.body.form)
+    {
+        jsonObj['form_error'] = "Form is required";
+        valid = false;
+    }
+
+    if(valid) {
+        var query = "SELECT * from DASH5082.MEDICINE WHERE GENERIC_NAME ='" + req.body.generic_name + "' AND FORM = '" + req.body.form + "';";           
+        var medicines = db.dbQuerySync(query);
+        var result = {message: "success"};
+        result['medicines'] = medicines; 
+        res.send(result);
+    }
+    else {
+        jsonObj['message'] = "failed";
+        res.send(jsonObj);
+    }
+});
+
+app.get('/doctor/selectmedicine', checkSignIn, function(req, res){
+   var treatmentCenter = req.param('t');
+   if(Number.isInteger(parseInt(treatmentCenter))) {
+        var query = "SELECT * FROM DASH5082.USER WHERE TYPE = 'TREATMENT CENTER' AND ID=" + treatmentCenter;
+        var treatmentCenterDetails = db.dbQuerySync(query);
+        if(treatmentCenterDetails.length > 0) {
+            var query = "SELECT DISTINCT GENERIC_NAME, FORM FROM MEDICINE WHERE SRA IS NOT NULL AND (GENERIC_NAME, FORM) NOT IN (SELECT DISTINCT M.GENERIC_NAME, FORM FROM DASH5082.MEDICINE M JOIN STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE U.ID = "  + treatmentCenter + ")";
+            // var query = "SELECT DISTINCT GENERIC_NAME, FORM FROM( SELECT GENERIC_NAME, FORM, STRENGTH, STRENGTH_UNIT, BRAND_NAME, MANUFACTURER FROM MEDICINE WHERE SRA IS NOT NULL AND (GENERIC_NAME, FORM, STRENGTH, STRENGTH_UNIT, BRAND_NAME, MANUFACTURER) NOT IN (SELECT M.GENERIC_NAME, FORM, M.STRENGTH, M.STRENGTH_UNIT, M.BRAND_NAME, M.MANUFACTURER FROM DASH5082.MEDICINE M JOIN STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE U.ID = " + treatmentCenter + "))";
+            var medicines = db.dbQuerySync(query);
+            var base = req.protocol + '://' + req.get('host');
+            res.render('doctor/select_medicine', { base: base, medicines:medicines });  
+        }
+        else {
+            res.send("404 Not Found");
+        }
+   }
+   else {
+        res.send("404 Not Found");
+   }
+});
+
+app.post('/doctor/gettreatmentcenter', checkSignIn, function(req, res){
+    if(Number.isInteger(parseInt(req.body.id))) {
+        var query = "SELECT * FROM DASH5082.USER WHERE TYPE = 'TREATMENT CENTER' AND ID=" + req.body.id;
+        var treatmentCenter = db.dbQuerySync(query);
+        if(treatmentCenter.length > 0) {
+            res.send({ message: 'success', treatmentCenter: treatmentCenter});
+        }
+        else {
+            res.send({message:'failed'});
+        }
+    }
+    else {
+        res.send({message: 'failed'});
+    }
+});
+
 app.get('/doctor', checkSignIn, function(req, res){
-    // console.log(req.session);
-    // req.session.user_id = "1000";
-    // console.log(req.session);
-    var query = "SELECT * from DASH5082.MEDICINE WHERE SRA IS NOT NULL";
-    db.dbQuery(query, function(result) {
-        //console.log(result[0].ID);
-        var base = req.protocol + '://' + req.get('host');
-        // redirect with data
-        //res.send({data: result});
-        res.render('doctor/search_medicines', { base: base, medicines:result });  
-    });
+    req.session.shoppinglist = null;    
+    var base = req.protocol + '://' + req.get('host');
+    var query = "SELECT * FROM DASH5082.USER WHERE TYPE = 'TREATMENT CENTER'";
+    var treatmentCenters = db.dbQuerySync(query);
+    res.render('doctor/select_treatment_center', { base: base, treatmentCenters: treatmentCenters});
 });
 
 app.use('/doctor', function(err, req, res, next){
