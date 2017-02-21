@@ -32,54 +32,100 @@ block content
           | 4. Shopping List
         // end ngRepeat: tab in tabBarCtrl.tabs
     h4.table-title Shopping List
-      -  if (shoppinglist.length > 0) {
-        -  for (var i = 0; i < shoppinglist.length; i++) {
-            h5.medicine-title x#{shoppinglist[i].quantity} #{shoppinglist[i].medicine.GENERIC_NAME} #{shoppinglist[i].medicine.BRAND_NAME} #{shoppinglist[i].medicine.FORM} #{shoppinglist[i].medicine.STRENGTH} #{shoppinglist[i].medicine.STRENGTH_UNIT} #{shoppinglist[i].medicine.MANUFACTURER}
-            div.div_search
-                table.table_search
-                  thead
-                    tr.tr_search
-                      th.th_search Name
-                      th.th_search Phone
-                      th.th_search Email
-                      th.th_search Street
-                      th.th_search City
-                      th.th_search State
-                      th.th_search ZIP
-                      th.th_search Open Form
-                      th.th_search Open To
-                      th.th_search Expiry Date
-                      th.th_search Pack Size
-                      th.th_search Price/Pack
-                  tbody
-                    -  if(shoppinglist[i].pharmacies && shoppinglist[i].pharmacies.length > 0) {
-                        -  for (var j = 0; j < shoppinglist[i].pharmacies.length; j++) {
-                            tr.tr_search_row
-                              td.td_search #{shoppinglist[i].pharmacies[j].NAME}
-                              td.td_search #{shoppinglist[i].pharmacies[j].PHONE_NUMBER}
-                              td.td_search #{shoppinglist[i].pharmacies[j].EMAIL}
-                              td.td_search #{shoppinglist[i].pharmacies[j].STREET}
-                              td.td_search #{shoppinglist[i].pharmacies[j].CITY}
-                              td.td_search #{shoppinglist[i].pharmacies[j].STATE}
-                              td.td_search #{shoppinglist[i].pharmacies[j].ZIP}
-                              td.td_search #{shoppinglist[i].pharmacies[j].OPEN_FROM}
-                              td.td_search #{shoppinglist[i].pharmacies[j].OPEN_TO}
-                              td.td_search #{shoppinglist[i].pharmacies[j].EXPIRY_DATE}
-                              td.td_search #{shoppinglist[i].pharmacies[j].PACK_SIZE}
-                              td.td_search #{shoppinglist[i].pharmacies[j].PRICE_PER_PACK}
-                        -  }  	
-                    - }
-                    -  else {
-                        tr.tr_search_row
-                          td.empty_table.td_search(style="text-align: center;", valign="top", colspan="12") No available pharmacies
-                    -  }                 
-        -  }
-      -  }                    
+    p Your treatment center is 
+      strong #{treatmentCenter[0].NAME}
+    -  if (shoppinglist.length > 0) {
+      -  for (var i = 0; i < shoppinglist.length; i++) {
+          h5.medicine-title x#{shoppinglist[i].quantity} #{shoppinglist[i].medicine.GENERIC_NAME} #{shoppinglist[i].medicine.BRAND_NAME} #{shoppinglist[i].medicine.FORM} #{shoppinglist[i].medicine.STRENGTH} #{shoppinglist[i].medicine.STRENGTH_UNIT} #{shoppinglist[i].medicine.MANUFACTURER}
+          div.div_search
+              table.table_search
+                thead
+                  tr.tr_search
+                    th.th_search Name
+                    th.th_search Phone
+                    th.th_search Email
+                    th.th_search Street
+                    th.th_search City
+                    th.th_search State
+                    th.th_search ZIP
+                    th.th_search Open Form
+                    th.th_search Open To
+                    th.th_search Expiry Date
+                    th.th_search Pack Size
+                    th.th_search Price/Pack
+                tbody
+                  -  if(shoppinglist[i].pharmacies && shoppinglist[i].pharmacies.length > 0) {
+                      -  for (var j = 0; j < shoppinglist[i].pharmacies.length; j++) {
+                          tr.tr_search_row
+                            td.td_search #{shoppinglist[i].pharmacies[j].NAME}
+                            td.td_search #{shoppinglist[i].pharmacies[j].PHONE_NUMBER}
+                            td.td_search #{shoppinglist[i].pharmacies[j].EMAIL}
+                            td.td_search #{shoppinglist[i].pharmacies[j].STREET}
+                            td.td_search #{shoppinglist[i].pharmacies[j].CITY}
+                            td.td_search #{shoppinglist[i].pharmacies[j].STATE}
+                            td.td_search #{shoppinglist[i].pharmacies[j].ZIP}
+                            td.td_search #{shoppinglist[i].pharmacies[j].OPEN_FROM}
+                            td.td_search #{shoppinglist[i].pharmacies[j].OPEN_TO}
+                            td.td_search #{shoppinglist[i].pharmacies[j].EXPIRY_DATE}
+                            td.td_search #{shoppinglist[i].pharmacies[j].PACK_SIZE}
+                            td.td_search #{shoppinglist[i].pharmacies[j].PRICE_PER_PACK}
+                      -  }  	
+                  - }
+                  -  else {
+                      tr.tr_search_row
+                        td.empty_table.td_search(style="text-align: center;", valign="top", colspan="12") No available pharmacies
+                  -  }                 
+      -  }
+    -  }                    
     button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20(onclick="printPage()") Print
-    button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20 Send Email
+    button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20(data-toggle='modal', data-target='#sendEmail') Send Email
     button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20 Send SMS
     button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20(onclick="window.location.href='"+base+"/doctor'") Search Again              
-
+block modals		
+  #sendEmail.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          h4#myModalLabel.modal-title Send Email
+        // /.modal-header
+        .modal-body
+          p#email-box
+            strong send this shopping list to:
+          form(role='form')
+            #emailForm.form-group
+              .input-group
+                input#email.form-control(name='email', type='text', placeholder='Email')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-user
+              // /.input-group
+            // /.form-group
+        // /.modal-body
+        .modal-footer
+          button#login-btn.form-control.btn.btn-primary(onclick='sendEmail();') Send
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal
+  #confirmEmail.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h4#myModalLabel.modal-title Send Email
+        // /.modal-header
+        .modal-body
+          p Your Email has been sent successfully, do you want to send another email? 
+        // /.modal-body
+        .modal-footer
+          button.btn.btn-primary(type='button', onclick='sendAnotherEmail()') Yes
+          button.btn.btn-primary(type='button', onclick='backHome()') No
+  #loadingModal.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog.modal-sm
+      .modal-content
+        .modal-body
+          h2
+            span.glyphicon.glyphicon-refresh.glyphicon-refresh-animate
+            |   Loading...      
 block scripts
   script(type='text/javascript', src=base+'/scripts/doctor/medicines_shopping_list.js')
     

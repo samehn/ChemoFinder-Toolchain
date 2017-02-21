@@ -940,9 +940,11 @@ function sendEmail(mailOptions) {
     transporter.sendMail(mailOptions, function(error, info){
         if(error){
             console.log(error);
+            return 'failed';
             //res.json({message: 'error'});
         }else{
             console.log('Message sent: ' + info.response);
+            return 'success';
             //res.json({message: info.response});
         };
     });
@@ -3375,14 +3377,59 @@ app.get('/protected_page', checkSignIn, function(req, res){
 //         res.render('doctor/search_medicines', { base: base, medicines:result });  
 //     });
 // });
+
+app.post('/doctor/shoppinglist/sendemail', function(req, res) {
+    var treatmentCenter = req.body.treatment_center;
+    var email = req.body.email;
+    var jsonObj = {};
+    var valid = true;
+    
+    if(!email)
+    {
+        jsonObj['email_error'] = "email is required";
+        valid = false;
+    }
+    if(!Number.isInteger(parseInt(treatmentCenter))) {
+        jsonObj['treatment_center_error'] = "Treatment Center is required";
+        valid = false;
+    }
+
+    if(valid) {
+        var query = "SELECT * FROM DASH5082.USER WHERE TYPE = 'TREATMENT CENTER' AND ID=" + treatmentCenter;
+        var treatmentCenterDetails = db.dbQuerySync(query);
+        if(treatmentCenterDetails.length > 0) {
+            var mailOptions = {
+            from: 'chemofinder@gmail.com', // sender address
+            to: email, // list of receivers
+            subject: 'Chemofinder Shopping List', // Subject line
+            template: 'shopping_list',
+            context: {
+                treatmentCenter:treatmentCenterDetails[0].NAME, shoppinglist: req.session.shoppinglist
+            }
+            //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
+        };
+        var result = sendEmail(mailOptions);
+        res.send({message: result});
+        }
+        else {
+            jsonObj['message'] = "failed";
+            res.send(jsonObj);
+        }
+    }
+    else {
+        jsonObj['message'] = "failed";
+        res.send(jsonObj);
+    }
+});
+
 app.get('/doctor/shoppinglist', checkSignIn, function(req, res) {
-    var treatmentCenter = req.param('t');
+   var treatmentCenter = req.param('t');
    if(Number.isInteger(parseInt(treatmentCenter))) {
         var query = "SELECT * FROM DASH5082.USER WHERE TYPE = 'TREATMENT CENTER' AND ID=" + treatmentCenter;
         var treatmentCenterDetails = db.dbQuerySync(query);
         if(treatmentCenterDetails.length > 0) {
             var base = req.protocol + '://' + req.get('host');
-            res.render('doctor/medicines_shopping_list', {base:base, treatmentCenter:treatmentCenter, shoppinglist: req.session.shoppinglist});
+            res.render('doctor/medicines_shopping_list', {base:base, treatmentCenter:treatmentCenterDetails, shoppinglist: req.session.shoppinglist});
         }
         else {
             res.send("404 Not Found");

@@ -1,0 +1,78 @@
+<style type="text/css">
+  body,
+  html, 
+  .body {
+    background: #f3f3f3 !important;
+  }
+  .header {
+    background: #f3f3f3;
+  }
+</style>
+
+<container>
+
+  <row>
+    <columns>
+
+      <spacer size="16"></spacer>
+
+      <h1 style="text-align: center;">Medicines Shopping List </h1>
+      
+      <spacer size="16"></spacer>
+      <p style="text-align: center;"> Your treatment center is <strong>{{treatmentCenter}}</strong></p>
+      {{#each shoppinglist}}
+        <h5 style="text-align: center; margin: 30px; font-weight: 900; font-size: large;">x{{quantity}} {{#medicine}} {{GENERIC_NAME}} {{BRAND_NAME}} {{FORM}} {{STRENGTH}} {{STRENGTH_UNIT}} {{MANUFACTURER}}{{/medicine}}
+        <div style="overflow-x: auto; margin-top: 20px;">
+          <table style="border-collapse: collapse; border-spacing: 0; width: 100%; border: 1px solid #262626;">
+            <thead>
+              <tr style="background-color: #f2f2f2;">
+                <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">Name</th>
+                <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">Phone</th>
+                <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">Email</th>
+                <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">Street</th>
+                <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">City</th>
+                <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">State</th>
+                <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">ZIP</th>
+                <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">Open Form</th>
+                <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">Open To</th>
+                <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">Expiry Date</th>
+                <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">Pack Size</th>
+                <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">Price/Pack</th>
+              </tr>
+            </thead>
+            <tbody>
+              <style>
+                .tr_search_row:nth-child(odd) { background-color: #f2f2f2;}
+              </style>
+              {{#each pharmacies}}
+                <tr>
+                  <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{NAME}}</td>
+                  <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{PHONE_NUMBER}}</td>
+                  <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{EMAIL}}</td>
+                  <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{STREET}}</td>
+                  <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{CITY}}</td>
+                  <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{STATE}}</td>
+                  <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{ZIP}}</td>
+                  <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{OPEN_FROM}}</td>
+                  <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{OPEN_TO}}</td>
+                  <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{EXPIRY_DATE}}</td>
+                  <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{PACK_SIZE}}</td>
+                  <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{PRICE_PER_PACK}}</td>
+                </tr>
+              {{else}}
+                <tr>
+                  <td valign="top" colspan="12" style="text-align: center; border-bottom: 1px solid #262626; padding: 8px; font-weight: normal; font-size: 16px;">No available pharmacies</td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      {{/each}}  
+
+      <hr/>
+
+    </columns>
+  </row>
+
+  <spacer size="16"></spacer>
+</container>
