@@ -15,8 +15,6 @@ function updateSelectedPharmacy(element) {
 	$(element).parent().parent().css("background-color", "#60c2ff" );
 }
 
-//console.log($('*[id^="pharmacy_row_"]'));
-
 function nextStep() {
 	console.log($('*[id^="pharmacy_row_"]'));
 	var uniqueSelectors = [];
@@ -26,7 +24,7 @@ function nextStep() {
 	    if($.inArray(selector, uniqueSelectors) == -1) {
 	    	uniqueSelectors.push(selector);
 	    }
-	    // console.log( index + ": " + $( this ).attr('id') );
+
 	});
 	var sub_url ='';
 	var flag = true;
