@@ -9,7 +9,6 @@ var cookieParser = require('cookie-parser');
 var routes = require('./routes');
 var http = require('http');
 var path = require('path');
-
 var morgan = require('morgan');
 var errorhandler = require('errorhandler');
 var bcrypt = require('bcrypt');
@@ -26,7 +25,6 @@ var db = require('./models/model');
 require('cf-deployment-tracker-client').track();
 
 app.set('view engine', 'jade');
-
 app.set('views','./views');
 
 app.use(bodyParser.json());
@@ -58,6 +56,7 @@ var transporter = nodemailer.createTransport({
     auth: {
         user: 'chemofinder@gmail.com', // Your email id
         pass: 'chemofinder2016' // Your password
+        //TODO remove password use encrypted token SAMEH
     }
 });
 var options = {
@@ -122,7 +121,7 @@ app.post('/user/signup', function(req, res){
     }
     else if(!validateWithRegex(emailRegex, req.body.email))
     {
-       jsonObj['email_error'] = "This email is not valid"
+       jsonObj['email_error'] = "Please input valid email address"
        valid = false;
     }
     
@@ -141,7 +140,7 @@ app.post('/user/signup', function(req, res){
     }
     else if(req.body.password != req.body.rpassword)
     {
-       jsonObj['password_error'] = "Password and cofirm password doesn't match";   
+       jsonObj['password_error'] = "Password and confirm password doesn't match";   //fixing spelling
        valid = false;
     }
 
