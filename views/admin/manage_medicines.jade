@@ -2,7 +2,7 @@ extends ../layout
 
 block stylesheets
   link(href=base+'/style/bootstrap-timepicker.min.css', rel='stylesheet')
-block headers
+block pages
   button.header__action-button.ng-binding(data-toggle="tooltip", title="Manage Users", onclick="location.href='" + base + "/admin/manage_users';")
     i.glyphicon.glyphicon-user
     span.main-actions|                         Manage Users
@@ -15,9 +15,7 @@ block headers
     i.glyphicon.glyphicon-tower
     span.main-actions|                         Admins List
   .header__actions-divider  
-  button.header__action-button.ng-binding(data-toggle="tooltip", title="Settings", onclick="")
-    i.glyphicon.glyphicon-cog
-    span.main-actions|                         Settings
+block account
   .header__actions-divider
   button.header__action-button.ng-binding(data-toggle="tooltip", title="Logout", onclick="location.href='" + base + "/admin/logout';")
     i.glyphicon.glyphicon-log-out

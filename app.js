@@ -70,8 +70,19 @@ var options = {
 };
 transporter.use('compile', hbs(options));
 
-
-
+var languageConfiguration = require('./config/languages/lang.en');
+app.use(function(req, res, next) {
+    if(req.cookies.lang == 'en') {
+        languageConfiguration = require('./config/languages/lang.en');
+    }
+    else if(req.cookies.lang == 'fr') {
+        languageConfiguration = require('./config/languages/lang.fr');
+    }
+    
+    res.locals.lang = languageConfiguration.lang;
+    res.locals.base = req.protocol + '://' + req.get('host');
+    next();
+});
 
 require('./routes/home')(app);
 
@@ -777,6 +788,7 @@ app.post('/user/login', function(req, res){
 //ADMIN
 
 app.get('/admin/login', function(req, res){
+    // console.log(lang.lang.home);
     var base = req.protocol + '://' + req.get('host');
     res.render('admin/login', { base: base });
 });

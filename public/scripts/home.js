@@ -290,7 +290,7 @@ function search() {
                 '<td class="td_search">' + result.medicines[i].STRENGTH_UNIT + '</td>' +
                 '<td class="td_search">' + result.medicines[i].STRENGTH +' ' + result.medicines[i].STRENGTH_UNIT + '</td>' +
                 '<td class="td_search">' + result.medicines[i].MANUFACTURER + '</td>' +
-                '<td class="td_search"><button class="btn btn-primary" onclick="showPharmacies(' + result.medicines[i].ID + ')"> Show Pharmacies </button></td>' +
+                '<td class="td_search"><button class="btn btn-primary" onclick="showPharmacies(' + result.medicines[i].ID + ')">' + lang.show_pharmacies + '</button></td>' +
               '</tr>';
             }
             $('#search-result').html(html); 

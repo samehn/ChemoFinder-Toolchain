@@ -3,7 +3,7 @@ extends ../layout
 block stylesheets
   link(rel='stylesheet', href='https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css')
 
-block headers
+block pages
   button.header__action-button.ng-binding(data-toggle="tooltip", title="Search Medicines", onclick="location.href='" + base + "/doctor';")
     i.glyphicon.glyphicon-search
     span.main-actions|                         Search Medicines
@@ -11,6 +11,8 @@ block headers
   button.header__action-button.ng-binding(data-toggle="tooltip", title="Profile", onclick="location.href='" + base + "/doctor/profile';")
     i.glyphicon.glyphicon-user
     span.main-actions|                         Profile
+  .header__actions-divider
+block account
   .header__actions-divider
   button.header__action-button.ng-binding(data-toggle="tooltip", title="Logout", onclick="location.href='" + base + "/logout';")
     i.glyphicon.glyphicon-log-out

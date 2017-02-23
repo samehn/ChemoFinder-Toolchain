@@ -16,36 +16,15 @@ html
           a(ui-sref='welcome', href='#/welcome')
             span.heavy-title ChemoFinder
         .header__actions
-          block headers
+          block pages
           //- button.header__action-button.ng-binding(ng-click='headerCtrl.home()')
           //-   img(src= base +'/images/home.svg')
           //-   |                         Home
-          //- .header__actions-divider
-          //- button.header__action-button.ng-binding(ng-click='headerCtrl.settings()')
-          //-   img(src= base +'/images/gear.svg')
-          //-   |                         Settings
-      // Settings modal start
-      .back-drop.ng-hide(ng-show='headerCtrl.showSettings')
-      .pop-up.ng-hide(ng-show='headerCtrl.showSettings')
-        .pop-up__header
-          h2 Settings
-        .pop-up__content
-          | Language:
-          select.header__settings-select.ng-pristine.ng-valid.ng-not-empty.ng-touched(ng-model='headerCtrl.currLang')
-            // ngRepeat: lang in headerCtrl.getLangs()
-            option.ng-binding.ng-scope(ng-repeat='lang in headerCtrl.getLangs()', value='en') English
-            // end ngRepeat: lang in headerCtrl.getLangs()
-            option.ng-binding.ng-scope(ng-repeat='lang in headerCtrl.getLangs()', value='fr') French
-            // end ngRepeat: lang in headerCtrl.getLangs()
-          br
-          br
-          br
-          br
-          br
-          br
-        .pop-up__footer
-          button.button(ng-click='headerCtrl.refreshLogic()') Refresh Cancer Logic
-          button.button(ng-click='headerCtrl.saveSettings()') Save
+          span(data-toggle='modal', data-target='#settings')
+            button.header__action-button.ng-binding(data-toggle="tooltip", title=lang.settings)
+              img(src= base +'/images/gear.svg', style='    position: inherit; margin-right: 0px;')
+              span.main-actions                         #{lang.settings}
+          block account
     main-comp.ng-isolate-scope
       // uiView:
       .ng-scope(ui-view='')
@@ -56,7 +35,35 @@ html
             img.welcome__heath-corp(src= base +'/images/IBM_HealthCorps.svg')
             img.welcome__acs(src= base +'/images/ACS_Logo.png')
             img.welcome__chai(src= base +'/images/CHAI_LOGO.png')  
-    block modals          
+    block modals
+    #settings.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+      .modal-dialog
+        .modal-content
+          .modal-header
+            button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+            h4#myModalLabel.modal-title #{lang.settings}
+          // /.modal-header
+          .modal-body
+            p
+              strong #{lang.change_language}
+            form(role='form')
+              .form-group
+                .input-group
+                  select#language.form-control(name='language')
+                    option.form-control(value=lang.short_default_language) #{lang.default_language}
+                    option.form-control(value=lang.short_second_language) #{lang.second_language}
+                  span.input-group-addon
+                    img(src= base +'/images/gear-black.png')
+                // /.input-group
+              // /.form-group
+          // /.modal-body
+          .modal-footer
+            button#login-btn.form-control.btn.btn-primary(onclick='changeLanguage();') #{lang.save}
+          // /.modal-footer
+        // /.modal-content
+      // /.modal-dialog
+    // /.modal          
     script(src='https://code.jquery.com/jquery-3.1.1.js', integrity='sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA=', crossorigin='anonymous')
     script(type='text/javascript', src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js')
+    script(type='text/javascript', src=base+'/scripts/layout.js') 
     block scripts

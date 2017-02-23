@@ -1454,3 +1454,9 @@ td.highlight {
         margin: 0
     }
 }
+
+@media (min-width: 1030px) {
+    .modal-large-width {
+        width: 1000px;
+    }
+}

@@ -3,7 +3,7 @@ extends ../layout
 block stylesheets
   link(href=base+'/style/bootstrap-timepicker.min.css', rel='stylesheet')
 
-block headers
+block pages
   button.header__action-button.ng-binding(data-toggle="tooltip", title="My Stock", onclick="location.href='" + base + "/pharmacy';")
     i.glyphicon.glyphicon-list-alt
     span.main-actions|                         My Stock
@@ -11,6 +11,8 @@ block headers
   button.header__action-button.ng-binding(data-toggle="tooltip", title="Profile", onclick="location.href='" + base + "/pharmacy/profile';")
     i.glyphicon.glyphicon-user
     span.main-actions|                         Profile
+  .header__actions-divider
+block account    
   .header__actions-divider
   button.header__action-button.ng-binding(data-toggle="tooltip", title="Logout", onclick="location.href='" + base + "/logout';")
     i.glyphicon.glyphicon-log-out

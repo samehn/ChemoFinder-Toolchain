@@ -3,36 +3,37 @@ extends ../layout
 block stylesheets
   link(href=base+'/style/bootstrap-timepicker.min.css', rel='stylesheet')
   link(rel='stylesheet', href='https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css')  
-block headers
-  button.header__action-button.ng-binding(data-toggle="tooltip", title="Login", onclick="loginModal()")
-    i.glyphicon.glyphicon-log-in
-    span.main-actions|                         Login
+block account
   .header__actions-divider
-  button.header__action-button.ng-binding(data-toggle="tooltip", title="Register", onclick="registerModal()")
+  button.header__action-button.ng-binding(data-toggle="tooltip", title=lang.login, onclick="loginModal()")
+    i.glyphicon.glyphicon-log-in
+    span.main-actions|                         #{lang.login}
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title=lang.register, onclick="registerModal()")
     i.glyphicon.glyphicon-user
-    span.main-actions|                         Register    
+    span.main-actions|                         #{lang.register}    
 block content
   img.welcome__home-image(src=base+'/images/homeicon.svg')
-  .welcome__home-message.ng-binding Welcome to ChemoFinder
+  .welcome__home-message.ng-binding #{lang.welcome} ChemoFinder
   .welcome__home-buttons
     section#section-search.section-search.search-bar
       .div-search.search-bar
-         input#tags.input-search.search-bar(type='text', placeholder='Search For Medicines...', style='width:100%')
-         p.search_hint hint: use the autocomplete to search for your medicine      
+         input#tags.input-search.search-bar(type='text', placeholder=lang.search_medicines, style='width:100%')
+         p.search_hint #{lang.search_hint}
       .div-search.search-bar
-        button#search-btn.button-search.search-bar.btn.btn-primary(onclick="search()", style='height:60px; color: white;') Search
+        button#search-btn.button-search.search-bar.btn.btn-primary(onclick="search()", style='height:60px; color: white;') #{lang.search}
     #search-result-table.div_search.hidden
-      table#table_search
+      table.table_search
         thead
           tr.tr_search
-            th.th_search Generic Name
-            th.th_search Brand Name
-            th.th_search Form
-            th.th_search Strength
-            th.th_search Strength Unit
-            th.th_search Pack Type
-            th.th_search Manufacturer
-            th.th_search Pharmacies
+            th.th_search #{lang.generic_name}
+            th.th_search #{lang.brand_name}
+            th.th_search #{lang.form}
+            th.th_search #{lang.strength}
+            th.th_search #{lang.strength_unit}
+            th.th_search #{lang.pack_type}
+            th.th_search #{lang.manufacturer}
+            th.th_search #{lang.pharmacies}
         tbody#search-result       
 block modals             
   #Login.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
@@ -40,29 +41,29 @@ block modals
       .modal-content
         .modal-header
           button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
-          h4#myModalLabel.modal-title Log in
+          h4#myModalLabel.modal-title #{lang.log_in}
         // /.modal-header
         .modal-body
           form#login-form(role='form')
             #emailLoginForm.form-group
               .input-group
-                input#uEmail.form-control(name='email', type='text', placeholder='Email')
+                input#uEmail.form-control(name='email', type='text', placeholder=lang.email)
                 span.input-group-addon
                   i.glyphicon.glyphicon-user
             // /.form-group
             #passwordLoginForm.form-group
               .input-group
-                input#uPassword.form-control(name='password', type='password', placeholder='Password')
+                input#uPassword.form-control(name='password', type='password', placeholder=lang.password)
                 span.input-group-addon
                   i.glyphicon.glyphicon-lock
               // /.input-group
             // /.form-group
-            a(href=base+'/user/forgotpassword') forgot password?
+            a(href=base+'/user/forgotpassword') #{lang.forgot_password}?
               // /.input-group
             // /.form-group
         // /.modal-body
         .modal-footer
-          button#login-btn.form-control.btn.btn-primary(onclick='login();') Login
+          button#login-btn.form-control.btn.btn-primary(onclick='login();') #{lang.login}
         // /.modal-footer
       // /.modal-content
     // /.modal-dialog
@@ -72,80 +73,80 @@ block modals
       .modal-content
         .modal-header
           button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
-          h4#myModalLabel.modal-title Register
+          h4#myModalLabel.modal-title #{lang.register}
         // /.modal-header
         .modal-body
           form#register-form(role='form')
             #typeRegisterForm.form-group
               .input-group
                 select#type.form-control(name='type')
-                  option.form-control(value='') Select Your Type
-                  option.form-control(value='DOCTOR') Doctor
-                  option.form-control(value='NAVIGATOR') Navigator
-                  option.form-control(value='PHARMACY') Pharmacy
-                  option.form-control(value='TREATMENT CENTER') Treatment Center
+                  option.form-control(value='') #{lang.select_type}
+                  option.form-control(value='DOCTOR') #{lang.doctor}
+                  option.form-control(value='NAVIGATOR') #{lang.navigator}
+                  option.form-control(value='PHARMACY') #{lang.pharmacy}
+                  option.form-control(value='TREATMENT CENTER') #{lang.treatment_center}
                 span.input-group-addon
                   i.glyphicon.glyphicon-briefcase
               // /.input-group
             // /.form-group
             #nameRegisterForm.form-group
               .input-group
-                input#name.form-control(name='name', type='text', placeholder='Name')
+                input#name.form-control(name='name', type='text', placeholder=lang.name)
                 span.input-group-addon
                   i.glyphicon.glyphicon-user
             // /.form-group
             #emailRegisterForm.form-group
               .input-group
-                input#email.form-control(name='email', type='text', placeholder='Email')
+                input#email.form-control(name='email', type='text', placeholder=lang.email)
                 span.input-group-addon
                   i.glyphicon.glyphicon-envelope
             // /.form-group
             #passwordRegisterForm.form-group
               .input-group
-                input#password.form-control(name='password', type='password', placeholder='Password')
+                input#password.form-control(name='password', type='password', placeholder=lang.password)
                 span.input-group-addon
                   i.glyphicon.glyphicon-lock
               // /.input-group
             // /.form-group
             #rpasswordRegisterForm.form-group
               .input-group
-                input#rpassword.form-control(name='rpassword' type='password', placeholder='Confirm Password')
+                input#rpassword.form-control(name='rpassword' type='password', placeholder=lang.confirm_password)
                 span.input-group-addon
                   i.glyphicon.glyphicon-lock
               // /.input-group
             // /.form-group
             #streetRegisterForm.form-group
               .input-group
-                input#street.form-control(name='street', type='text', placeholder='Street')
+                input#street.form-control(name='street', type='text', placeholder=lang.street)
                 span.input-group-addon
                   i.glyphicon.glyphicon-home
             // /.form-group
             #cityRegisterForm.form-group
               .input-group
-                input#city.form-control(name='city', type='text', placeholder='City')
+                input#city.form-control(name='city', type='text', placeholder=lang.city)
                 span.input-group-addon
                   i.glyphicon.glyphicon-home
             // /.form-group
             #stateRegisterForm.form-group
               .input-group
-                input#state.form-control(name='state', type='text', placeholder='State')
+                input#state.form-control(name='state', type='text', placeholder=lang.state)
                 span.input-group-addon
                   i.glyphicon.glyphicon-home
             // /.form-group
             #zipRegisterForm.form-group
               .input-group
-                input#zip.form-control(name='zip', type='text', placeholder='Postal Code')
+                input#zip.form-control(name='zip', type='text', placeholder=lang.postal_code)
                 span.input-group-addon
                   i.glyphicon.glyphicon-home
             // /.form-group
             #phoneRegisterForm.form-group.handle(style='display:none;')
               .input-group
-                input#phone.form-control(name='phone_number', type='text', placeholder='Phone Number')
+                input#phone.form-control(name='phone_number', type='text', placeholder=lang.phone_number)
                 span.input-group-addon
                   i.glyphicon.glyphicon-earphone
             // /.form-group
             p.handle(style='display:none;') 
-              strong Open from
+              strong #{lang.open_from}
             #openFromRegisterForm.form-group.handle(style='display:none;')
               .input-group.bootstrap-timepicker.timepicker
                 input#timepicker1.form-control.input-small(name='open_from', type='text')
@@ -153,7 +154,7 @@ block modals
                   i.glyphicon.glyphicon-time
             // /.form-group
             p.handle(style='display:none;')
-              strong Open to
+              strong #{lang.open_to}
             #openToRegisterForm.form-group.handle(style='display:none;')
               .input-group.bootstrap-timepicker.timepicker
                 input#timepicker2.form-control.input-small(name='open_to', type='text')
@@ -162,7 +163,7 @@ block modals
             // /.form-group      
         // /.modal-body
         .modal-footer
-          button#signup-btn.form-control.btn.btn-primary(onclick='register();') Register
+          button#signup-btn.form-control.btn.btn-primary(onclick='register();') #{lang.sign_up}
         // /.modal-footer
       // /.modal-content
     // /.modal-dialog
@@ -173,49 +174,49 @@ block modals
         .modal-body
           h2
             span.glyphicon.glyphicon-refresh.glyphicon-refresh-animate
-            |   Loading...
+            |   #{lang.loading}
   #confimSignup.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
     .modal-dialog
       .modal-content
         .modal-header
-          h4#myModalLabel.modal-title Register
+          h4#myModalLabel.modal-title #{lang.register}
         // /.modal-header
         .modal-body
-          |  You registration is done successfuly, wait for the admin approval
+          |  #{lang.success_register}
         // /.modal-body
         .modal-footer
-          button.form-control.btn.btn-primary(onclick='location.reload();') OK
+          button.form-control.btn.btn-primary(onclick='location.reload();') #{lang.ok}
         // /.modal-footer
       // /.modal-content
     // /.modal-dialog
   // /.modal
   #showPharmacies.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
-    .modal-dialog
-      .modal-content
+    .modal-dialog.modal-large-width
+      .modal-content(style="padding:15px;")
         .modal-header
           button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
-          h4#myModalLabel.modal-title Pharmacies
+          h4#myModalLabel.modal-title #{lang.pharmacies}
         // /.modal-header
         .modal-body.ovf-auto
-          table#table_pharmacies
+          table#table_pharmacies.table_search
             thead
               tr.tr_search
-                th.th_search Name
-                th.th_search Phone
-                th.th_search Email
-                th.th_search Street
-                th.th_search City
-                th.th_search State
-                th.th_search ZIP
-                th.th_search Open From
-                th.th_search Open To
-                th.th_search Price
-                th.th_search Last Update
+                th.th_search #{lang.name}
+                th.th_search #{lang.phone_number}
+                th.th_search #{lang.email}
+                th.th_search #{lang.street}
+                th.th_search #{lang.city}
+                th.th_search #{lang.state}
+                th.th_search #{lang.postal_code}
+                th.th_search #{lang.open_from}
+                th.th_search #{lang.open_to}
+                th.th_search #{lang.price}
+                th.th_search #{lang.last_update}
             tbody#pharmacies-result
-              td.empty_table.td_search(style="text-align: center;", valign="top", colspan="11") No available pharmacies currently
+              td.empty_table.td_search(style="text-align: center;", valign="top", colspan="11") #{lang.no_pharmacy}
         // /.modal-body
         .modal-footer
-          button.form-control.btn.btn-primary(type='button', data-dismiss='modal', aria-hidden='true') OK
+          button.form-control.btn.btn-primary(type='button', data-dismiss='modal', aria-hidden='true') #{lang.ok}
         // /.modal-footer
       // /.modal-content
     // /.modal-dialog

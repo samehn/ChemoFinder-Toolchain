@@ -1,6 +1,6 @@
 extends ../layout
 
-block headers
+block pages
   button.header__action-button.ng-binding(data-toggle="tooltip", title="Search Medicines", onclick="location.href='" + base + "/doctor';")
     i.glyphicon.glyphicon-search
     span.main-actions|                         Search Medicines
@@ -9,6 +9,8 @@ block headers
     i.glyphicon.glyphicon-user
     span.main-actions|                         Profile
   .header__actions-divider
+block account
+  .header__actions-divider  	
   button.header__action-button.ng-binding(data-toggle="tooltip", title="Logout", onclick="location.href='" + base + "/logout';")
     i.glyphicon.glyphicon-log-out
     span.main-actions|                         Logout
@@ -81,7 +83,7 @@ block content
     button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20(data-toggle='modal', data-target='#sendEmail') Send Email
     button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20 Send SMS
     button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20(onclick="window.location.href='"+base+"/doctor'") Search Again              
-block modals		
+block modals
   #sendEmail.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
     .modal-dialog
       .modal-content
