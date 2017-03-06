@@ -56,9 +56,9 @@ function reset_password(user_type) {
             $('.message-form').remove();
             if(data.message == "failed")
             {
-               if(data.fpassword_error)
+               if(data.email_error)
                {
-                  var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.fpassword_error + '</div>';
+                  var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.email_error + '</div>';
                   $(error_message).insertBefore($('#emailForm'));
                }
             }

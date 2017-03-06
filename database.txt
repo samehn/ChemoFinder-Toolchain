@@ -1,0 +1,34 @@
+create table CHEMO_USER (
+   ID integer not null GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1)
+  ,ENTITY_NAME varchar(60) 
+  ,PERSON_NAME varchar(60) NOT NULL
+  ,PERSON_POSITION varchar(60)
+  ,EMAIL varchar(60) UNIQUE NOT NULL
+  ,PHONE_NUMBER varchar(80)
+  ,ADDRESS varchar(1000)
+  ,CITY varchar(60)
+  ,COUNTRY varchar(60)
+  ,PASSWORD varchar(200) NOT NULL
+  ,OPEN_FROM TIME
+  ,OPEN_TO TIME
+  ,TYPE VARCHAR(30)
+  ,APPROVE VARCHAR(1)
+  ,ACTIVE VARCHAR(1)
+  ,FIRST_LOGIN VARCHAR(1)
+  ,STOCK_UPDATE TIMESTAMP NOT NULL with default current timestamp
+  ,CREATED_AT TIMESTAMP NOT NULL with default current timestamp
+  ,UPDATED_AT timestamp not null with default current timestamp
+  ,PRIMARY KEY (ID)
+);
+
+create table CHEMO_ADMIN (
+   ID integer not null GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1)
+  ,USERNAME varchar(60) 
+  ,EMAIL varchar(60) UNIQUE NOT NULL
+  ,PASSWORD varchar(200) NOT NULL
+  ,TYPE integer
+  ,ACTIVE integer
+  ,CREATED_AT TIMESTAMP NOT NULL with default current timestamp
+  ,UPDATED_AT timestamp not null with default current timestamp
+  ,PRIMARY KEY (ID)
+);

@@ -137,7 +137,7 @@ function changePassword() {
   console.log(user_array);
   $.ajax({
     type: "post",
-    url: url + '/user/changepassword',
+    url: url + '/pharmacy/changepassword',
     data : user_array,
     success:  function(data){
       console.log(data);

@@ -1,7 +1,8 @@
-db = require('../config/db'); 
-
-
-function dbQuery(query, callback) {
+var model = function() {
+    db = require('../config/db'); 
+};
+ 
+model.prototype.dbQuery = function(query, callback) {
     var result;
     db.ibmdb.open(db.connString, function(err, conn) {
         console.log(query);
@@ -28,7 +29,7 @@ function dbQuery(query, callback) {
         } );
 }
 
-function dbQuerySync(query) {
+model.prototype.dbQuerySync = function(query) {
     var option = { connectTimeout : 3000000 };// Connection Timeout after 40 seconds. 
     var conn = db.ibmdb.openSync(db.connString, option);
     var rows = conn.querySync(query);
@@ -37,7 +38,4 @@ function dbQuerySync(query) {
     return rows;
 }
 
-module.exports = {
-    dbQuery:dbQuery,
-    dbQuerySync:dbQuerySync
-}
+module.exports = new model();

@@ -8,6 +8,10 @@ function printPage() {
 	return true;
 }
 
+$('#sendEmail').on('hidden.bs.modal', function () {
+    $( ".modal-backdrop" ).remove();
+})
+
 function sendEmail() {
 	var data = {};
 	var email = $('#email');
@@ -30,8 +34,8 @@ function sendEmail() {
         success:  function(data){
           $('#loadingModal').modal('hide');
           $('#sendEmail').modal('show');    
-          // console.log(data);
-          // console.log(data.message);
+          console.log(data);
+          console.log(data.message);
           $('.error-form').remove();
           $('.message-form').remove();
           if(data.message == "failed")

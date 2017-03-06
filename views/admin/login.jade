@@ -2,7 +2,7 @@ extends ../layout
 
 block content
   img.welcome__home-image(src= base +'/images/homeicon.svg')
-  .welcome__home-message.ng-binding Welcome to ChemoFinder
+  .welcome__home-message.ng-binding #{lang.welcome} ChemoFinder
   .welcome__home-buttons
     .col-md-6.col-md-push-3
       form#login-form(role='form')

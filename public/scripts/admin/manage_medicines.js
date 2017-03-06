@@ -21,6 +21,12 @@ $('#add-new-medicine-form').keydown(function(event){
   }
 });
 
+$("#addNewMedicine").on("show.bs.modal", function () {
+  $("html").addClass("modal-open");
+}).on("hidden.bs.modal", function () {
+  $("html").removeClass("modal-open");
+});
+
 $("#updateMedicine").on("show.bs.modal", function () {
   $("html").addClass("modal-open");
 }).on("hidden.bs.modal", function () {
@@ -31,7 +37,7 @@ function getMedicine(medicine_id) {
   var item_array = {medicine_id: medicine_id};
   $.ajax({
     type: "get",
-    url: url + '/getmedicinebyid/' + medicine_id,
+    url: url + '/admin/getmedicinebyid/' + medicine_id,
     data : item_array,
     success:  function(data){
       console.log(data);
@@ -58,7 +64,7 @@ function showDetails(medicine_id) {
   var item_array = {medicine_id: medicine_id};
   $.ajax({
     type: "get",
-    url: url + '/getmedicinebyid/' + medicine_id,
+    url: url + '/admin/getmedicinebyid/' + medicine_id,
     data : item_array,
     success:  function(data){
       console.log(data);
@@ -84,17 +90,20 @@ function deleteStockRecord(medicine_id, element) {
   if (confirm("Are you sure you want to remove this medicine from the medicines list?") == true) {
         var data_array={};
     data_array['medicine_id'] = medicine_id;
+    $('#loadingModal').modal('show');
     $.ajax({
           type: "post",
           url: url + '/admin/deletemedicine',
           data : data_array,
           success:  function(data){
+            $('#loadingModal').modal('hide');
             console.log(data);
             if(data.message == "success")
             {
-              $(element).parent().parent().remove();
-              var message = '<div class="alert alert-success info-form"><button class="close" data-close="alert"></button>The medicine is deleted successfuly from the medicine list</div>';
-              $(message).insertAfter($('.page__subtitle'));
+              $('#confimDeleteMedicine').modal('show');
+              // $(element).parent().parent().remove();
+              // var message = '<div class="alert alert-success info-form"><button class="close" data-close="alert"></button>The medicine is deleted successfuly from the medicine list</div>';
+              // $(message).insertAfter($('.page__subtitle'));
             }
             else {
               var message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>This is not a valid medicine </div>';

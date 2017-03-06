@@ -347,6 +347,21 @@ block modals
         // /.modal-footer
       // /.modal-content
     // /.modal-dialog
+  // /.modal
+  #confimDeleteMedicine.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h4#myModalLabel.modal-title Delete Medicine
+        // /.modal-header
+        .modal-body
+          |  The medicine is deleted successfuly
+        // /.modal-body
+        .modal-footer
+          button.form-control.btn.btn-primary(onclick='location.reload();') OK
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
   // /.modal          
 block scripts
   script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js')
