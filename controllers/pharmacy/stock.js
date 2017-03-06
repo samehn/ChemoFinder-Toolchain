@@ -9,7 +9,7 @@ function stock(){
 stock.prototype.constructor = stock;
 
 stock.prototype.stock_page =  function(req, res) {
-    tomodel.user_id = req.session.user_id;
+    tomodel.user_id = req.session.pharmacy_id;
     var stock_list = stock_list_model.select_stock_list_by_id(tomodel);
     var medicines = medicine_model.select_non_approved_medicines();    
     var data = {stock_list: stock_list, medicines: medicines};
@@ -29,7 +29,7 @@ stock.prototype.stock_page =  function(req, res) {
 stock.prototype.get_stock_record =  function(req, res) {
     if(Number.isInteger(parseInt(req.body.stock_id))) {
         tomodel.stock_id = req.body.stock_id;
-        tomodel.user_id = req.session.user_id; 
+        tomodel.user_id = req.session.pharmacy_id; 
         var stock_list_record = stock_list_model.select_stock_list_record_by_id(tomodel);       
         if(stock_list_record.length > 0){
             res.send({message:"success", result: stock_list_record});
@@ -64,10 +64,10 @@ stock.prototype.add_new_medicine =  function(req, res) {
         tomodel.price = data.price;
         tomodel.quantity = data.quantity;
         tomodel.avg_monthly_consumption = data.avg_monthly_consumption;
-        tomodel.user_id = req.session.user_id;
+        tomodel.user_id = req.session.pharmacy_id;
         if(medicine.length > 0) {
             tomodel.medicine_id = medicine[0].ID;
-            tomodel.user_id = req.session.user_id;
+            tomodel.user_id = req.session.pharmacy_id;
             var stock_list_medicine = stock_list_model.select_stock_list_by_medicine(tomodel);
             if(stock_list_medicine.length > 0) {
                 res.send({message: "failed", generic_name_error: "This Medicine is already exists in your stock"});
@@ -96,7 +96,7 @@ stock.prototype.add_new_approved_medicine =  function(req, res) {
     }
     else {
         tomodel.medicine_id = data.medicine;
-        tomodel.user_id = req.session.user_id;
+        tomodel.user_id = req.session.pharmacy_id;
         var stock_list_medicine = stock_list_model.select_stock_list_by_medicine(tomodel);
         if(stock_list_medicine.length > 0) {
             res.send({message: "failed", medicine_error: "This Medicine is already exists in your stock"});
@@ -123,7 +123,7 @@ stock.prototype.update_medicine =  function(req, res) {
     }
     else {
         tomodel.stock_id = data.stock_id;
-        tomodel.user_id = req.session.user_id;
+        tomodel.user_id = req.session.pharmacy_id;
         var stock_list_record = stock_list_model.select_stock_record_by_pharmacy(tomodel);
         if(stock_list_record.length > 0) {
             tomodel.batch_number = data.batch_number;
@@ -150,7 +150,7 @@ stock.prototype.delete_medicine =  function(req, res) {
     }
     else {
         tomodel.stock_id = data.stock_id;
-        tomodel.user_id = req.session.user_id;
+        tomodel.user_id = req.session.pharmacy_id;
         var stock_list_record = stock_list_model.select_stock_record_by_pharmacy(tomodel);
         if(stock_list_record.length > 0) {
             stock_list_model.delete_stock_record(tomodel);
@@ -175,7 +175,7 @@ stock.prototype.upload_stock_list =  function(req, res) {
     var extension = fileArray[fileArray.length - 1];
     if(extension == "xlsx")
     {
-        sampleFile.mv('./public/uploads/stocks/stock_list_' + req.session.user_id + '.xlsx', function(err) {
+        sampleFile.mv('./public/uploads/stocks/stock_list_' + req.session.pharmacy_id + '.xlsx', function(err) {
             if (err) {
                 res.status(500).send(err);
             }
@@ -238,7 +238,7 @@ stock.prototype.download_last_stock =  function(req, res) {
             dobCol.width = 20;
         }       
     }
-    tomodel.user_id = req.session.user_id;
+    tomodel.user_id = req.session.pharmacy_id;
 
     var stock_list = stock_list_model.select_stock_list_by_id(tomodel);
     
@@ -246,7 +246,7 @@ stock.prototype.download_last_stock =  function(req, res) {
         for (var i = 0; i < stock_list.length; i++) {
             worksheet.addRow([stock_list[i].ID, stock_list[i].GENERIC_NAME, stock_list[i].FORM, stock_list[i].STRENGTH, stock_list[i].STRENGTH_UNIT, stock_list[i].BRAND_NAME, stock_list[i].MANUFACTURER, stock_list[i].BATCH_NUMBER, stock_list[i].EXPIRY_DATE, stock_list[i].SRA, stock_list[i].PACK_SIZE, stock_list[i].PRICE_PER_PACK, stock_list[i].AVAILABLE_STOCK, stock_list[i].AVG_MONTHLY_CONSUMPTION]);
         }
-        var path = './public/uploads/stocks/stock_list_' + req.session.user_id + '_' + Date.now() + '.xlsx';
+        var path = './public/uploads/stocks/stock_list_' + req.session.pharmacy_id + '_' + Date.now() + '.xlsx';
         if(controller.fs.existsSync(path)) {
             controller.fs.unlinkSync(path);
         }
@@ -270,7 +270,7 @@ function validate_stock_list_sheet(worksheet) {
 }
 
 function parsingStockList(req, res) {
-    var workbook = controller.XLSX.readFile('./public/uploads/stocks/stock_list_' + req.session.user_id + '.xlsx');
+    var workbook = controller.XLSX.readFile('./public/uploads/stocks/stock_list_' + req.session.pharmacy_id + '.xlsx');
     var first_sheet_name = workbook.SheetNames[0];
     var worksheet = workbook.Sheets[first_sheet_name];
     if(validate_stock_list_sheet(worksheet)) {
@@ -471,10 +471,10 @@ function parsingStockList(req, res) {
                 tomodel.price = data.price;
                 tomodel.quantity = data.quantity;
                 tomodel.avg_monthly_consumption = data.avg_monthly_consumption;
-                tomodel.user_id = req.session.user_id;
+                tomodel.user_id = req.session.pharmacy_id;
                 if(medicine.length > 0) {
                     tomodel.medicine_id = medicine[0].ID;
-                    tomodel.user_id = req.session.user_id;
+                    tomodel.user_id = req.session.pharmacy_id;
                     var stock_list_medicine = stock_list_model.select_stock_list_by_medicine(tomodel);
                     if(stock_list_medicine.length > 0) {
                         tomodel.stock_id = stock_list_medicine[0].ID;

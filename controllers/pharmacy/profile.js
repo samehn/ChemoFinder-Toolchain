@@ -7,7 +7,7 @@ function profile(){
 profile.prototype.constructor = profile;
 
 profile.prototype.profile_page =  function(req, res) {
-    tomodel.user_id = req.session.user_id;
+    tomodel.user_id = req.session.pharmacy_id;
     var pharmacy_info = user_model.select_user_by_id(tomodel);
     res.render('pharmacy/profile', {info: pharmacy_info});
 }
@@ -21,7 +21,7 @@ profile.prototype.update_profile =  function(req, res) {
     }
     else
     {
-        tomodel.user_id = req.session.user_id;
+        tomodel.user_id = req.session.pharmacy_id;
         tomodel.email = data.email;
         tomodel.name = data.name;
         tomodel.phone_number = data.phone_number;
@@ -49,7 +49,7 @@ profile.prototype.change_password =  function(req, res) {
     }
     else
     {
-        tomodel.user_id = req.session.user_id;
+        tomodel.user_id = req.session.pharmacy_id;
         var result = user_model.select_user_by_id(tomodel);
         controller.bcrypt.compare(data.old_password, result[0].PASSWORD, function(err, cmp) {
             // res == true
@@ -79,7 +79,7 @@ function profile_validations(req, data) {
     else {
         tomodel.email = data.email;
         var user =  user_model.select_user_by_email(tomodel);
-        if(user.length > 0 && user[0].ID != req.session.user_id) {
+        if(user.length > 0 && user[0].ID != req.session.pharmacy_id) {
             validation_array = controller.mergeArrays(validation_array, {email_error: 'This email is already registered'});
         }
     }

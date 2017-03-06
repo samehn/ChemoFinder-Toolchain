@@ -9,7 +9,7 @@ first_login.prototype.constructor = first_login;
 
 
 first_login.prototype.first_login_page =  function(req, res) {
-    res.render('user/first_changepassword');	
+    res.render('user/first_changepassword', {user_type: 'doctor'});	
 }
 
 first_login.prototype.change_password =  function(req, res) {
@@ -23,10 +23,10 @@ first_login.prototype.change_password =  function(req, res) {
     {
         controller.bcrypt.hash(data.password, controller.saltRounds, function(err, hash) {
           // Store hash in your password DB.
-          tomodel.user_id = req.session.user_id;
+          tomodel.user_id = req.session.doctor_id;
           tomodel.password = hash;
           user_model.update_user_first_password(tomodel);
-            req.session.user_first_login = '0';  
+            req.session.doctor_first_login = '0';  
             res.send({message: "success"});
         });
     }  

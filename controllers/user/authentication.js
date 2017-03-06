@@ -33,10 +33,16 @@ authentication.prototype.login =  function(req, res) {
                     }
                     else
                     {
-                        req.session.user_id = user[0].ID;
-                        req.session.user_first_login = user[0].FIRST_LOGIN;
+                        if(user[0].TYPE.toLowerCase() == 'doctor' || user[0].TYPE.toLowerCase() == 'navigator') {
+                            req.session.doctor_id = user[0].ID;
+                            req.session.doctor_first_login = user[0].FIRST_LOGIN;
+                        }
+                        else if(user[0].TYPE.toLowerCase() == 'pharmacy' || user[0].TYPE.toLowerCase() == 'treatment center') {
+                            req.session.pharmacy_id = user[0].ID;
+                            req.session.pharmacy_first_login = user[0].FIRST_LOGIN;
+                        }
+                        
                         var type = user[0].TYPE;
-                        req.session.user_type = type;
                         
                         res.send({message: "success", type: type});
                     }

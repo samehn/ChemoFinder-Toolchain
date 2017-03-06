@@ -1,5 +1,5 @@
 var url = window.location.origin;
-function change_password() {
+function change_password(user_type) {
 	var user_array={};
   var password = $('#password');
   var rpassword =$('#rpassword');
@@ -8,7 +8,7 @@ function change_password() {
   console.log(user_array);
   $.ajax({
   	type: "post",
-  	url: url + '/user/first_changepassword',
+  	url: url + '/'+ user_type +'/first_changepassword',
   	data : user_array,
   	success:  function(data){
   		console.log(data);
