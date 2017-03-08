@@ -64,7 +64,8 @@ module.exports = function(app){
 	app.get('/admin/manage_medicines', admin_middleware.check_admin_sign_in, admin_manage_medicines_controller.manage_medicines_page);
 	app.post('/admin/addnewmedicine', admin_middleware.check_admin_sign_in, admin_manage_medicines_controller.add_new_medicine);
 	app.post('/admin/updatemedicine', admin_middleware.check_admin_sign_in, admin_manage_medicines_controller.update_medicine);
-	app.post('/admin/deletemedicine', admin_middleware.check_admin_sign_in, admin_manage_medicines_controller.delete_medicine);
+	app.post('/admin/deleteapprovedmedicine', admin_middleware.check_admin_sign_in, admin_manage_medicines_controller.delete_approved_medicine);
+	app.post('/admin/deletenonapprovedmedicine', admin_middleware.check_admin_sign_in, admin_manage_medicines_controller.delete_non_approved_medicine);
 	app.get('/admin/getmedicinebyid/:id', admin_middleware.check_admin_sign_in, admin_manage_medicines_controller.get_medicine_by_id);
 	app.get('/admin/downloadtemplate', admin_middleware.check_admin_sign_in, admin_manage_medicines_controller.download_medicines_template);
 	app.post('/admin/uploadmedicines', admin_middleware.check_admin_sign_in, admin_manage_medicines_controller.upload_medicines_list);

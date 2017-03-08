@@ -5,7 +5,7 @@ user_model.prototype     		= model;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 user_model.prototype.select_pharmacy_by_medicine_id = function(data) {
-	var query = "SELECT U.ID AS ID, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, S.LAST_UPDATE FROM DASH5082.MEDICINE M JOIN STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE S.APPROVAL ='1' AND M.ID =" + data.medicine_id + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)";
+	var query = "SELECT U.ID AS ID, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, U.STOCK_UPDATE AS LAST_UPDATE FROM DASH5082.CHEMO_MEDICINE M JOIN CHEMO_STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE M.APPROVED = TRUE AND M.ID =" + data.medicine_id + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)";
 	return this.dbQuerySync(query);
 };
 
@@ -86,8 +86,13 @@ user_model.prototype.select_treatment_center_by_id = function(data) {
 };
 
 user_model.prototype.select_pharmacies_by_medicine_and_quantity = function(data) {
-	var query = "SELECT U.ID AS ID, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, S.LAST_UPDATE FROM DASH5082.MEDICINE M JOIN STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE M.SRA IS NOT NULL AND U.TYPE='PHARMACY' AND M.ID =" + data.medicine_id + " AND S.AVAILABLE_STOCK >=" + data.quantity + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)";
+	var query = "SELECT U.ID AS ID, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, U.STOCK_UPDATE FROM DASH5082.CHEMO_MEDICINE M JOIN DASH5082.CHEMO_STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE M.APPROVED = TRUE AND U.TYPE='PHARMACY' AND M.ID =" + data.medicine_id + " AND S.AVAILABLE_STOCK >=" + data.quantity + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)";
 	return this.dbQuerySync(query);	
+};
+
+user_model.prototype.update_stock_time = function(data) {
+	var query = "UPDATE DASH5082.USER SET STOCK_UPDATE = CURRENT_TIMESTAMP WHERE ID = " + data.user_id;
+	return this.dbQuerySync(query);
 };
 
 module.exports = new user_model();

@@ -4,6 +4,7 @@ function manage_medicines(){
 	tomodel = {};
 	user_model 	= require('../../models/user_model');
     medicine_model  = require('../../models/medicine_model');
+    stock_list_model  = require('../../models/stock_list_model');
 };
 manage_medicines.prototype.constructor = manage_medicines;
 
@@ -32,6 +33,7 @@ manage_medicines.prototype.manage_medicines_page =  function(req, res) {
 
 manage_medicines.prototype.add_new_medicine =  function(req, res) {
 	var data = controller.xssClean(req.body);
+	console.log(data);
     var validation_array = medicine_validations(data);
     if(Object.keys(validation_array).length > 0){
         var result = controller.mergeArrays(validation_array, {message:'failed'});
@@ -54,6 +56,20 @@ manage_medicines.prototype.add_new_medicine =  function(req, res) {
     		tomodel.approval_date = data.approval_date;
     		tomodel.source = data.source;
     		tomodel.extract_date = data.extract_date;
+    		tomodel.specification_form = data.specification_form;
+    		tomodel.pack_type = data.pack_type;
+    		tomodel.units_per_pack = data.units_per_pack;
+    		if(!data.units_per_pack) {
+    			tomodel.units_per_pack = 0;
+    		}
+    		tomodel.status = data.status;
+    		tomodel.comments = data.comments;
+    		if(data.approve == 'true') {
+    			tomodel.approve = true;
+    		}
+    		else {
+    			tomodel.approve = false;
+    		}
     		medicine_model.insert_new_medicine(tomodel);
             res.send({message: 'success'});
     	}
@@ -90,6 +106,20 @@ manage_medicines.prototype.update_medicine =  function(req, res) {
 	    		tomodel.approval_date = data.approval_date;
 	    		tomodel.source = data.source;
 	    		tomodel.extract_date = data.extract_date;
+	    		tomodel.specification_form = data.specification_form;
+	    		tomodel.pack_type = data.pack_type;
+	    		tomodel.units_per_pack = data.units_per_pack;
+	    		if(!data.units_per_pack) {
+	    			tomodel.units_per_pack = 0;
+	    		}
+	    		tomodel.status = data.status;
+	    		tomodel.comments = data.comments;
+	    		if(data.approve == 'true') {
+	    			tomodel.approve = true;
+	    		}
+	    		else {
+	    			tomodel.approve = false;
+	    		}
 	    		medicine_model.update_medicine(tomodel);
 	    		res.send({message: 'success'});
 	    	}
@@ -105,13 +135,48 @@ manage_medicines.prototype.update_medicine =  function(req, res) {
     }
 }
 
-manage_medicines.prototype.delete_medicine =  function(req, res) {
+manage_medicines.prototype.delete_approved_medicine =  function(req, res) {
 	if(req.body.medicine_id && Number.isInteger(parseInt(req.body.medicine_id))) {
 		tomodel.medicine_id = req.body.medicine_id;
     	var medicine = medicine_model.select_medicine_by_id(tomodel);
     	if(medicine.length > 0) {
-    		medicine_model.delete_medicine(tomodel);
-    		res.send({message: "success"});
+    		var stocks = stock_list_model.select_stocks_by_medicine_id(tomodel);
+    		var result = {message: "success"};
+    		if(stocks.length > 0) {
+    			result['action'] = 'non_approved';
+    			tomodel.approve = 'FALSE';
+    			medicine_model.update_medicine_approval(tomodel);
+    		}
+    		else {
+    			result['action'] = 'delete';
+    			medicine_model.delete_medicine(tomodel);
+    		}
+    		res.send(result);
+    	}
+    	else {
+    		res.send({message: "failed", medicine_error: "This is not a valid medicine"});
+    	}
+	}
+	else {
+		res.send({message: "failed", medicine_error: "This is not a valid medicine"});
+	}
+}
+
+manage_medicines.prototype.delete_non_approved_medicine =  function(req, res) {
+	if(req.body.medicine_id && Number.isInteger(parseInt(req.body.medicine_id))) {
+		tomodel.medicine_id = req.body.medicine_id;
+    	var medicine = medicine_model.select_medicine_by_id(tomodel);
+    	if(medicine.length > 0) {
+    		var stocks = stock_list_model.select_stocks_by_medicine_id(tomodel);
+    		var result = {message: "success"};
+    		if(stocks.length > 0) {
+    			result['action'] = "no_delete"
+    		}
+    		else {
+    			result['action'] = 'delete';
+    			medicine_model.delete_medicine(tomodel);
+    		}
+    		res.send(result);
     	}
     	else {
     		res.send({message: "failed", medicine_error: "This is not a valid medicine"});
@@ -296,7 +361,40 @@ function parsing_approved_medicines(req, res) {
 	            data['strength_unit'] = '';
 	        }
 
-	        var route_address = 'G'+i;
+	        var specification_form_address = 'G'+i;
+	        var specification_form_cell = worksheet[specification_form_address];
+	        if(specification_form_cell != undefined)
+	        {
+	            data['specification_form'] = specification_form_cell.v;
+	        }
+	        else
+	        {
+	            data['specification_form'] = '';
+	        }
+
+	        var pack_type_address = 'H'+i;
+	        var pack_type_cell = worksheet[pack_type_address];
+	        if(pack_type_cell != undefined)
+	        {
+	            data['pack_type'] = pack_type_cell.v;
+	        }
+	        else
+	        {
+	            data['pack_type'] = '';
+	        }
+
+	        var units_per_pack_address = 'I'+i;
+	        var units_per_pack_cell = worksheet[units_per_pack_address];
+	        if(units_per_pack_cell != undefined)
+	        {
+	            data['units_per_pack'] = units_per_pack_cell.v;
+	        }
+	        else
+	        {
+	            data['units_per_pack'] = 0;
+	        }
+
+	        var route_address = 'J'+i;
 	        var route_cell = worksheet[route_address];
 	        if(route_cell != undefined)
 	        {
@@ -307,7 +405,7 @@ function parsing_approved_medicines(req, res) {
 	            data['route'] = '';
 	        }
 
-	        var manufacturer_address = 'H'+i;
+	        var manufacturer_address = 'K'+i;
 	        var manufacturer_cell = worksheet[manufacturer_address];
 	        if(manufacturer_cell != undefined)
 	        {
@@ -318,18 +416,20 @@ function parsing_approved_medicines(req, res) {
 	            data['manufacturer'] = '';
 	        }
 
-	        var sra_address = 'I'+i;
+	        var sra_address = 'L'+i;
 	        var sra_cell = worksheet[sra_address];
 	        if(sra_cell != undefined)
 	        {
+	        	data['approve'] = 'true';
 	            data['sra'] = sra_cell.v;
 	        }
 	        else
 	        {
 	            data['sra'] = '';
+	            data['approve'] = 'false';
 	        }
 
-	        var approval_date_address = 'J'+i;
+	        var approval_date_address = 'M'+i;
 	        var approval_date_cell = worksheet[approval_date_address];
 	        if(approval_date_cell != undefined)
 	        {
@@ -340,7 +440,7 @@ function parsing_approved_medicines(req, res) {
 	            data['approval_date'] = '';
 	        }
 
-	        var source_address = 'K'+i;
+	        var source_address = 'N'+i;
 	        var source_cell = worksheet[source_address];
 	        if(source_cell != undefined)
 	        {
@@ -351,7 +451,7 @@ function parsing_approved_medicines(req, res) {
 	            data['source'] = '';
 	        }
 
-	        var extract_date_address = 'L'+i;
+	        var extract_date_address = 'O'+i;
 	        var extract_date_cell = worksheet[extract_date_address];
 	        console.log(extract_date_cell);
 	        if(extract_date_cell != undefined)
@@ -363,8 +463,38 @@ function parsing_approved_medicines(req, res) {
 	            data['extract_date'] = '';
 	        }
 
-	        data = controller.xssClean(data);
-    		var validation_array = medicine_validations(data);
+	        var status_address = 'P'+i;
+	        var status_cell = worksheet[status_address];
+	        if(status_cell != undefined)
+	        {
+	            data['status'] = status_cell.v;
+	        }
+	        else
+	        {
+	            data['status'] = '';
+	        }
+
+	        var comments_address = 'Q'+i;
+	        var comments_cell = worksheet[comments_address];
+	        if(comments_cell != undefined)
+	        {
+	            data['comments'] = comments_cell.v;
+	        }
+	        else
+	        {
+	            data['comments'] = '';
+	        }
+
+	        var new_data = controller.xssClean(data);
+	        new_data['extract_date'] = data.extract_date;
+	        new_data['approval_date'] = data.approval_date;
+	        console.log(data.extract_date);
+	        console.log(new_data.extract_date);
+	        console.log(data.approval_date);
+	        console.log(new_data.approval_date);
+	        console.log(new_data);
+    		var validation_array = medicine_validations(new_data);
+	        console.log(new_data);
 	        if(Object.keys(validation_array).length > 0){
 	        	format_error_flag = true;
 		        var result = validation_array;
@@ -377,21 +507,35 @@ function parsing_approved_medicines(req, res) {
 	            warning_message = warning_message + wm;
 		    }
 		    else {
-		    	tomodel.generic_name = data.generic_name;
-		    	tomodel.brand_name = data.brand_name;
-		    	tomodel.form = data.form;
-		    	tomodel.strength = data.strength;
-		    	tomodel.strength_unit = data.strength_unit;
-		    	tomodel.manufacturer = data.manufacturer;
+		    	tomodel.generic_name = new_data.generic_name;
+		    	tomodel.brand_name = new_data.brand_name;
+		    	tomodel.form = new_data.form;
+		    	tomodel.strength = new_data.strength;
+		    	tomodel.strength_unit = new_data.strength_unit;
+		    	tomodel.manufacturer = new_data.manufacturer;
 		    	var medicine = medicine_model.select_medicine_by_main_keys(tomodel);
-		    	tomodel.route = data.route;
-	    		tomodel.sra = data.sra;
-	    		if(!data.approval_date) {
-	    			data.approval_date = '01/01/0001';
+		    	tomodel.route = new_data.route;
+	    		tomodel.sra = new_data.sra;
+	    		if(!new_data.approval_date) {
+	    			new_data.approval_date = '01/01/0001';
 	    		}
-	    		tomodel.approval_date = data.approval_date;
-	    		tomodel.source = data.source;
-	    		tomodel.extract_date = data.extract_date;
+	    		tomodel.approval_date = new_data.approval_date;
+	    		tomodel.source = new_data.source;
+	    		tomodel.extract_date = new_data.extract_date;
+	    		tomodel.specification_form = new_data.specification_form;
+	    		tomodel.pack_type = new_data.pack_type;
+	    		tomodel.units_per_pack = new_data.units_per_pack;
+	    		if(!new_data.units_per_pack) {
+	    			tomodel.units_per_pack = 0;
+	    		}
+	    		tomodel.status = new_data.status;
+	    		tomodel.comments = new_data.comments;
+	    		if(new_data.approve == 'true') {
+	    			tomodel.approve = true;
+	    		}
+	    		else {
+	    			tomodel.approve = false;
+	    		}
 		    	if(medicine.length == 0) {
 		    		medicine_model.insert_new_medicine(tomodel);
 		    	}
@@ -409,6 +553,7 @@ function parsing_approved_medicines(req, res) {
 }
 
 function medicine_validations(data) {
+	console.log(data);
     var validation_array = {};
     
     var generic_name = controller.validate({generic_name: data.generic_name},['required','length:0-60']);
@@ -425,19 +570,13 @@ function medicine_validations(data) {
     if(form){
         validation_array = controller.mergeArrays(validation_array, form);
     }
-    else {
-    	var forms = ['vial', 'tab', 'other'];
-	    if(!forms.includes(data.form.toLowerCase())) {
-	        validation_array = controller.mergeArrays(validation_array, {form_error: 'This is not a valid type'});
-	    }
-    }
 
     var strength = controller.validate({strength: data.strength},['required', 'float']);
     if(strength){
         validation_array = controller.mergeArrays(validation_array, strength);
     }
 
-    var strength_unit = controller.validate({strength_unit: data.strength_unit},['required', 'length:0-60']);
+    var strength_unit = controller.validate({strength_unit: data.strength_unit},['required', 'length:0-20']);
     if(strength_unit){
         validation_array = controller.mergeArrays(validation_array, strength_unit);
     }
@@ -445,11 +584,13 @@ function medicine_validations(data) {
 	var manufacturer = controller.validate({manufacturer: data.manufacturer},['required', 'length:0-60']);
     if(manufacturer){
         validation_array = controller.mergeArrays(validation_array, manufacturer);
-    }  
+    }
 
-    var sra = controller.validate({sra: data.sra},['required', 'length:0-60']);
-    if(sra){
-        validation_array = controller.mergeArrays(validation_array, sra);
+    if(data.approve == 'true') {
+    	var sra = controller.validate({sra: data.sra},['required', 'length:0-100']);
+	    if(sra){
+	        validation_array = controller.mergeArrays(validation_array, sra);
+	    }
     }
 
     var source = controller.validate({source: data.source},['length:0-2000']);
@@ -457,14 +598,20 @@ function medicine_validations(data) {
         validation_array = controller.mergeArrays(validation_array, source);
     }
  	
- 	var route = controller.validate({route: data.route},['length:0-100']);
+ 	var route = controller.validate({route: data.route},['length:0-200']);
     if(route){
         validation_array = controller.mergeArrays(validation_array, route);
     }
     
     if(data.extract_date && data.extract_date.length > 0) {
     	data.extract_date = new Date(data.extract_date);
-    	data.extract_date = controller.dateFormat(data.extract_date, "dd/mm/yyyy").toString();
+    	console.log(data.extract_date);
+    	if(Object.prototype.toString.call(data.extract_date) === "[object Date]" && !isNaN(data.extract_date.getTime())) {
+    		data.extract_date = controller.dateFormat(data.extract_date, "dd/mm/yyyy").toString();	
+    	}
+    	else {
+    		validation_array = controller.mergeArrays(validation_array, {extract_date_error: 'This is not a valid date'});
+    	}
     }
 
     var extract_date = controller.validate({extract_date: data.extract_date},['required', 'match_regex:^(?:(?:31(\\/|-|\\.)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.)(?:0?[1,3-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(\\/|-|\\.)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.)(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$||This is not a valid date format']);
@@ -474,7 +621,13 @@ function medicine_validations(data) {
 
     if(data.approval_date && data.approval_date.length > 0) {
     	data.approval_date = new Date(data.approval_date);
-    	data.approval_date = controller.dateFormat(data.approval_date, "dd/mm/yyyy").toString();
+    	console.log(data.approval_date);
+    	if(Object.prototype.toString.call(data.approval_date) === "[object Date]" && !isNaN(data.approval_date.getTime())) {
+    		data.approval_date = controller.dateFormat(data.approval_date, "dd/mm/yyyy").toString();
+    	}
+    	else {
+    		validation_array = controller.mergeArrays(validation_array, {approval_date_error: 'This is not a valid date'});
+    	}
     }
 
     if(data.approval_date && data.approval_date.length > 0) {
@@ -484,6 +637,33 @@ function medicine_validations(data) {
 	    }
     }
     
+    var specification_form = controller.validate({specification_form: data.specification_form},['length:0-60']);
+    if(specification_form){
+        validation_array = controller.mergeArrays(validation_array, specification_form);
+    }
+
+    var pack_type = controller.validate({pack_type: data.pack_type},['length:0-60']);
+    if(pack_type){
+        validation_array = controller.mergeArrays(validation_array, pack_type);
+    }
+
+    if(data.units_per_pack && data.units_per_pack.length > 0) {
+		var units_per_pack = controller.validate({units_per_pack: data.units_per_pack},['required', 'integer']);
+	    if(units_per_pack){
+	        validation_array = controller.mergeArrays(validation_array, units_per_pack);
+	    }	
+    }
+    
+
+    var status = controller.validate({status: data.status},['length:0-60']);
+    if(status){
+        validation_array = controller.mergeArrays(validation_array, status);
+    }
+
+    var comments = controller.validate({comments: data.comments},['length:0-2000']);
+    if(comments){
+        validation_array = controller.mergeArrays(validation_array, comments);
+    }
 
     return validation_array;
 }

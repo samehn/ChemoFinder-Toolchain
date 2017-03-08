@@ -10,7 +10,7 @@ reset_password.prototype.constructor = reset_password;
 
 reset_password.prototype.reset_password_page =  function(req, res) {
 	tomodel.token = req.params.token;
-	var forgot_password = admin_forgot_password_model.select_forgot_password_by_token(tomodel);
+	var forgot_password = admin_forgot_password_model.admin_select_forgot_password_by_token(tomodel);
 	if(forgot_password.length > 0) {
         // check the expiration date of the token
         var tokenDate = new Date(forgot_password[0].CREATED_AT);
@@ -41,7 +41,7 @@ reset_password.prototype.reset_password_page =  function(req, res) {
 reset_password.prototype.reset_password_process =  function(req, res) {
 	// check if the token exists
 	tomodel.token = req.body.token;
-	var forgot_password = admin_forgot_password_model.select_forgot_password_by_token(tomodel);
+	var forgot_password = admin_forgot_password_model.admin_select_forgot_password_by_token(tomodel);
 	if(forgot_password.length > 0) {
         // check the expiration date of the token
         var tokenDate = new Date(forgot_password[0].CREATED_AT);

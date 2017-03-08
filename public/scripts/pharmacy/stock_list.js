@@ -50,7 +50,6 @@ function getStockRecord(stock_id) {
       $('#medicineInfo').html(medicineInfo);
       $('#batchNumberUpdate').val(data.result[0].BATCH_NUMBER);
       $('#expiryDateUpdate').val(data.result[0].EXPIRY_DATE);
-      $('#sraUpdate').val(data.result[0].SRA);
       $('#packSizeUpdate').val(data.result[0].PACK_SIZE);
       $('#priceUpdate').val(data.result[0].PRICE_PER_PACK);
       $('#quantityUpdate').val(data.result[0].AVAILABLE_STOCK);
@@ -82,6 +81,15 @@ function showStockRecord(stock_id) {
       $('#priceShow').html(data.result[0].PRICE_PER_PACK);
       $('#quantityShow').html(data.result[0].AVAILABLE_STOCK);
       $('#avgMonthlyConsumptionShow').html(data.result[0].AVG_MONTHLY_CONSUMPTION);
+      $('#specificationFormShow').html(data.result[0].SPECIFICATION_FORM);
+      $('#packTypeShow').html(data.result[0].PACK_TYPE);
+      $('#unitsPerPackShow').html(data.result[0].UNITS_PER_PACK);
+      if(data.result[0].APPROVED) {
+        $('#approveShow').html('Approved');
+      }
+      else {
+        $('#approveShow').html('Not Approved'); 
+      }
       $('#updateDateShow').html(data.result[0].LAST_UPDATE);
       $('#medicineDetails').modal('show');
     }
@@ -93,7 +101,6 @@ function updateStockRecord(stock_id) {
     
   var batch = $('#batchNumberUpdate');
   var expiry_date = $('#expiryDateUpdate');
-  var sra = $('#sraUpdate');
   var pack_size = $('#packSizeUpdate');
   var price = $('#priceUpdate');
   var quantity = $('#quantityUpdate');
@@ -101,7 +108,6 @@ function updateStockRecord(stock_id) {
   item_array['stock_id'] = stock_id;
   item_array[batch.attr('name')] = batch.val();
   item_array[expiry_date.attr('name')] = expiry_date.val();
-  item_array[sra.attr('name')] = sra.val();
   item_array[pack_size.attr('name')] = pack_size.val();
   item_array[price.attr('name')] = price.val();
   item_array[quantity.attr('name')] = quantity.val();
@@ -134,11 +140,6 @@ function updateStockRecord(stock_id) {
         {
           var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.expiry_date_error + '</div>';
           $(error_message).insertBefore($('#expiryDateUpdateForm'));
-        }
-        if(data.sra_error)
-        {
-          var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.sra_error + '</div>';
-          $(error_message).insertBefore($('#sraUpdateForm'));
         }
         if(data.pack_size_error)
         {
@@ -201,7 +202,6 @@ function add_new_medicine() {
   var manufacturer = $('#manufacturer');
   var batch = $('#batchNumber');
   var expiry_date = $('#expiryDate');
-  var sra = $('#sra');
   var pack_size = $('#packSize');
   var price = $('#price');
   var quantity = $('#quantity');
@@ -215,7 +215,6 @@ function add_new_medicine() {
   item_array[manufacturer.attr('name')] = manufacturer.val();
   item_array[batch.attr('name')] = batch.val();
   item_array[expiry_date.attr('name')] = expiry_date.val();
-  item_array[sra.attr('name')] = sra.val();
   item_array[pack_size.attr('name')] = pack_size.val();
   item_array[price.attr('name')] = price.val();
   item_array[quantity.attr('name')] = quantity.val();
@@ -279,11 +278,6 @@ function add_new_medicine() {
             var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.expiry_date_error + '</div>';
             $(error_message).insertBefore($('#expiryDateForm'));
          }
-         if(data.sra_error)
-         {
-            var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.sra_error + '</div>';
-            $(error_message).insertBefore($('#sraForm'));
-         }
          if(data.pack_size_error)
          {
             var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.pack_size_error + '</div>';
@@ -315,7 +309,6 @@ function add_new_approved_medicine() {
   var medicine_id = $('#medicineApproved');
   var batch = $('#batchNumberApproved');
   var expiry_date = $('#expiryDateApproved');
-  var sra = $('#sraApproved');
   var pack_size = $('#packSizeApproved');
   var price = $('#priceApproved');
   var quantity = $('#quantityApproved');
@@ -325,7 +318,6 @@ function add_new_approved_medicine() {
   item_array[medicine_id.attr('name')] = medicine_id.val();
   item_array[batch.attr('name')] = batch.val();
   item_array[expiry_date.attr('name')] = expiry_date.val();
-  item_array[sra.attr('name')] = sra.val();
   item_array[pack_size.attr('name')] = pack_size.val();
   item_array[price.attr('name')] = price.val();
   item_array[quantity.attr('name')] = quantity.val();
@@ -363,11 +355,6 @@ function add_new_approved_medicine() {
          {
             var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.expiry_date_error + '</div>';
             $(error_message).insertBefore($('#expiryDateFormApproved'));
-         }
-         if(data.sra_error)
-         {
-            var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.sra_error + '</div>';
-            $(error_message).insertBefore($('#sraFormApproved'));
          }
          if(data.pack_size_error)
          {

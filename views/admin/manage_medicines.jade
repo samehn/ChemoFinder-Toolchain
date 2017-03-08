@@ -69,7 +69,7 @@ block content
             td
               button.form-control.btn.btn-primary(onclick='getMedicine(' + approved_medicines[i].ID + ')') Update
             td
-              button.form-control.btn.btn-gray(onclick='deleteStockRecord(' + approved_medicines[i].ID + ', this)') Delete
+              button.form-control.btn.btn-gray(onclick='deleteApprovedStockRecord(' + approved_medicines[i].ID + ', this)') Delete
             td
               button.form-control.btn.btn-gray(onclick='showDetails(' + approved_medicines[i].ID + ')') Show Details  
             td #{approved_medicines[i].GENERIC_NAME} 
@@ -99,7 +99,7 @@ block content
             td
               button.form-control.btn.btn-primary(onclick='getMedicine(' + non_approved_medicines[i].ID + ')') Update
             td
-              button.form-control.btn.btn-gray(onclick='deleteStockRecord(' + non_approved_medicines[i].ID + ', this)') Delete
+              button.form-control.btn.btn-gray(onclick='deleteNonApprovedStockRecord(' + non_approved_medicines[i].ID + ', this)') Delete
             td
               button.form-control.btn.btn-gray(onclick='showDetails(' + non_approved_medicines[i].ID + ')') Show Details    
             td #{non_approved_medicines[i].GENERIC_NAME} 
@@ -146,7 +146,13 @@ block modals
             .col-xs-6.text-center
               label Strength Unit
             .col-xs-6.text-center  
-              p.wrapping#strengthUnitShow 
+              p.wrapping#strengthUnitShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Specification Form
+            .col-xs-6.text-center  
+              p.wrapping#specificationFormShow         
           hr
           .row
             .col-xs-6.text-center
@@ -159,6 +165,18 @@ block modals
               label Manufacturer
             .col-xs-6.text-center  
               p.wrapping#manufacturerShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Pack Type
+            .col-xs-6.text-center  
+              p.wrapping#packTypeShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Units Per Pack
+            .col-xs-6.text-center  
+              p.wrapping#unitsPerPackShow
           hr
           .row
             .col-xs-6.text-center
@@ -183,6 +201,18 @@ block modals
               label Extract Date
             .col-xs-6.text-center  
               p.wrapping#extractDateShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Status
+            .col-xs-6.text-center  
+              p.wrapping#statusShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Comments
+            .col-xs-6.text-center  
+              p.wrapping#commentsShow          
             // /.form-group  
         // /.modal-body
       // /.modal-content
@@ -206,26 +236,67 @@ block modals
             #formForm.form-group
               select#form.form-control(name='form')
                 option.form-control(value='') Select Form
-                option.form-control(value='TAB') Tab
-                option.form-control(value='VIAL') Vial
-                option.form-control(value='OTHER') Other
+                option.form-control(value='Ampule') Ampule
+                option.form-control(value='Caps') Caps
+                option.form-control(value='Eye Drops') Eye Drops
+                option.form-control(value='Syringe') Syringe
+                option.form-control(value='Vial') Vial
+                option.form-control(value='Tablets') Tablets
+                option.form-control(value='Film') Film
+                option.form-control(value='Solution') Solution
+                option.form-control(value='Other') Other
               // /.input-group
             // /.form-group  
             #strengthForm.form-group
               input#strength.form-control(name='strength', type='text', placeholder='Strength')
             // /.form-group
             #strengthUnitForm.form-group
-              input#strengthUnit.form-control(name='strength_unit', type='text', placeholder='Strength Unit')
+              select#strengthUnit.form-control(name='strength_unit')
+                option.form-control(value='') Select Form
+                option.form-control(value='Mcg') Mcg
+                option.form-control(value='Mg') Mg
+                option.form-control(value='Gr') Gr
+                option.form-control(value='Mcg/ml') Mcg/ml
+                option.form-control(value='Mg/ml') Mg/ml
+                option.form-control(value='Gr/ml') Gr/ml
+                option.form-control(value='ml') ml
+                option.form-control(value='IU') IU
+                option.form-control(value='MU') MU
+                option.form-control(value='%') %
+                option.form-control(value='Other') Other
             // /.form-group
+
+
+            #specificationFormForm.form-group
+              input#specificationForm.form-control(name='specification_form', type='text', placeholder='Specification Form')
+            // /.form-group
+
+
             #routeForm.form-group
               input#route.form-control(name='route', type='text', placeholder='Route')
             // /.form-group
             #manufacturerForm.form-group
               input#manufacturer.form-control(name='manufacturer', type='text', placeholder='Manufacturer')
             // /.form-group
-            #sraForm.form-group
-              input#sra.form-control(name='sra', type='text', placeholder='SRA Approval')
+
+
+            #packTypeForm.form-group
+              input#packType.form-control(name='pack_type', type='text', placeholder='Pack Type')
             // /.form-group
+            
+
+
+            #unitsPerPackForm.form-group
+              input#unitsPerPack.form-control(name='units_per_pack', type='text', placeholder='Units Per Pack')
+            // /.form-group
+
+            #sraForm.form-group.row
+              .col-xs-1
+                input#approve.checkbox-form-control(name='approve', type="checkbox")
+              .col-xs-10
+                input#sra.form-control(name='sra', type='text', placeholder='SRA Approval' disabled="disabled")
+            // /.form-group
+
             p 
               strong Approval Date
             #approvalDateForm.form-group
@@ -238,7 +309,19 @@ block modals
               strong Extract Date
             #extractDateForm.form-group
               input#extractDate.form-control(name='extract_date', type='date', placeholder='Extract Date')
-            // /.form-group  
+            // /.form-group
+
+
+            #statusForm.form-group
+              input#status.form-control(name='status', type='text', placeholder='Status')
+            // /.form-group
+            
+
+            #commentsForm.form-group
+              input#comments.form-control(name='comments', type='text', placeholder='Comments')
+            // /.form-group
+        
+
         // /.modal-body
         .modal-footer
           button.form-control.btn.btn-primary(onclick='add_new_medicine();') Submit
@@ -267,9 +350,15 @@ block modals
             #formFormUpdate.form-group
               select#formUpdate.form-control(name='form')
                 option.form-control(value='') Select Form
-                option.form-control(value='TAB') Tab
-                option.form-control(value='VIAL') Vial
-                option.form-control(value='OTHER') Other
+                option.form-control(value='Ampule') Ampule
+                option.form-control(value='Caps') Caps
+                option.form-control(value='Eye Drops') Eye Drops
+                option.form-control(value='Syringe') Syringe
+                option.form-control(value='Vial') Vial
+                option.form-control(value='Tablets') Tablets
+                option.form-control(value='Film') Film
+                option.form-control(value='Solution') Solution
+                option.form-control(value='Other') Other
               // /.input-group
             // /.form-group
             label Strength  
@@ -278,8 +367,27 @@ block modals
             // /.form-group
             label Strength Unit
             #strengthUnitFormUpdate.form-group
-              input#strengthUnitUpdate.form-control(name='strength_unit', type='text', placeholder='Strength Unit')
+              select#strengthUnitUpdate.form-control(name='strength_unit')
+                option.form-control(value='') Select Form
+                option.form-control(value='Mcg') Mcg
+                option.form-control(value='Mg') Mg
+                option.form-control(value='Gr') Gr
+                option.form-control(value='Mcg/ml') Mcg/ml
+                option.form-control(value='Mg/ml') Mg/ml
+                option.form-control(value='Gr/ml') Gr/ml
+                option.form-control(value='ml') ml
+                option.form-control(value='IU') IU
+                option.form-control(value='MU') MU
+                option.form-control(value='%') %
+                option.form-control(value='Other') Other
             // /.form-group
+
+            label Specification Form
+            #specificationFormFormUpdate.form-group
+              input#specificationFormUpdate.form-control(name='specification_form', type='text', placeholder='Specification Form')
+            // /.form-group
+
+
             label Route
             #routeFormUpdate.form-group
               input#routeUpdate.form-control(name='route', type='text', placeholder='Route')
@@ -288,9 +396,25 @@ block modals
             #manufacturerFormUpdate.form-group
               input#manufacturerUpdate.form-control(name='manufacturer', type='text', placeholder='Manufacturer')
             // /.form-group
+
+            label Pack Type
+            #packTypeFormUpdate.form-group
+              input#packTypeUpdate.form-control(name='pack_type', type='text', placeholder='Pack Type')
+            // /.form-group
+            
+
+            label Units Per Pack
+            #unitsPerPackFormUpdate.form-group
+              input#unitsPerPackUpdate.form-control(name='units_per_pack', type='text', placeholder='Units Per Pack')
+            // /.form-group
+
+
             label SRA Approval
-            #sraFormUpdate.form-group
-              input#sraUpdate.form-control(name='sra', type='text', placeholder='SRA Approval')
+            #sraFormUpdate.form-group.row
+              .col-xs-1
+                input#approveUpdate.checkbox-form-control(name='approve', type="checkbox")
+              .col-xs-10
+                input#sraUpdate.form-control(name='sra', type='text', placeholder='SRA Approval' disabled="disabled")
             // /.form-group
             label Approval Date
             #approvalDateFormUpdate.form-group
@@ -303,7 +427,19 @@ block modals
             label Extract Date
             #extractDateFormUpdate.form-group
               input#extractDateUpdate.form-control(name='extract_date', type='date', placeholder='Extract Date')
-            // /.form-group  
+            // /.form-group
+            
+            label Status
+            #statusFormUpdate.form-group
+              input#statusUpdate.form-control(name='status', type='text', placeholder='Status')
+            // /.form-group
+            
+            label Comments
+            #commentsFormUpdate.form-group
+              input#commentsUpdate.form-control(name='comments', type='text', placeholder='Comments')
+            // /.form-group
+
+
         // /.modal-body
         .modal-footer
           button#update-medicine-btn.form-control.btn.btn-primary Submit
@@ -360,9 +496,37 @@ block modals
         .modal-footer
           button.form-control.btn.btn-primary(onclick='location.reload();') OK
         // /.modal-footer
+  #confimDeleteNonApprovedMedicine.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h4#myModalLabel.modal-title Delete Medicine
+        // /.modal-header
+        .modal-body
+          |  This medicine cannot be deleted as it is available in some pharmacies but it will be converted to the non approved medicines list
+        // /.modal-body
+        .modal-footer
+          button.form-control.btn.btn-primary(onclick='location.reload();') OK
+        // /.modal-footer      
       // /.modal-content
     // /.modal-dialog
-  // /.modal          
+  // /.modal
+  #confimNoDeleteMedicine.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          h4#myModalLabel.modal-title Delete Medicine
+        // /.modal-header
+        .modal-body
+          | This medicine cannot be deleted as it is available in some pharmacies
+        // /.modal-body
+        .modal-footer
+          button.form-control.btn.btn-primary(data-dismiss='modal') Close
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal        
 block scripts
   script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js')
   script(type='text/javascript', src=base+'/scripts/admin/manage_medicines.js')

@@ -8,6 +8,7 @@ controller.prototype.XLSX = require('xlsx');
 controller.prototype.xssFilters = require('xss-filters');
 controller.prototype.saltRounds = 10;
 controller.prototype.Excel = require("exceljs");
+controller.prototype.randtoken = require('rand-token');
 // controller.prototype.multer  = require('multer');
 controller.prototype.fs = require('fs');
 // controller.prototype.mv = require('mv');

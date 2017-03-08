@@ -11,7 +11,7 @@ stock.prototype.constructor = stock;
 stock.prototype.stock_page =  function(req, res) {
     tomodel.user_id = req.session.pharmacy_id;
     var stock_list = stock_list_model.select_stock_list_by_id(tomodel);
-    var medicines = medicine_model.select_non_approved_medicines();    
+    var medicines = medicine_model.select_approved_medicines();    
     var data = {stock_list: stock_list, medicines: medicines};
     if(req.session.extention_error)
     {
@@ -133,6 +133,7 @@ stock.prototype.update_medicine =  function(req, res) {
             tomodel.quantity = data.quantity;
             tomodel.avg_monthly_consumption = data.avg_monthly_consumption;
             stock_list_model.update_stock_record(tomodel);
+            user_model.update_stock_time(tomodel);
             res.send({message: "success"});
         }
         else {
@@ -386,7 +387,7 @@ function parsingStockList(req, res) {
             }
             else
             {
-                data['expiry_date'] = 'NULL';
+                data['expiry_date'] = '';
             }
 
             var sra_address = 'J'+i;
@@ -445,6 +446,7 @@ function parsingStockList(req, res) {
             }
 
             data = controller.xssClean(data);
+            console.log(data);
             var validation_array = new_medicine_validations(data);
             if(Object.keys(validation_array).length > 0){
                 format_error_flag = true;
@@ -479,6 +481,7 @@ function parsingStockList(req, res) {
                     if(stock_list_medicine.length > 0) {
                         tomodel.stock_id = stock_list_medicine[0].ID;
                         stock_list_model.update_stock_record(tomodel);
+                        user_model.update_stock_time(tomodel);
                     }
                     else {
                         stock_list_model.insert_new_record(tomodel);
@@ -532,11 +535,6 @@ function updated_medicine_validations(data) {
         }
     }
 
-    var sra = controller.validate({sra: data.sra},['length:0-60']);
-    if(sra){
-        validation_array = controller.mergeArrays(validation_array, sra);
-    }
-
     var pack_size = controller.validate({pack_size: data.pack_size},['required', 'integer', 'length:0-60']);
     if(pack_size){
         validation_array = controller.mergeArrays(validation_array, pack_size);
@@ -549,7 +547,13 @@ function updated_medicine_validations(data) {
     
     if(data.expiry_date && data.expiry_date.length > 0) {
         data.expiry_date = new Date(data.expiry_date);
-        data.expiry_date = controller.dateFormat(data.expiry_date, "dd/mm/yyyy").toString();
+        console.log(data.expiry_date);
+        if(Object.prototype.toString.call(data.expiry_date) === "[object Date]" && !isNaN(data.expiry_date.getTime())) {
+            data.expiry_date = controller.dateFormat(data.expiry_date, "dd/mm/yyyy").toString();  
+        }
+        else {
+            validation_array = controller.mergeArrays(validation_array, {expiry_date_error: 'This is not a valid date'});
+        }
     }
 
     var expiry_date = controller.validate({expiry_date: data.expiry_date},['required', 'match_regex:^(?:(?:31(\\/|-|\\.)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.)(?:0?[1,3-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(\\/|-|\\.)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.)(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$||This is not a valid date format']);
@@ -590,11 +594,6 @@ function approved_medicine_validations(data) {
         }
     }
 
-    var sra = controller.validate({sra: data.sra},['length:0-60']);
-    if(sra){
-        validation_array = controller.mergeArrays(validation_array, sra);
-    }
-
     var pack_size = controller.validate({pack_size: data.pack_size},['required', 'integer', 'length:0-60']);
     if(pack_size){
         validation_array = controller.mergeArrays(validation_array, pack_size);
@@ -607,7 +606,13 @@ function approved_medicine_validations(data) {
     
     if(data.expiry_date && data.expiry_date.length > 0) {
         data.expiry_date = new Date(data.expiry_date);
-        data.expiry_date = controller.dateFormat(data.expiry_date, "dd/mm/yyyy").toString();
+        console.log(data.expiry_date);
+        if(Object.prototype.toString.call(data.expiry_date) === "[object Date]" && !isNaN(data.expiry_date.getTime())) {
+            data.expiry_date = controller.dateFormat(data.expiry_date, "dd/mm/yyyy").toString();  
+        }
+        else {
+            validation_array = controller.mergeArrays(validation_array, {expiry_date_error: 'This is not a valid date'});
+        }
     }
 
     var expiry_date = controller.validate({expiry_date: data.expiry_date},['required', 'match_regex:^(?:(?:31(\\/|-|\\.)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.)(?:0?[1,3-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(\\/|-|\\.)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.)(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$||This is not a valid date format']);
@@ -650,12 +655,6 @@ function new_medicine_validations(data) {
     if(form){
         validation_array = controller.mergeArrays(validation_array, form);
     }
-    else {
-        var forms = ['vial', 'tab', 'other'];
-        if(!forms.includes(data.form.toLowerCase())) {
-            validation_array = controller.mergeArrays(validation_array, {form_error: 'This is not a valid type'});
-        }
-    }
 
     var strength = controller.validate({strength: data.strength},['required', 'float']);
     if(strength){
@@ -670,11 +669,6 @@ function new_medicine_validations(data) {
     var manufacturer = controller.validate({manufacturer: data.manufacturer},['required', 'length:0-60']);
     if(manufacturer){
         validation_array = controller.mergeArrays(validation_array, manufacturer);
-    }  
-
-    var sra = controller.validate({sra: data.sra},['length:0-60']);
-    if(sra){
-        validation_array = controller.mergeArrays(validation_array, sra);
     }
 
     var pack_size = controller.validate({pack_size: data.pack_size},['required', 'integer', 'length:0-60']);
@@ -686,10 +680,16 @@ function new_medicine_validations(data) {
     if(batch_number){
         validation_array = controller.mergeArrays(validation_array, batch_number);
     }
-    
+
     if(data.expiry_date && data.expiry_date.length > 0) {
-        data.expiry_date = new Date(data.expiry_date);
-        data.expiry_date = controller.dateFormat(data.expiry_date, "dd/mm/yyyy").toString();
+        var expiry_date = new Date(data.expiry_date);
+        console.log(data.expiry_date);
+        if(Object.prototype.toString.call(expiry_date) === "[object Date]" && !isNaN(expiry_date.getTime())) {
+            data.expiry_date = controller.dateFormat(data.expiry_date, "dd/mm/yyyy").toString();  
+        }
+        else {
+            validation_array = controller.mergeArrays(validation_array, {expiry_date_error: 'This is not a valid date'});
+        }
     }
 
     var expiry_date = controller.validate({expiry_date: data.expiry_date},['required', 'match_regex:^(?:(?:31(\\/|-|\\.)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.)(?:0?[1,3-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(\\/|-|\\.)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.)(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$||This is not a valid date format']);

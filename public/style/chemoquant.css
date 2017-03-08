@@ -1278,6 +1278,22 @@ regimen-dist {
     -o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
     transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
 }
+.checkbox-form-control{
+    display: block;
+    width: 100%;
+    height: 34px;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.auto-width{width: auto;}
+.uppercase {text-transform: uppercase;}
+.capitalize{text-transform: capitalize;}
 .break-words{word-break: break-all;}
 .qty-box{    width: 80px; float: right;}
 .search_hint{text-align: left; color: gray; margin: 10 10}

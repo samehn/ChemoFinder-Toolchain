@@ -26,7 +26,7 @@ forgot_password.prototype.forgot_password_process =  function(req, res) {
         // Generate a 20 character alpha-numeric token:
         var flag = true;
         while(flag) {
-        	tomodel.token = randtoken.generate(120);
+        	tomodel.token = controller.randtoken.generate(120);
         	var forgot_password = user_forgot_password_model.select_forgot_password_by_token(tomodel);
         	if(forgot_password.length == 0) {
         		flag = false;
@@ -42,11 +42,11 @@ forgot_password.prototype.forgot_password_process =  function(req, res) {
         user_forgot_password_model.insert_forgot_password(tomodel);
         res.send({message: "success"});
         var base = req.protocol + '://' + req.get('host');
-        var link = base + '/user/resetpassword/' + token;
+        var link = base + '/user/resetpassword/' + tomodel.token;
         //send email
         var mailOptions = {
             from: 'chemofinder@gmail.com', // sender address
-            to: req.body.email, // list of receivers
+            to: data.email, // list of receivers
             subject: 'Password Recovery', // Subject line
             template: 'forgot_password_mail',
             context: {

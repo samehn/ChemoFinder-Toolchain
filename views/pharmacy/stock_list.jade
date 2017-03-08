@@ -41,7 +41,7 @@ block content
         button.form-control.btn.btn-primary.mg-btm-10(type="submit") Download My Last Stock        
   hr  
   .welcome__home-buttons
-    h4.table-title Approved Medicines     
+    h4.table-title Medicines In Stock     
     table#stockListTable.display(cellspacing="0", width="100%")
       thead
         tr
@@ -53,7 +53,8 @@ block content
           th Strength
           th Strength Unit
           th Brand Name
-          th Manufacturer 
+          th Manufacturer
+          th Approval
       tbody
         - for( var i = 0, len = stock_list.length; i < len; i++ ) {
         tr
@@ -69,7 +70,13 @@ block content
           td #{stock_list[i].STRENGTH_UNIT}
           td #{stock_list[i].BRAND_NAME}
           td #{stock_list[i].MANUFACTURER}
+          td
+            if(stock_list[i].APPROVED)
+              | Approved
+            else
+              | Not Approved
         - }
+
 block modals
   #medicineDetails.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
     .modal-dialog
@@ -114,6 +121,12 @@ block modals
               label Manufacturer
             .col-xs-6.text-center  
               p.wrapping#manufacturerShow
+          hr  
+          .row
+            .col-xs-6.text-center
+              label Specification Form
+            .col-xs-6.text-center  
+              p.wrapping#specificationFormShow
           hr
           .row
             .col-xs-6.text-center
@@ -129,6 +142,12 @@ block modals
           hr
           .row
             .col-xs-6.text-center
+              label Approval Status
+            .col-xs-6.text-center  
+              p.wrapping#approveShow
+          hr
+          .row
+            .col-xs-6.text-center
               label SRA Approvals
             .col-xs-6.text-center  
               p.wrapping#sraShow
@@ -137,7 +156,19 @@ block modals
             .col-xs-6.text-center
               label Pack Size
             .col-xs-6.text-center  
-              p.wrapping#packSizeShow   
+              p.wrapping#packSizeShow
+          hr
+          .row
+            .col-xs-6.text-center
+              label Pack Type 
+            .col-xs-6.text-center  
+              p.wrapping#packTypeShow      
+          hr
+          .row
+            .col-xs-6.text-center
+              label Units Per Pack
+            .col-xs-6.text-center  
+              p.wrapping#unitsPerPackShow   
           hr
           .row
             .col-xs-6.text-center
@@ -181,16 +212,34 @@ block modals
             #formForm.form-group
               select#form.form-control(name='form')
                 option.form-control(value='') Select Form
-                option.form-control(value='TAB') Tab
-                option.form-control(value='VIAL') Vial
-                option.form-control(value='OTHER') Other
+                option.form-control(value='Ampule') Ampule
+                option.form-control(value='Caps') Caps
+                option.form-control(value='Eye Drops') Eye Drops
+                option.form-control(value='Syringe') Syringe
+                option.form-control(value='Vial') Vial
+                option.form-control(value='Tablets') Tablets
+                option.form-control(value='Film') Film
+                option.form-control(value='Solution') Solution
+                option.form-control(value='Other') Other
               // /.input-group
             // /.form-group
             #strengthForm.form-group
               input#strength.form-control(name='strength', type='text', placeholder='Strength')
             // /.form-group
             #strengthUnitForm.form-group
-              input#strengthUnit.form-control(name='strength_unit', type='text', placeholder='Strength Unit')
+              select#strengthUnit.form-control(name='strength_unit')
+                option.form-control(value='') Select Form
+                option.form-control(value='Mcg') Mcg
+                option.form-control(value='Mg') Mg
+                option.form-control(value='Gr') Gr
+                option.form-control(value='Mcg/ml') Mcg/ml
+                option.form-control(value='Mg/ml') Mg/ml
+                option.form-control(value='Gr/ml') Gr/ml
+                option.form-control(value='ml') ml
+                option.form-control(value='IU') IU
+                option.form-control(value='MU') MU
+                option.form-control(value='%') %
+                option.form-control(value='Other') Other             
             // /.form-group
             #brandNameForm.form-group
               input#brandName.form-control(name='brand_name', type='text', placeholder='Brand Name')
@@ -199,15 +248,12 @@ block modals
               input#manufacturer.form-control(name='manufacturer', type='text', placeholder='Manufacturer')
             // /.form-group
             #batchNumberForm.form-group
-              input#batchNumber.form-control(name='batch_number', type='number', step="any", placeholder='Batch Number')
+              input#batchNumber.form-control(name='batch_number', type='text', placeholder='Batch Number')
             // /.form-group            
             p 
               strong Expiry Date
             #expiryDateForm.form-group
               input#expiryDate.form-control(name='expiry_date', type='date', placeholder='Expiry Date')
-            // /.form-group
-            #sraForm.form-group
-              input#sra.form-control(name='sra', type='text', placeholder='SRA Approval')
             // /.form-group
             #packSizeForm.form-group
               input#packSize.form-control(name='pack_size', type='text', placeholder='Pack Size')
@@ -246,15 +292,12 @@ block modals
               // /.input-group
             // /.form-group
             #batchNumberFormApproved.form-group
-              input#batchNumberApproved.form-control(name='batch_number', type='number', step="any", placeholder='Batch Number')
+              input#batchNumberApproved.form-control(name='batch_number', placeholder='Batch Number')
             // /.form-group            
             p 
               strong Expiry Date
             #expiryDateFormApproved.form-group
               input#expiryDateApproved.form-control(name='expiry_date', type='date', placeholder='Expiry Date')
-            // /.form-group
-            #sraFormApproved.form-group
-              input#sraApproved.form-control(name='sra', type='text', placeholder='SRA Approval')
             // /.form-group
             #packSizeFormApproved.form-group
               input#packSizeApproved.form-control(name='pack_size', type='text', placeholder='Pack Size')
@@ -289,15 +332,11 @@ block modals
             // /.form-group
             label Batch Number
             #batchNumberUpdateForm.form-group
-              input#batchNumberUpdate.form-control(name='batch_number', type='number', step="any", placeholder='Batch Number')
+              input#batchNumberUpdate.form-control(name='batch_number', placeholder='Batch Number')
             // /.form-group            
             label Expiry Date
             #expiryDateUpdateForm.form-group
               input#expiryDateUpdate.form-control(name='expiry_date', type='date', placeholder='Expiry Date')
-            // /.form-group
-            label SRA Approval
-            #sraUpdateForm.form-group
-              input#sraUpdate.form-control(name='sra', type='text', placeholder='SRA Approval')
             // /.form-group
             label Pack Size
             #packSizeUpdateForm.form-group

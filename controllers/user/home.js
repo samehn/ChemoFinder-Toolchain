@@ -46,7 +46,7 @@ home.prototype.get_medicines_by_generic_and_form = function(req, res) {
     else {
         tomodel.generic_name = data.generic_name;
         tomodel.form = data.form
-        var medicines = medicine_model.select_medicine_by_generid_and_form(tomodel);
+        var medicines = medicine_model.select_medicine_by_generic_and_form(tomodel);
         var result = {message: "success"};
         result['medicines'] = medicines; 
         res.send(result);
@@ -63,12 +63,6 @@ function medicine_validations(data) {
     var form = controller.validate({form: data.form},['required', 'length:0-60']);
     if(form){
         validation_array = controller.mergeArrays(validation_array, form);
-    }
-    else {
-        var forms = ['vial', 'tab', 'other'];
-        if(!forms.includes(data.form.toLowerCase())) {
-            validation_array = controller.mergeArrays(validation_array, {form_error: 'This is not a valid type'});
-        }
     }
 
     return validation_array;

@@ -46,7 +46,7 @@ block content
             td #{non_approved_users[i].EMAIL}
             td #{non_approved_users[i].TYPE}
             td 
-              button.form-control.btn.btn-primary(onclick='approve('+non_approved_users[i].ID+')') Approve
+              button.form-control.btn.btn-primary.auto-width(onclick='approve('+non_approved_users[i].ID+')') Approve
           - }
     h4.table-title Users Accounts     
     table#usersTable.display(cellspacing="0", width="100%")
@@ -71,18 +71,18 @@ block content
               input.form-control(type='text', id='suspend_message_'+approved_users[i].ID)
             td
               if approved_users[i].ACTIVE == 1
-                input.form-control(type='checkbox', id='chk_'+approved_users[i].ID)
+                input.checkbox-form-control(type='checkbox', id='chk_'+approved_users[i].ID)
               else
-                input.form-control(type='checkbox' disabled readonly)
+                input.checkbox-form-control(type='checkbox' disabled readonly)
             td 
               if approved_users[i].ACTIVE == 1
-                button.form-control.btn.btn-gray(onclick='suspend('+approved_users[i].ID+')') Suspend
+                button.form-control.btn.btn-gray.auto-width(onclick='suspend('+approved_users[i].ID+')') Suspend
               else
-                button.form-control.btn.btn-success(onclick='activate('+approved_users[i].ID+')') Activate
+                button.form-control.btn.btn-success.auto-width(onclick='activate('+approved_users[i].ID+')') Activate
             td
-              button.form-control.btn.btn-gray(onclick='showHistory('+approved_users[i].ID+')') Show Suspension History
+              button.form-control.btn.btn-gray.auto-width(onclick='showHistory('+approved_users[i].ID+')') Show Suspension History
             td 
-              button.form-control.btn.btn-danger(onclick='delete_user('+ approved_users[i].ID+')') Delete     
+              button.form-control.btn.btn-danger.auto-width(onclick='delete_user('+ approved_users[i].ID+')') Delete     
           - }
 block modals             
   #addNewUser.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')

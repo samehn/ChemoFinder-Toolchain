@@ -13,9 +13,11 @@ for (var i = 1; i <= 20; i++) {
 
 function selectMedicine(element) {
 	var medicine = $(element).val();
-	var medicineDetails = medicine.split(' ');
-	if(medicineDetails.length == 2) {
-		var data = {generic_name: medicineDetails[0], form: medicineDetails[1]};
+	var generic_name = $('option:selected', element).attr("data-name");
+	var form = $('option:selected', element).attr("data-form");
+
+	if(generic_name && form) {
+		var data = {generic_name: generic_name, form: form};
 		console.log(data);
 		$.ajax({
 	      type: "post",

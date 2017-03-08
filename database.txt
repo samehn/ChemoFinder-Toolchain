@@ -32,3 +32,42 @@ create table CHEMO_ADMIN (
   ,UPDATED_AT timestamp not null with default current timestamp
   ,PRIMARY KEY (ID)
 );
+
+create table CHEMO_MEDICINE (
+   ID integer not null GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1)
+  ,GENERIC_NAME varchar(60) NOT NULL
+  ,BRAND_NAME varchar(60) NOT NULL
+  ,FORM varchar(60) NOT NULL
+  ,STRENGTH DOUBLE NOT NULL
+  ,STRENGTH_UNIT varchar(20) NOT NULL
+  ,ROUTE varchar(200)
+  ,MANUFACTURER varchar(60) NOT NULL
+  ,SPECIFICATION_FORM varchar(60)
+  ,PACK_TYPE VARCHAR(60)
+  ,UNITS_PER_PACK INTEGER
+  ,SRA varchar(100)
+  ,APPROVED BOOLEAN DEFAULT FALSE
+  ,APPROVAL_DATE DATE
+  ,SOURCE varchar(2000)
+  ,EXTRACT_DATE DATE
+  ,STATUS varchar(60)
+  ,COMMENTS varchar(2000)
+  ,CREATED_AT TIMESTAMP NOT NULL with default current timestamp
+  ,UPDATED_AT timestamp not null with default current timestamp
+  ,PRIMARY KEY (ID)
+);
+
+create table CHEMO_STOCK_LIST (
+   ID integer not null GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1)
+  ,MEDICINE_ID INT NOT NULL
+  ,BATCH_NUMBER varchar(100)
+  ,EXPIRY_DATE DATE
+  ,PACK_SIZE INTEGER
+  ,PRICE_PER_PACK DOUBLE
+  ,AVAILABLE_STOCK INT
+  ,AVG_MONTHLY_CONSUMPTION VARCHAR(60)
+  ,PHARMACY_ID INT
+  ,CREATED_AT TIMESTAMP NOT NULL with default current timestamp
+  ,UPDATED_AT timestamp not null with default current timestamp
+  ,PRIMARY KEY (ID)
+);
