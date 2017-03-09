@@ -270,6 +270,24 @@ manage_medicines.prototype.upload_stock_list =  function(req, res) {
 }
 
 function validate_medicine_list_sheet(worksheet) {
+	var str = "ABCDEFGHIJKLMNOPQ";
+	var titles = ["id", "generic name", "brand name", "form", "strength", "strength unit", "specification form", "pack type", "units per pack", "route", "manufacturer", "current stringent regulatory authority", "approval date", "source", "extract date", "status", "comments"];
+    for(var i=0; i<str.length; i++)
+    {
+        var char = str.charAt(i);
+		var address = char + '1';
+   		var cell = worksheet[address];
+	    if(cell == undefined)
+	    {
+	        return false;
+	    }
+	    else
+	    {
+	        if(!(cell.v && cell.v.toLowerCase().startsWith(titles[i]))) {
+	        	return false;
+	        }
+	    }
+	}
 	return true;
 }
 
