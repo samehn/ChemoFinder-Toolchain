@@ -267,6 +267,24 @@ stock.prototype.download_last_stock =  function(req, res) {
 }
 
 function validate_stock_list_sheet(worksheet) {
+    var str = "ABCDEFGHIJKLMN";
+    var titles = ["id", "generic name", "form", "strength", "strength unit", "brand name", "manufacturer", "batch number", "expiry date", "current stringent regulatory authority", "pack size", "price per pack", "available stock", "average monthly consumption"];
+    for(var i=0; i<str.length; i++)
+    {
+        var char = str.charAt(i);
+        var address = char + '1';
+        var cell = worksheet[address];
+        if(cell == undefined)
+        {
+            return false;
+        }
+        else
+        {
+            if(!(cell.v && cell.v.toLowerCase().startsWith(titles[i]))) {
+                return false;
+            }
+        }
+    }
     return true;
 }
 

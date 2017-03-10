@@ -30,7 +30,7 @@ manage_admins.prototype.change_type =  function(req, res) {
 
 manage_admins.prototype.activate_admin =  function(req, res) {
     var data = controller.xssClean(req.body);
-    var validation_array = admin_validations(data);
+    var validation_array = admin_activation_validations(data);
     if(Object.keys(validation_array).length > 0){
         var result = controller.mergeArrays(validation_array, {message:'failed'});
         res.send(result);
@@ -59,6 +59,27 @@ function admin_validations(data) {
        var types = [0, 1];
        if(!types.includes(parseInt(data.type))) {
             validation_array = controller.mergeArrays(validation_array, {type_error: 'This is not a valid type'});       
+       } 
+    }
+
+    return validation_array;
+}
+
+function admin_activation_validations(data) {
+    var validation_array = {};
+    var id = controller.validate({id: data.id},['required', 'integer']);
+    if(id){
+        validation_array = controller.mergeArrays(validation_array, id);
+    }
+    
+    var active = controller.validate({active: data.active},['required', 'integer']);
+    if(active){
+        validation_array = controller.mergeArrays(validation_array, active);
+    }
+    else {
+       var active_types = [0, 1];
+       if(!active_types.includes(parseInt(data.active))) {
+            validation_array = controller.mergeArrays(validation_array, {active_error: 'This is not a valid activation type'});       
        } 
     }
 
