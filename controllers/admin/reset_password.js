@@ -29,7 +29,7 @@ reset_password.prototype.reset_password_page =  function(req, res) {
         else
         {
             var admin_type = 'admin';
-            res.render('admin/reset_password', {admin_type: admin_type });
+            res.render('user/reset_password', {admin_type: admin_type });
         }
     }
     else

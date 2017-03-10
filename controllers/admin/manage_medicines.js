@@ -621,38 +621,18 @@ function medicine_validations(data) {
         validation_array = controller.mergeArrays(validation_array, route);
     }
     
-    if(data.extract_date && data.extract_date.length > 0) {
-    	data.extract_date = new Date(data.extract_date);
-    	console.log(data.extract_date);
-    	if(Object.prototype.toString.call(data.extract_date) === "[object Date]" && !isNaN(data.extract_date.getTime())) {
-    		data.extract_date = controller.dateFormat(data.extract_date, "dd/mm/yyyy").toString();	
-    	}
-    	else {
-    		validation_array = controller.mergeArrays(validation_array, {extract_date_error: 'This is not a valid date'});
-    	}
-    }
-
-    var extract_date = controller.validate({extract_date: data.extract_date},['required', 'match_regex:^(?:(?:31(\\/|-|\\.)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.)(?:0?[1,3-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(\\/|-|\\.)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.)(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$||This is not a valid date format']);
-    if(extract_date){
-        validation_array = controller.mergeArrays(validation_array, extract_date);
-    }
+    
+    data.extract_date = new Date(data.extract_date);
+	data.extract_date = controller.moment(data.extract_date).format('DD/MM/YYYY');
+	if(!controller.moment(data.extract_date, 'DD/MM/YYYY',true).isValid()) {
+		validation_array = controller.mergeArrays(validation_array, {extract_date_error: 'This is not a valid date'});
+	}
 
     if(data.approval_date && data.approval_date.length > 0) {
-    	data.approval_date = new Date(data.approval_date);
-    	console.log(data.approval_date);
-    	if(Object.prototype.toString.call(data.approval_date) === "[object Date]" && !isNaN(data.approval_date.getTime())) {
-    		data.approval_date = controller.dateFormat(data.approval_date, "dd/mm/yyyy").toString();
-    	}
-    	else {
-    		validation_array = controller.mergeArrays(validation_array, {approval_date_error: 'This is not a valid date'});
-    	}
-    }
-
-    if(data.approval_date && data.approval_date.length > 0) {
-    	var approval_date = controller.validate({approval_date: data.approval_date},['match_regex:^(?:(?:31(\\/|-|\\.)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.)(?:0?[1,3-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(\\/|-|\\.)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.)(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$||This is not a valid date format']);
-	    if(approval_date){
-	        validation_array = controller.mergeArrays(validation_array, approval_date);
-	    }
+    	data.approval_date = controller.moment(data.approval_date).format('DD/MM/YYYY');
+		if(!controller.moment(data.approval_date, 'DD/MM/YYYY',true).isValid()) {
+			validation_array = controller.mergeArrays(validation_array, {approval_date_error: 'This is not a valid date'});
+		}
     }
     
     var specification_form = controller.validate({specification_form: data.specification_form},['length:0-60']);

@@ -90,7 +90,7 @@ manage_users.prototype.add_new_admin =  function(req, res) {
         res.send(result);
     }
     else {
-        bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+        controller.bcrypt.hash(data.password, controller.saltRounds, function(err, hash) {
             // Store hash in your password DB.
             tomodel.email = data.email;
             tomodel.password = hash;
@@ -402,7 +402,7 @@ function new_admin_validations(data) {
         validation_array = controller.mergeArrays(validation_array, type);
     }
     else {
-       var types = [1, 2];
+       var types = [0, 1];
        if(!types.includes(parseInt(data.type))) {
             validation_array = controller.mergeArrays(validation_array, {type_error: 'This is not a valid type'});       
        } 

@@ -545,20 +545,10 @@ function updated_medicine_validations(data) {
         validation_array = controller.mergeArrays(validation_array, batch_number);
     }
     
-    if(data.expiry_date && data.expiry_date.length > 0) {
-        data.expiry_date = new Date(data.expiry_date);
-        console.log(data.expiry_date);
-        if(Object.prototype.toString.call(data.expiry_date) === "[object Date]" && !isNaN(data.expiry_date.getTime())) {
-            data.expiry_date = controller.dateFormat(data.expiry_date, "dd/mm/yyyy").toString();  
-        }
-        else {
-            validation_array = controller.mergeArrays(validation_array, {expiry_date_error: 'This is not a valid date'});
-        }
-    }
-
-    var expiry_date = controller.validate({expiry_date: data.expiry_date},['required', 'match_regex:^(?:(?:31(\\/|-|\\.)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.)(?:0?[1,3-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(\\/|-|\\.)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.)(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$||This is not a valid date format']);
-    if(expiry_date){
-        validation_array = controller.mergeArrays(validation_array, expiry_date);
+    data.expiry_date = new Date(data.expiry_date);
+    data.expiry_date = controller.moment(data.expiry_date).format('DD/MM/YYYY');
+    if(!controller.moment(data.expiry_date, 'DD/MM/YYYY',true).isValid()) {
+        validation_array = controller.mergeArrays(validation_array, {expiry_date_error: 'This is not a valid date'});
     }
 
     var price = controller.validate({price: data.price},['required', 'float']);
@@ -604,20 +594,10 @@ function approved_medicine_validations(data) {
         validation_array = controller.mergeArrays(validation_array, batch_number);
     }
     
-    if(data.expiry_date && data.expiry_date.length > 0) {
-        data.expiry_date = new Date(data.expiry_date);
-        console.log(data.expiry_date);
-        if(Object.prototype.toString.call(data.expiry_date) === "[object Date]" && !isNaN(data.expiry_date.getTime())) {
-            data.expiry_date = controller.dateFormat(data.expiry_date, "dd/mm/yyyy").toString();  
-        }
-        else {
-            validation_array = controller.mergeArrays(validation_array, {expiry_date_error: 'This is not a valid date'});
-        }
-    }
-
-    var expiry_date = controller.validate({expiry_date: data.expiry_date},['required', 'match_regex:^(?:(?:31(\\/|-|\\.)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.)(?:0?[1,3-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(\\/|-|\\.)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.)(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$||This is not a valid date format']);
-    if(expiry_date){
-        validation_array = controller.mergeArrays(validation_array, expiry_date);
+    data.expiry_date = new Date(data.expiry_date);
+    data.expiry_date = controller.moment(data.expiry_date).format('DD/MM/YYYY');
+    if(!controller.moment(data.expiry_date, 'DD/MM/YYYY',true).isValid()) {
+        validation_array = controller.mergeArrays(validation_array, {expiry_date_error: 'This is not a valid date'});
     }
 
     var price = controller.validate({price: data.price},['required', 'float']);
@@ -681,20 +661,10 @@ function new_medicine_validations(data) {
         validation_array = controller.mergeArrays(validation_array, batch_number);
     }
 
-    if(data.expiry_date && data.expiry_date.length > 0) {
-        var expiry_date = new Date(data.expiry_date);
-        console.log(data.expiry_date);
-        if(Object.prototype.toString.call(expiry_date) === "[object Date]" && !isNaN(expiry_date.getTime())) {
-            data.expiry_date = controller.dateFormat(data.expiry_date, "dd/mm/yyyy").toString();  
-        }
-        else {
-            validation_array = controller.mergeArrays(validation_array, {expiry_date_error: 'This is not a valid date'});
-        }
-    }
-
-    var expiry_date = controller.validate({expiry_date: data.expiry_date},['required', 'match_regex:^(?:(?:31(\\/|-|\\.)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.)(?:0?[1,3-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(\\/|-|\\.)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.)(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$||This is not a valid date format']);
-    if(expiry_date){
-        validation_array = controller.mergeArrays(validation_array, expiry_date);
+    data.expiry_date = new Date(data.expiry_date);
+    data.expiry_date = controller.moment(data.expiry_date).format('DD/MM/YYYY');
+    if(!controller.moment(data.expiry_date, 'DD/MM/YYYY',true).isValid()) {
+        validation_array = controller.mergeArrays(validation_array, {expiry_date_error: 'This is not a valid date'});
     }
 
     var price = controller.validate({price: data.price},['required', 'float']);
