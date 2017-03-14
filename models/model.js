@@ -39,6 +39,8 @@ model.prototype.dbQuerySync = function(query) {
 }
 
 model.prototype.mysql_real_escape_string = function(str) {
+    console.log(str);
+    str = "" + str;
     return str.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, function (char) {
         switch (char) {
             case "\0":
