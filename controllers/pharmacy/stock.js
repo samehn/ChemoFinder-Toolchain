@@ -464,9 +464,10 @@ function parsingStockList(req, res) {
                 data['avg_monthly_consumption'] = '';
             }
 
-            data = controller.xssClean(data);
-            console.log(data);
-            var validation_array = new_medicine_validations(data);
+            var new_data = controller.xssClean(data);
+            new_data['expiry_date'] = new Date(data.expiry_date);
+            console.log(new_data);
+            var validation_array = new_medicine_validations(new_data);
             if(Object.keys(validation_array).length > 0){
                 format_error_flag = true;
                 var result = validation_array;
@@ -479,19 +480,19 @@ function parsingStockList(req, res) {
                 warning_message = warning_message + wm;
             }
             else {
-                tomodel.generic_name = data.generic_name;
-                tomodel.brand_name = data.brand_name;
-                tomodel.form = data.form;
-                tomodel.strength = data.strength;
-                tomodel.strength_unit = data.strength_unit;
-                tomodel.manufacturer = data.manufacturer;
+                tomodel.generic_name = new_data.generic_name;
+                tomodel.brand_name = new_data.brand_name;
+                tomodel.form = new_data.form;
+                tomodel.strength = new_data.strength;
+                tomodel.strength_unit = new_data.strength_unit;
+                tomodel.manufacturer = new_data.manufacturer;
                 var medicine = medicine_model.select_medicine_by_main_keys(tomodel);
-                tomodel.batch_number = data.batch_number;
-                tomodel.expiry_date = data.expiry_date;
-                tomodel.pack_size = data.pack_size;
-                tomodel.price = data.price;
-                tomodel.quantity = data.quantity;
-                tomodel.avg_monthly_consumption = data.avg_monthly_consumption;
+                tomodel.batch_number = new_data.batch_number;
+                tomodel.expiry_date = controller.moment(new_data.expiry_date).format('DD/MM/YYYY');
+                tomodel.pack_size = new_data.pack_size;
+                tomodel.price = new_data.price;
+                tomodel.quantity = new_data.quantity;
+                tomodel.avg_monthly_consumption = new_data.avg_monthly_consumption;
                 tomodel.user_id = req.session.pharmacy_id;
                 if(medicine.length > 0) {
                     tomodel.medicine_id = medicine[0].ID;

@@ -56,17 +56,17 @@ user_model.prototype.update_user_active = function(data) {
 };
 
 user_model.prototype.delete_user = function(data) {
-	var query = "DELETE FROM DASH5082.CHEMO_USER WHERE ID=" + data.user_id + ";";
+	var query = "DELETE FROM DASH5082.CHEMO_USER WHERE ID=" + this.mysql_real_escape_string(data.user_id) + ";";
 	return this.dbQuerySync(query);
 };
 
 user_model.prototype.update_user_first_password = function(data) {
-	var query = "UPDATE DASH5082.CHEMO_USER SET PASSWORD ='" + data.password + "', FIRST_LOGIN = '0' WHERE ID =" + data.user_id + ";";
+	var query = "UPDATE DASH5082.CHEMO_USER SET PASSWORD ='" + this.mysql_real_escape_string(data.password) + "', FIRST_LOGIN = '0' WHERE ID =" + this.mysql_real_escape_string(data.user_id) + ";";
 	return this.dbQuerySync(query);
 };
 
 user_model.prototype.update_user = function(data) {
-	query = "UPDATE DASH5082.CHEMO_USER SET EMAIL='" + data.email + "', PERSON_NAME ='" + data.name + "', PERSON_POSITION ='" + data.position + "', ENTITY_NAME='" + data.entity_name + "', PHONE_NUMBER ='" + data.phone_number + "', ADDRESS ='" + data.address + "', CITY ='" + data.city + "', COUNTRY ='" + data.country + "', UPDATED_AT = CURRENT_TIMESTAMP WHERE ID =" + data.user_id;
+	query = "UPDATE DASH5082.CHEMO_USER SET EMAIL='" + this.mysql_real_escape_string(data.email) + "', PERSON_NAME ='" + this.mysql_real_escape_string(data.name) + "', PERSON_POSITION ='" + this.mysql_real_escape_string(data.position) + "', ENTITY_NAME='" + this.mysql_real_escape_string(data.entity_name) + "', PHONE_NUMBER ='" + this.mysql_real_escape_string(data.phone_number) + "', ADDRESS ='" + this.mysql_real_escape_string(data.address) + "', CITY ='" + this.mysql_real_escape_string(data.city) + "', COUNTRY ='" + this.mysql_real_escape_string(data.country) + "', UPDATED_AT = CURRENT_TIMESTAMP WHERE ID =" + this.mysql_real_escape_string(data.user_id);
 	return this.dbQuerySync(query);
 };
 
@@ -76,12 +76,12 @@ user_model.prototype.select_treatment_centers = function() {
 };
 
 user_model.prototype.select_treatment_center_by_id = function(data) {
-	var query = "SELECT * FROM DASH5082.CHEMO_USER U JOIN DASH5082.CHEMO_USER_PHARMACY UP ON U.ID = UP.PHARMACY_ID WHERE U.TYPE = 'treatment center' AND U.ID=" + data.user_id;
+	var query = "SELECT * FROM DASH5082.CHEMO_USER U JOIN DASH5082.CHEMO_USER_PHARMACY UP ON U.ID = UP.PHARMACY_ID WHERE U.TYPE = 'treatment center' AND U.ID=" + this.mysql_real_escape_string(data.user_id);
 	return this.dbQuerySync(query);
 };
 
 user_model.prototype.select_pharmacies_by_medicine_and_quantity = function(data) {
-	var query = "SELECT U.ID AS ID, U.EMAIL, U.ENTITY_NAME, U.PHONE_NUMBER, U.ADDRESS, U.CITY, U.COUNTRY, UP.OPEN_FROM, UP.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, UP.STOCK_UPDATE AS LAST_UPDATE FROM DASH5082.CHEMO_MEDICINE M JOIN DASH5082.CHEMO_STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN DASH5082.CHEMO_USER U ON U.ID = S.PHARMACY_ID JOIN DASH5082.CHEMO_USER_PHARMACY UP ON U.ID = UP.PHARMACY_ID WHERE M.APPROVED = TRUE AND U.TYPE='pharmacy' AND M.ID =" + data.medicine_id + " AND S.AVAILABLE_STOCK >=" + data.quantity + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)";
+	var query = "SELECT U.ID AS ID, U.EMAIL, U.ENTITY_NAME, U.PHONE_NUMBER, U.ADDRESS, U.CITY, U.COUNTRY, UP.OPEN_FROM, UP.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, UP.STOCK_UPDATE AS LAST_UPDATE FROM DASH5082.CHEMO_MEDICINE M JOIN DASH5082.CHEMO_STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN DASH5082.CHEMO_USER U ON U.ID = S.PHARMACY_ID JOIN DASH5082.CHEMO_USER_PHARMACY UP ON U.ID = UP.PHARMACY_ID WHERE M.APPROVED = TRUE AND U.TYPE='pharmacy' AND M.ID =" + this.mysql_real_escape_string(data.medicine_id) + " AND S.AVAILABLE_STOCK >=" + this.mysql_real_escape_string(data.quantity) + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)";
 	return this.dbQuerySync(query);	
 };
 
