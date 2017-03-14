@@ -16,7 +16,7 @@ user_pharmacy_model.prototype.update_user_pharmacy = function(data) {
 };
 
 user_pharmacy_model.prototype.update_stock_time = function(data) {
-	var query = "UPDATE DASH5082.CHEMO_USER_PHARMACY SET STOCK_UPDATE = CURRENT_TIMESTAMP, UPDATED_AT = CURRENT_TIMESTAMP WHERE ID = " + data.user_id;
+	var query = "UPDATE DASH5082.CHEMO_USER_PHARMACY SET STOCK_UPDATE = CURRENT_TIMESTAMP, UPDATED_AT = CURRENT_TIMESTAMP WHERE PHARMACY_ID = " + data.user_id;
 	return this.dbQuerySync(query);
 };
 
