@@ -46,6 +46,10 @@ stock.prototype.get_stock_record =  function(req, res) {
 
 stock.prototype.add_new_medicine =  function(req, res) {
     var data = controller.xssClean(req.body);
+    data.expiry_date = req.body.expiry_date;
+    if(controller.moment(data.expiry_date, 'YYYY-MM-DD').isValid()) {
+        data.expiry_date = controller.moment(data.expiry_date).format('DD/MM/YYYY');
+    }
     var validation_array = new_medicine_validations(data);
     if(Object.keys(validation_array).length > 0){
         var result = controller.mergeArrays(validation_array, {message:'failed'});
@@ -691,15 +695,9 @@ function new_medicine_validations(data) {
         validation_array = controller.mergeArrays(validation_array, batch_number);
     }
 
-    data.expiry_date = new Date(data.expiry_date);
-    if(controller.moment(data.expiry_date).isValid()) {
-        data.expiry_date = controller.moment(data.expiry_date).format('DD/MM/YYYY');
-        if(!controller.moment(data.expiry_date, 'DD/MM/YYYY',true).isValid()) {
-            validation_array = controller.mergeArrays(validation_array, {expiry_date_error: 'This is not a valid date'});
-        }    
-    }
-    else {
+    if(!controller.moment(data.expiry_date, 'DD/MM/YYYY', true).isValid() && !controller.moment(data.expiry_date, 'DD-MM-YYYY', true).isValid() && !controller.moment(data.expiry_date, 'DD-MMM-YYYY', true).isValid()) {
         validation_array = controller.mergeArrays(validation_array, {expiry_date_error: 'This is not a valid date'});
+        // data.expiry_date = controller.moment(data.expiry_date).format('MM/DD/YYYY');
     }
 
     var price = controller.validate({price: data.price},['required', 'float']);
