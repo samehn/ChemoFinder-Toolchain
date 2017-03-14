@@ -54,13 +54,13 @@ medicine_model.prototype.insert_new_medicine_by_main_keys = function(data) {
 };
 
 medicine_model.prototype.select_medicine_by_generic_and_form = function(data) {
-	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE GENERIC_NAME ='" + data.generic_name + "' AND FORM = '" + data.form + "';";
+	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE GENERIC_NAME ='" + data.generic_name + "' AND FORM = '" + data.form + "' AND APPROVED = TRUE;";
 	console.log(query);
 	return this.dbQuerySync(query);
 };
 
 medicine_model.prototype.select_medicine_not_in_treatment_center = function(data) {
-	var query = "SELECT DISTINCT GENERIC_NAME, FORM FROM DASH5082.CHEMO_MEDICINE WHERE APPROVED = TRUE AND (GENERIC_NAME, FORM) NOT IN (SELECT DISTINCT M.GENERIC_NAME, FORM FROM DASH5082.CHEMO_MEDICINE M JOIN CHEMO_STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE U.ID = "  + data.user_id + ")";
+	var query = "SELECT DISTINCT GENERIC_NAME, FORM FROM DASH5082.CHEMO_MEDICINE WHERE APPROVED = TRUE AND (GENERIC_NAME, FORM) NOT IN (SELECT DISTINCT M.GENERIC_NAME, FORM FROM DASH5082.CHEMO_MEDICINE M JOIN CHEMO_STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN DASH5082.CHEMO_USER U ON U.ID = S.PHARMACY_ID WHERE U.ID = "  + data.user_id + ")";
 	return this.dbQuerySync(query);
 };
 

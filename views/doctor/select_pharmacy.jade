@@ -47,10 +47,9 @@ block content
             th.th_search Name
             th.th_search Phone
             th.th_search Email
-            th.th_search Street
+            th.th_search Address
             th.th_search City
-            th.th_search State
-            th.th_search ZIP
+            th.th_search Country
             th.th_search Open Form
             th.th_search Open To
             th.th_search Price/Pack
@@ -63,13 +62,12 @@ block content
                   tr.tr_search_row.unselected-pharmacy(data-id=pharmacies[i].ID)
                     td.td_search
                       button.form-control.btn.btn-primary(onclick='addMedicine(this)') Add
-                    td.td_search #{pharmacies[i].NAME}
+                    td.td_search #{pharmacies[i].ENTITY_NAME}
                     td.td_search #{pharmacies[i].PHONE_NUMBER}
                     td.td_search.break-words #{pharmacies[i].EMAIL}
-                    td.td_search #{pharmacies[i].STREET}
+                    td.td_search #{pharmacies[i].ADDRESS}
                     td.td_search #{pharmacies[i].CITY}
-                    td.td_search #{pharmacies[i].STATE}
-                    td.td_search #{pharmacies[i].ZIP}
+                    td.td_search #{pharmacies[i].COUNTRY}
                     td.td_search #{pharmacies[i].OPEN_FROM}
                     td.td_search #{pharmacies[i].OPEN_TO}
                     td.td_search #{pharmacies[i].PRICE_PER_PACK}
@@ -90,10 +88,9 @@ block content
             th.th_search Name
             th.th_search Phone
             th.th_search Email
-            th.th_search Street
+            th.th_search Address
             th.th_search City
-            th.th_search State
-            th.th_search ZIP
+            th.th_search Country
             th.th_search Open Form
             th.th_search Open To
             th.th_search Price/Pack
@@ -102,7 +99,7 @@ block content
             th.th_search Last Update
         tbody#selected-pharmacy-body
           tr.tr_search
-            td.empty_table.td_search(style="text-align: center;", valign="top", colspan="14") No pharmacy has been chosen yet        
+            td.empty_table.td_search(style="text-align: center;", valign="top", colspan="13") No pharmacy has been chosen yet        
     button#next-btn.btn.btn-primary.pull-right.mg-btm-70.mg-top-20(onclick="nextStep()") Next              
 block modals
   #noPharmacies.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
@@ -142,4 +139,3 @@ block modals
             |   Loading...        
 block scripts
   script(type='text/javascript', src=base+'/scripts/doctor/select_pharmacy.js')
-    

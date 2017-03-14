@@ -3,12 +3,13 @@ controller 					= require('../controller');
 function profile(){
 	tomodel = {};
 	user_model 	= require('../../models/user_model');
+    user_pharmacy_model  = require('../../models/user_pharmacy_model');
 };
 profile.prototype.constructor = profile;
 
 profile.prototype.profile_page =  function(req, res) {
     tomodel.user_id = req.session.pharmacy_id;
-    var pharmacy_info = user_model.select_user_by_id(tomodel);
+    var pharmacy_info = user_model.select_pharmacy_by_id(tomodel);
     res.render('pharmacy/profile', {info: pharmacy_info});
 }
 
@@ -22,20 +23,23 @@ profile.prototype.update_profile =  function(req, res) {
     else
     {
         tomodel.user_id = req.session.pharmacy_id;
-        tomodel.email = data.email;
         tomodel.name = data.name;
+        tomodel.position = data.position;
+        tomodel.entity_name = data.entity_name;
         tomodel.phone_number = data.phone_number;
-        tomodel.street = data.street;
+        tomodel.address = data.address;
         tomodel.city = data.city;
-        tomodel.state = data.state;
-        tomodel.zip = data.zip;
+        tomodel.country = data.country;
+        tomodel.email = data.email;
+        var user = user_model.update_user(tomodel);
+
         tomodel.open_from = data.open_from;
         tomodel.open_to = data.open_to;
         if(!data.open_from || !data.open_to) {
             tomodel.open_from = '12:00:00';
             tomodel.open_to = '12:00:00';
         }
-        var user = user_model.update_user(tomodel);
+        user_pharmacy_model.update_user_pharmacy(tomodel);
         res.send({message: "success"});
     }       
 }
@@ -57,7 +61,7 @@ profile.prototype.change_password =  function(req, res) {
             {
                 controller.bcrypt.hash(data.new_password, controller.saltRounds, function(err, hash) {
                     tomodel.password = hash;
-                    user_model.update_password(tomodel);
+                    user_model.update_user_password(tomodel);
                     res.send({message: "success"});
                 });
             }
@@ -72,6 +76,41 @@ profile.prototype.change_password =  function(req, res) {
 function profile_validations(req, data) {
     var validation_array = {};
 
+    var name = controller.validate({name: data.name},['required', 'length:0-60']);
+    if(name){
+        validation_array = controller.mergeArrays(validation_array, name);
+    }
+
+    var position = controller.validate({position: data.position},['required', 'length:0-60']);
+    if(position){
+        validation_array = controller.mergeArrays(validation_array, position);
+    }
+
+    var entity_name = controller.validate({entity_name: data.entity_name},['required', 'length:0-60']);
+    if(entity_name){
+        validation_array = controller.mergeArrays(validation_array, entity_name);
+    }
+
+    var phone_number = controller.validate({phone_number: data.phone_number},['required', 'integer', 'length:4-23']);
+    if(phone_number){
+        validation_array = controller.mergeArrays(validation_array, phone_number);
+    }
+
+    var address = controller.validate({address: data.address},['required', 'length:0-1000']);
+    if(address){
+        validation_array = controller.mergeArrays(validation_array, address);
+    }
+
+    var city = controller.validate({city: data.city},['required', 'length:0-60']);
+    if(city){
+        validation_array = controller.mergeArrays(validation_array, city);
+    }
+
+    var country = controller.validate({country: data.country},['required', 'length:0-60']);
+    if(country){
+        validation_array = controller.mergeArrays(validation_array, country);
+    }
+    
     var email = controller.validate({email: data.email},['required', 'email', 'length:0-60']);
     if(email){
         validation_array = controller.mergeArrays(validation_array, email);
@@ -82,36 +121,6 @@ function profile_validations(req, data) {
         if(user.length > 0 && user[0].ID != req.session.pharmacy_id) {
             validation_array = controller.mergeArrays(validation_array, {email_error: 'This email is already registered'});
         }
-    }
-
-    var name = controller.validate({name: data.name},['required']);
-    if(name){
-        validation_array = controller.mergeArrays(validation_array, name);
-    }
- 
-    var street = controller.validate({street: data.street},['required']);
-    if(street){
-        validation_array = controller.mergeArrays(validation_array, street);
-    }
-
-    var city = controller.validate({city: data.city},['required']);
-    if(city){
-        validation_array = controller.mergeArrays(validation_array, city);
-    }
-
-    var state = controller.validate({state: data.state},['required']);
-    if(state){
-        validation_array = controller.mergeArrays(validation_array, state);
-    }
-
-    var zip = controller.validate({zip: data.zip},['required']);
-    if(zip){
-        validation_array = controller.mergeArrays(validation_array, zip);
-    }
-
-    var phone_number = controller.validate({phone_number: data.phone_number},['required']);
-    if(phone_number){
-        validation_array = controller.mergeArrays(validation_array, phone_number);
     }
 
     var open_from = controller.validate({open_from: data.open_from},['required']);

@@ -24,7 +24,7 @@ function selectTreatmentCenter(element) {
 	      success:  function(result){
 	      	console.log(result);
 	      	if(result.message == "success") {
-	      		var html = '<tr class="tr_search_row"><td class="td_search">' + result.treatmentCenter[0].NAME + '</td><td class="td_search">' + result.treatmentCenter[0].PHONE_NUMBER + '</td><td class="td_search">' + result.treatmentCenter[0].EMAIL + '</td><td class="td_search">' + result.treatmentCenter[0].STREET + '</td><td class="td_search">' + result.treatmentCenter[0].CITY + '</td><td class="td_search">' + result.treatmentCenter[0].STATE + '</td><td class="td_search">' + result.treatmentCenter[0].ZIP + '</td><td class="td_search">' + result.treatmentCenter[0].OPEN_FROM + '</td><td class="td_search">' + result.treatmentCenter[0].OPEN_TO + '</td></tr>';
+	      		var html = '<tr class="tr_search_row"><td class="td_search">' + result.treatmentCenter[0].ENTITY_NAME + '</td><td class="td_search">' + result.treatmentCenter[0].PHONE_NUMBER + '</td><td class="td_search">' + result.treatmentCenter[0].EMAIL + '</td><td class="td_search">' + result.treatmentCenter[0].ADDRESS + '</td><td class="td_search">' + result.treatmentCenter[0].CITY + '</td><td class="td_search">' + result.treatmentCenter[0].COUNTRY + '</td><td class="td_search">' + result.treatmentCenter[0].OPEN_FROM + '</td><td class="td_search">' + result.treatmentCenter[0].OPEN_TO + '</td><td class="td_search">' + result.treatmentCenter[0].STOCK_UPDATE + '</td></tr>';
 	      		$('#treatment-center-details').html(html);
 	      	}
 	      	else {

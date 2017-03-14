@@ -12,6 +12,15 @@ home.prototype.home_page =  function(req, res) {
 	res.render('user/home');
 }
 
+home.prototype.terms_and_conditions_page =  function(req, res) {
+    var filePath = "./public/downloads/chemofinder_terms_and_conditions.pdf";
+    console.log(filePath);
+    controller.fs.readFile(filePath , function (err,data){
+        res.contentType("application/pdf");
+        res.send(data);
+    });
+}
+
 home.prototype.get_pharmacies =  function(req, res) {
 	if(Number.isInteger(parseInt(req.body.id))) {
 		tomodel.medicine_id = req.body.id;

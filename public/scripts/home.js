@@ -7,10 +7,17 @@ $('#timepicker2').timepicker();
 $("#type").change(function() {
     $('.error-form').remove();
     $('.message-form').remove();
-    if ($("#type option:selected").val() == "PHARMACY" || $("#type option:selected").val() == "TREATMENT CENTER") {
-        $('.handle').css('display', 'inherit');
-    } else {
-        $('.handle').css('display', 'none');
+    if ($("#type option:selected").val() == "pharmacy") {
+      $('.handle').css('display', 'inherit');
+      $('#entityName').attr('placeholder', 'Pharmacy Name');
+    } 
+    else if($("#type option:selected").val() == "treatment center") {
+      $('.handle').css('display', 'inherit');
+      $('#entityName').attr('placeholder', 'Treatment Center Name');
+    }
+    else {
+      $('.handle').css('display', 'none');
+      $('#entityName').attr('placeholder', 'Place of Work');
     }
 });
 
@@ -131,11 +138,11 @@ function login() {
           }
           else if(data.message == "success")
           {
-              if( data.type == 'PHARMACY' || data.type == 'TREATMENT CENTER')
+              if( data.type == 'pharmacy' || data.type == 'treatment center')
               {
                   window.location = url + '/pharmacy';
               }
-              else if(data.type == 'DOCTOR' || data.type == 'NAVIGATOR')
+              else if(data.type == 'doctor' || data.type == 'navigator')
               {
                   window.location = url + '/doctor';
               }
@@ -149,30 +156,44 @@ function register() {
     
     var type = $('#type');
     var name = $('#name');
+    var position = $('#position');
+    var entity_name = $('#entityName');
+    var phone = $('#phone');
+    var address = $('#address');
+    var city = $('#city');
+    var country = $('#country');
+
     var email = $('#email');
     var password = $('#password');
     var rpassword = $('#rpassword');
-    var street = $('#street');
-    var city = $('#city');
-    var state = $('#state');
-    var zip = $('#zip');
+    
+    var terms = $('#terms');
 
     user_array[type.attr('name')] = type.val();
     user_array[name.attr('name')] = name.val();
+    user_array[position.attr('name')] = position.val();
+    user_array[entity_name.attr('name')] = entity_name.val();
+    user_array[phone.attr('name')] = phone.val();
+    user_array[address.attr('name')] = address.val();
+    user_array[city.attr('name')] = city.val();
+    user_array[country.attr('name')] = country.val();
+
     user_array[email.attr('name')] = email.val();
     user_array[password.attr('name')] = password.val();
     user_array[rpassword.attr('name')] = rpassword.val();
-    user_array[street.attr('name')] = street.val();
-    user_array[city.attr('name')] = city.val();
-    user_array[state.attr('name')] = state.val();
-    user_array[zip.attr('name')] = zip.val();
-
-    if(type.val() == "PHARMACY" || type.val() == "TREATMENT CENTER")
+    
+    if(terms.is(":checked"))
     {
-        var phone = $('#phone');
+      user_array[terms.attr('name')] = true;
+    }
+    else {
+      user_array[terms.attr('name')] = false; 
+    }
+
+    if(type.val() == "pharmacy" || type.val() == "treatment center")
+    {
         var open_from = $('#timepicker1');
         var open_to = $('#timepicker2');
-        user_array[phone.attr('name')] = phone.val();
         user_array[open_from.attr('name')] = open_from.val();
         user_array[open_to.attr('name')] = open_to.val();
     }
@@ -182,7 +203,7 @@ function register() {
       type: "post",
       url: url + '/user/signup',
       data : user_array,
-      success:  function(data){        
+      success:  function(data) {        
         $('#loadingModal').modal('hide');
         // console.log(data);
         // console.log(data.message);
@@ -195,69 +216,38 @@ function register() {
         }
         else if(data.message == "failed")
         {
-           if(data.email_error)
-           {
-              var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.email_error + '</div>';
-              $(error_message).insertBefore($('#emailRegisterForm'));
-           }
-           if(data.password_error)
-           {
-              var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.password_error + '</div>';
-              $(error_message).insertBefore($('#passwordRegisterForm'));
-           }
-           if(data.rpassword_error)
-           {
-              var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.rpassword_error + '</div>';
-              $(error_message).insertBefore($('#rpasswordRegisterForm'));
-           }
-           if(data.type_error)
-           {
-              var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.type_error + '</div>';
-              $(error_message).insertBefore($('#typeRegisterForm'));
-           }
-           if(data.name_error)
-           {
-              var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.name_error + '</div>';
-              $(error_message).insertBefore($('#nameRegisterForm'));
-           }
-           if(data.street_error)
-           {
-              var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.street_error + '</div>';
-              $(error_message).insertBefore($('#streetRegisterForm'));
-           }
-           if(data.city_error)
-           {
-              var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.city_error + '</div>';
-              $(error_message).insertBefore($('#cityRegisterForm'));
-           }
-           if(data.state_error)
-           {
-              var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.state_error + '</div>';
-              $(error_message).insertBefore($('#stateRegisterForm'));
-           }
-           if(data.zip_error)
-           {
-              var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.zip_error + '</div>';
-              $(error_message).insertBefore($('#zipRegisterForm'));
-           }
-           if(data.phone_number_error)
-           {
-              var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.phone_number_error + '</div>';
-              $(error_message).insertBefore($('#phoneRegisterForm'));
-           }
-           if(data.open_from_error)
-           {
-              var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.open_from_error + '</div>';
-              $(error_message).insertBefore($('#openFromRegisterForm'));
-           }
-           if(data.open_to_error)
-           {
-              var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.open_to_error + '</div>';
-              $(error_message).insertBefore($('#openToRegisterForm'));
-           }
+          showError(data.type_error, $('#typeRegisterForm'));
+          showError(data.name_error, $('#nameRegisterForm'));
+          showError(data.position_error, $('#positionRegisterForm'));
+          showError(data.entity_name_error, $('#entityNameRegisterForm'));
+          showError(data.phone_error, $('#phoneRegisterForm'));
+          showError(data.address_error, $('#addressRegisterForm'));
+          showError(data.city_error, $('#cityRegisterForm'));
+          showError(data.country_error, $('#countryRegisterForm'));
+
+          showError(data.email_error, $('#emailRegisterForm'));
+          showError(data.password_error, $('#passwordRegisterForm'));
+          showError(data.rpassword_error, $('#rpasswordRegisterForm'));
+          
+          showError(data.open_from_error, $('#openFromRegisterForm'));
+          showError(data.open_to_error, $('#openToRegisterForm'));
+
+          showError(data.terms_error, $('#termsRegisterForm'));
         }
       }
   });
+}
+
+function showError(error_data, position) {
+  if(error_data)
+  {
+    var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + error_data + '</div>';
+    $(error_message).insertBefore(position);
+  }
+}
+
+function openTermsWindow() {
+  window.open(url + "/terms_and_conditions", "_blank");
 }
 
 function search() {
@@ -333,13 +323,12 @@ function showPharmacies(id) {
             var html = '';
             for (var i = 0; i < data.pharmacies.length; i++) {
               var html = html + '<tr class="tr_search_row table-result-search">' +
-                '<td class="td_search">' + data.pharmacies[i].NAME + '</td>' +
+                '<td class="td_search">' + data.pharmacies[i].ENTITY_NAME + '</td>' +
                 '<td class="td_search">' + data.pharmacies[i].PHONE_NUMBER + '</td>' +
                 '<td class="td_search">' + data.pharmacies[i].EMAIL + '</td>' +
-                '<td class="td_search">' + data.pharmacies[i].STREET + '</td>' +
+                '<td class="td_search">' + data.pharmacies[i].ADDRESS + '</td>' +
                 '<td class="td_search">' + data.pharmacies[i].CITY + '</td>' +
-                '<td class="td_search">' + data.pharmacies[i].STATE + '</td>' +
-                '<td class="td_search">' + data.pharmacies[i].ZIP + '</td>' +
+                '<td class="td_search">' + data.pharmacies[i].COUNTRY + '</td>' +
                 '<td class="td_search">' + data.pharmacies[i].OPEN_FROM + '</td>' +
                 '<td class="td_search">' + data.pharmacies[i].OPEN_TO + '</td>' +
                 '<td class="td_search">' + data.pharmacies[i].PRICE_PER_PACK + '</td>' +

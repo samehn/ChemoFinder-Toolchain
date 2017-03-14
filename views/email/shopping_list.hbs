@@ -29,10 +29,9 @@
                 <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">Name</th>
                 <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">Phone</th>
                 <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">Email</th>
-                <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">Street</th>
+                <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">Address</th>
                 <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">City</th>
-                <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">State</th>
-                <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">ZIP</th>
+                <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">Country</th>
                 <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">Open Form</th>
                 <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">Open To</th>
                 <th style="border-bottom: 1px solid #262626; text-align: center; padding: 8px; font-size: 16px;">Expiry Date</th>
@@ -46,13 +45,12 @@
               </style>
               {{#each pharmacies}}
                 <tr>
-                  <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{NAME}}</td>
+                  <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{ENTITY_NAME}}</td>
                   <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{PHONE_NUMBER}}</td>
                   <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{EMAIL}}</td>
-                  <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{STREET}}</td>
+                  <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{ADDRESS}}</td>
                   <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{CITY}}</td>
-                  <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{STATE}}</td>
-                  <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{ZIP}}</td>
+                  <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{COUNTRY}}</td>
                   <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{OPEN_FROM}}</td>
                   <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{OPEN_TO}}</td>
                   <td style="border-bottom: 1px solid #262626; text-align: left; padding: 8px; font-weight: normal; font-size: 16px;">{{EXPIRY_DATE}}</td>

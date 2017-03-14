@@ -22,7 +22,21 @@ block content
       h4 Name
     .col-xs-2.col-xs-push-6 
       h4 
-        strong.word-wrapping #{info[0].NAME}
+        strong.word-wrapping #{info[0].PERSON_NAME}
+  hr
+  .row
+    .col-xs-2.col-xs-push-2 
+      h4 Position
+    .col-xs-2.col-xs-push-6 
+      h4 
+        strong.word-wrapping #{info[0].PERSON_POSITION}
+  hr
+  .row
+    .col-xs-2.col-xs-push-2 
+      h4 Place of Work
+    .col-xs-2.col-xs-push-6 
+      h4 
+        strong.word-wrapping #{info[0].ENTITY_NAME}
   hr
   .row
     .col-xs-2.col-xs-push-2 
@@ -31,13 +45,20 @@ block content
       h4 
         strong.word-wrapping #{info[0].EMAIL}
   hr
-  - if(info[0].STREET){
+  .row
+    .col-xs-2.col-xs-push-2 
+      h4 Phone Number
+    .col-xs-2.col-xs-push-6 
+      h4 
+        strong.word-wrapping #{info[0].PHONE_NUMBER}
+  hr  
+  - if(info[0].ADDRESS){
     .row
       .col-xs-2.col-xs-push-2 
-        h4 Street (office)
+        h4 Address
       .col-xs-2.col-xs-push-6 
         h4 
-          strong.word-wrapping #{info[0].STREET}
+          strong.word-wrapping #{info[0].ADDRESS}
     hr
   - }
   - if(info[0].CITY){
@@ -49,23 +70,13 @@ block content
           strong.word-wrapping #{info[0].CITY}
     hr
   - }
-  - if(info[0].STATE){
+  - if(info[0].COUNTRY){
     .row
       .col-xs-2.col-xs-push-2 
-        h4 Region (office)
+        h4 Country
       .col-xs-2.col-xs-push-6 
         h4 
-          strong.word-wrapping #{info[0].STATE}
-    hr
-  - }
-
-  - if(info[0].ZIP){
-    .row
-      .col-xs-2.col-xs-push-2 
-        h4 Postal Code (office)
-      .col-xs-2.col-xs-push-6 
-        h4 
-          strong.word-wrapping #{info[0].ZIP}
+          strong.word-wrapping #{info[0].COUNTRY}
     hr
   - }
   .row.text-center(style="margin-bottom: 80px;")
@@ -85,37 +96,49 @@ block modals
           form#edit-profile-form(role='form')
             #nameForm.form-group
               .input-group
-                input#name.form-control(name='name', type='text', placeholder='Pharmacy Name', value= info[0].NAME )
+                input#name.form-control(name='name', type='text', placeholder='Name', value= info[0].PERSON_NAME )
                 span.input-group-addon
                   i.glyphicon.glyphicon-user
             // /.form-group
+            #positionForm.form-group
+              .input-group
+                input#position.form-control(name='position', type='text', placeholder='Position', value= info[0].PERSON_POSITION )
+                span.input-group-addon
+                  i.glyphicon.glyphicon-user
+            // /.form-group
+            #entityNameForm.form-group
+              .input-group
+                input#entityName.form-control(name='entity_name', type='text', placeholder='Place of Work', value= info[0].ENTITY_NAME )
+                span.input-group-addon
+                  i.glyphicon.glyphicon-user
+            // /.form-group 
             #emailForm.form-group
               .input-group
                 input#email.form-control(name='email', type='text', placeholder='Email', value= info[0].EMAIL)
                 span.input-group-addon
                   i.glyphicon.glyphicon-envelope
             // /.form-group
-            #streetForm.form-group
+            #phoneForm.form-group
               .input-group
-                input#street.form-control(name='street', type='text', placeholder='Street (office)', value= info[0].STREET)
+                input#phone.form-control(name='phone_number', type='text', placeholder='Phone Number', value= info[0].PHONE_NUMBER)
+                span.input-group-addon
+                  i.glyphicon.glyphicon-home
+            // /.form-group
+            #addressForm.form-group
+              .input-group
+                input#address.form-control(name='address', type='text', placeholder='Address', value= info[0].ADDRESS)
                 span.input-group-addon
                   i.glyphicon.glyphicon-home
             // /.form-group
             #cityForm.form-group
               .input-group
-                input#city.form-control(name='city', type='text', placeholder='City (office)', value= info[0].CITY)
+                input#city.form-control(name='city', type='text', placeholder='City', value= info[0].CITY)
                 span.input-group-addon
                   i.glyphicon.glyphicon-home
             // /.form-group
-            #stateForm.form-group
+            #countryForm.form-group
               .input-group
-                input#state.form-control(name='state', type='text', placeholder='Region (office)', value= info[0].STATE)
-                span.input-group-addon
-                  i.glyphicon.glyphicon-home
-            // /.form-group
-            #zipForm.form-group
-              .input-group
-                input#zip.form-control(name='zip', type='text', placeholder='Postal Code (office)', value= info[0].ZIP)
+                input#country.form-control(name='country', type='text', placeholder='Country', value= info[0].COUNTRY)
                 span.input-group-addon
                   i.glyphicon.glyphicon-home
             // /.form-group     

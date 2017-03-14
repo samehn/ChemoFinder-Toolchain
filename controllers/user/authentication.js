@@ -3,6 +3,7 @@ controller 					= require('../controller');
 function authentication(){
 	tomodel = {};
 	user_model 	= require('../../models/user_model');
+    user_pharmacy_model = require('../../models/user_pharmacy_model');
 };
 authentication.prototype.constructor = authentication;
 
@@ -78,26 +79,36 @@ authentication.prototype.signup =  function(req, res) {
     else
     {    
         controller.bcrypt.hash(data.password, controller.saltRounds, function(err, hash) {
+            tomodel.type = data.type;
+            tomodel.name = data.name;
+            tomodel.position = data.position;
+            tomodel.entity_name = data.entity_name;
+            tomodel.phone_number = data.phone_number;
+            tomodel.address = data.address;
+            tomodel.city = data.city;
+            tomodel.country = data.country;
+
             tomodel.email = data.email;
             tomodel.password = hash;
-            tomodel.name = data.name;
-            tomodel.phone_number = data.phone_number;
-            tomodel.street = data.street;
-            tomodel.city = data.city;
-            tomodel.state = data.state;
-            tomodel.zip = data.zip;
-            tomodel.open_from = data.open_from;
-            tomodel.open_to = data.open_to;
-            if(!data.open_from || !data.open_to) {
-                tomodel.open_from = '12:00:00';
-                tomodel.open_to = '12:00:00';
-            }
-            tomodel.type = data.type;
+            
             tomodel.first_login = '0';
             tomodel.active = '1';
             tomodel.approve = '0';
-            var user = user_model.insert_user(tomodel);
+            user_model.insert_user(tomodel);
+            var user = user_model.select_user_by_email(tomodel);
+            if(data.type == 'pharmacy' || data.type == 'treatment center') {
+                tomodel.user_id = user[0].ID;
+                tomodel.open_from = data.open_from;
+                tomodel.open_to = data.open_to;
+                if(!data.open_from || !data.open_to) {
+                    tomodel.open_from = '12:00:00';
+                    tomodel.open_to = '12:00:00';
+                }
+                //insert new pharmacy
+                user_pharmacy_model.insert_user_pharmacy(tomodel);
+            }
             
+
             //Send Confirmation Email
             var link = req.protocol + '://' + req.get('host') + '/admin/manage_users';
             var mailOptions = {
@@ -134,6 +145,52 @@ function login_validations(data) {
 function register_validations(data) {
     var validation_array = {};
 
+    var type = controller.validate({type: data.type},['required']);
+    if(type){
+        validation_array = controller.mergeArrays(validation_array, type);
+    }
+    else {
+       var types = ['pharmacy', 'treatment center', 'doctor', 'navigator'];
+       if(!types.includes(data.type)) {
+            validation_array = controller.mergeArrays(validation_array, {type_error: 'This is not a valid type'});       
+       } 
+    }
+
+    var name = controller.validate({name: data.name},['required', 'length:0-60']);
+    if(name){
+        validation_array = controller.mergeArrays(validation_array, name);
+    }
+
+    var position = controller.validate({position: data.position},['required', 'length:0-60']);
+    if(position){
+        validation_array = controller.mergeArrays(validation_array, position);
+    }
+
+    var entity_name = controller.validate({entity_name: data.entity_name},['required', 'length:0-60']);
+    if(entity_name){
+        validation_array = controller.mergeArrays(validation_array, entity_name);
+    }
+
+    var phone_number = controller.validate({phone_number: data.phone_number},['required', 'integer', 'length:4-23']);
+    if(phone_number){
+        validation_array = controller.mergeArrays(validation_array, phone_number);
+    }
+
+    var address = controller.validate({address: data.address},['required', 'length:0-1000']);
+    if(address){
+        validation_array = controller.mergeArrays(validation_array, address);
+    }
+
+    var city = controller.validate({city: data.city},['required', 'length:0-60']);
+    if(city){
+        validation_array = controller.mergeArrays(validation_array, city);
+    }
+
+    var country = controller.validate({country: data.country},['required', 'length:0-60']);
+    if(country){
+        validation_array = controller.mergeArrays(validation_array, country);
+    }
+
     var email = controller.validate({email: data.email},['required', 'email', 'length:0-60']);
     if(email){
         validation_array = controller.mergeArrays(validation_array, email);
@@ -161,48 +218,11 @@ function register_validations(data) {
         validation_array = controller.mergeArrays(validation_array, rpassword);
     }
 
-    var name = controller.validate({name: data.name},['required']);
-    if(name){
-        validation_array = controller.mergeArrays(validation_array, name);
+    if(data.terms != 'true') {
+        validation_array = controller.mergeArrays(validation_array, {terms_error: "You have to accept our terms and conditions to be able to continue"});
     }
 
-    var type = controller.validate({type: data.type},['required']);
-    if(type){
-        validation_array = controller.mergeArrays(validation_array, type);
-    }
-    else {
-       var types = ['PHARMACY', 'TREATMENT CENTER', 'DOCTOR', 'NAVIGATOR'];
-       if(!types.includes(data.type)) {
-            validation_array = controller.mergeArrays(validation_array, {type_error: 'This is not a valid type'});       
-       } 
-    }
-
-    if(data.type == 'PHARMACY' || data.type == 'TREATMENT CENTER') {
-       var street = controller.validate({street: data.street},['required']);
-       if(street){
-            validation_array = controller.mergeArrays(validation_array, street);
-       }
-
-       var city = controller.validate({city: data.city},['required']);
-       if(city){
-            validation_array = controller.mergeArrays(validation_array, city);
-       }
-
-       var state = controller.validate({state: data.state},['required']);
-       if(state){
-            validation_array = controller.mergeArrays(validation_array, state);
-       }
-
-       var zip = controller.validate({zip: data.zip},['required']);
-       if(zip){
-            validation_array = controller.mergeArrays(validation_array, zip);
-       }
-
-       var phone_number = controller.validate({phone_number: data.phone_number},['required']);
-       if(phone_number){
-            validation_array = controller.mergeArrays(validation_array, phone_number);
-       }
-
+    if(data.type == 'pharmacy' || data.type == 'treatment center') {
        var open_from = controller.validate({open_from: data.open_from},['required']);
        if(open_from){
             validation_array = controller.mergeArrays(validation_array, open_from);

@@ -94,7 +94,6 @@ var routes = require('./config/routes')(app);
 //     res.render('admin/dashboard', { base: base });
 // });
 
-
 app.get('/generaterandompassword', function(req, res) {
     var random = new RandExp(/(?=.*[A-Za-z\d])@[A-Za-z\d]{8,10}/).gen();
     res.send({random: random});

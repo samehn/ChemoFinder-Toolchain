@@ -623,14 +623,26 @@ function medicine_validations(data) {
     
     
     data.extract_date = new Date(data.extract_date);
-	data.extract_date = controller.moment(data.extract_date).format('MM/DD/YYYY');
-	if(!controller.moment(data.extract_date, 'MM/DD/YYYY',true).isValid()) {
-		validation_array = controller.mergeArrays(validation_array, {extract_date_error: 'This is not a valid date'});
-	}
+    if(controller.moment(data.extract_date).isValid()) {
+    	data.extract_date = controller.moment(data.extract_date).format('DD/MM/YYYY');
+		if(!controller.moment(data.extract_date, 'DD/MM/YYYY',true).isValid()) {
+			validation_array = controller.mergeArrays(validation_array, {extract_date_error: 'This is not a valid date'});
+		}
+    }
+    else {
+    	validation_array = controller.mergeArrays(validation_array, {extract_date_error: 'This is not a valid date'});
+    }
+	
 
     if(data.approval_date && data.approval_date.length > 0) {
-    	data.approval_date = controller.moment(data.approval_date).format('MM/DD/YYYY');
-		if(!controller.moment(data.approval_date, 'MM/DD/YYYY',true).isValid()) {
+    	data.approval_date = new Date(data.approval_date);
+    	if(controller.moment(data.approval_date).isValid()) {
+	    	data.approval_date = controller.moment(data.approval_date).format('DD/MM/YYYY');
+			if(!controller.moment(data.approval_date, 'DD/MM/YYYY',true).isValid()) {
+				validation_array = controller.mergeArrays(validation_array, {approval_date_error: 'This is not a valid date'});
+			}
+		}
+		else {
 			validation_array = controller.mergeArrays(validation_array, {approval_date_error: 'This is not a valid date'});
 		}
     }

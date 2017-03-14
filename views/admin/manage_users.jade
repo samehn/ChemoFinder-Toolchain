@@ -42,7 +42,7 @@ block content
         if non_approved_users && non_approved_users.length > 0
           - for( var i = 0, len = non_approved_users.length; i < len; i++ ) {
           tr
-            td #{non_approved_users[i].NAME} 
+            td #{non_approved_users[i].PERSON_NAME} 
             td #{non_approved_users[i].EMAIL}
             td #{non_approved_users[i].TYPE}
             td 
@@ -64,7 +64,7 @@ block content
         if approved_users && approved_users.length > 0
           - for( var i = 0, len = approved_users.length; i < len; i++ ) {
           tr
-            td #{approved_users[i].NAME} 
+            td #{approved_users[i].PERSON_NAME} 
             td #{approved_users[i].EMAIL}
             td #{approved_users[i].TYPE}
             td
@@ -84,7 +84,7 @@ block content
             td 
               button.form-control.btn.btn-danger.auto-width(onclick='delete_user('+ approved_users[i].ID+')') Delete     
           - }
-block modals             
+block modals
   #addNewUser.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
     .modal-dialog
       .modal-content
@@ -98,10 +98,10 @@ block modals
               .input-group
                 select#typeUser.form-control(name='type')
                   option.form-control(value='') Select User Type
-                  option.form-control(value='DOCTOR') Doctor
-                  option.form-control(value='NAVIGATOR') Navigator
-                  option.form-control(value='PHARMACY') Pharmacy
-                  option.form-control(value='TREATMENT CENTER') Treatment Center
+                  option.form-control(value='doctor') Doctor
+                  option.form-control(value='navigator') Navigator
+                  option.form-control(value='pharmacy') Pharmacy
+                  option.form-control(value='treatment center') Treatment Center
                 span.input-group-addon
                   i.glyphicon.glyphicon-briefcase
               // /.input-group
@@ -111,6 +111,42 @@ block modals
                 input#nameUser.form-control(name='name', type='text', placeholder='Name')
                 span.input-group-addon
                   i.glyphicon.glyphicon-user
+            // /.form-group
+            #positionUserForm.form-group
+              .input-group
+                input#positionUser.form-control(name='position', type='text', placeholder="Position")
+                span.input-group-addon
+                  i.glyphicon.glyphicon-user
+            // /.form-group
+            #entityNameUserForm.form-group
+              .input-group
+                input#entityNameUser.form-control(name='entity_name', type='text', placeholder="Place of Work")
+                span.input-group-addon
+                  i.glyphicon.glyphicon-briefcase
+            // /.form-group
+            #phoneUserForm.form-group
+              .input-group
+                input#phoneUser.form-control(name='phone_number', type='text', placeholder='Phone Number')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-earphone
+            // /.form-group
+            #addressUserForm.form-group
+              .input-group
+                input#addressUser.form-control(name='address', type='text', placeholder='Address')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-home
+            // /.form-group
+            #cityUserForm.form-group
+              .input-group
+                input#cityUser.form-control(name='city', type='text', placeholder='City')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-home
+            // /.form-group
+            #countryUserForm.form-group
+              .input-group
+                input#countryUser.form-control(name='country', type='text', placeholder='Country')
+                span.input-group-addon
+                  i.glyphicon.glyphicon-home
             // /.form-group
             #emailUserForm.form-group
               .input-group
@@ -129,36 +165,6 @@ block modals
                 // /.form-group
               .col-xs-4
                  button.form-control.btn.btn-primary(type='button' onclick='generate_password(this)') Generate Password
-            #streetUserForm.form-group
-              .input-group
-                input#streetUser.form-control(name='street', type='text', placeholder='Street')
-                span.input-group-addon
-                  i.glyphicon.glyphicon-home
-            // /.form-group
-            #cityUserForm.form-group
-              .input-group
-                input#cityUser.form-control(name='city', type='text', placeholder='City')
-                span.input-group-addon
-                  i.glyphicon.glyphicon-home
-            // /.form-group
-            #stateUserForm.form-group
-              .input-group
-                input#stateUser.form-control(name='state', type='text', placeholder='State')
-                span.input-group-addon
-                  i.glyphicon.glyphicon-home
-            // /.form-group
-            #zipUserForm.form-group
-              .input-group
-                input#zipUser.form-control(name='zip', type='text', placeholder='Postal Code')
-                span.input-group-addon
-                  i.glyphicon.glyphicon-home
-            // /.form-group
-            #phoneUserForm.form-group.handle(style='display:none;')
-              .input-group
-                input#phoneUser.form-control(name='phone_number', type='text', placeholder='Phone Number')
-                span.input-group-addon
-                  i.glyphicon.glyphicon-earphone
-            // /.form-group
             p.handle(style='display:none;') 
               strong Open from
             #openFromUserForm.form-group.handle(style='display:none;')

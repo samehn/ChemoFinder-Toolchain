@@ -46,10 +46,9 @@ block content
                     th.th_search Name
                     th.th_search Phone
                     th.th_search Email
-                    th.th_search Street
+                    th.th_search Address
                     th.th_search City
-                    th.th_search State
-                    th.th_search ZIP
+                    th.th_search Country
                     th.th_search Open Form
                     th.th_search Open To
                     th.th_search Expiry Date
@@ -59,13 +58,12 @@ block content
                   -  if(shoppinglist[i].pharmacies && shoppinglist[i].pharmacies.length > 0) {
                       -  for (var j = 0; j < shoppinglist[i].pharmacies.length; j++) {
                           tr.tr_search_row
-                            td.td_search #{shoppinglist[i].pharmacies[j].NAME}
+                            td.td_search #{shoppinglist[i].pharmacies[j].ENTITY_NAME}
                             td.td_search #{shoppinglist[i].pharmacies[j].PHONE_NUMBER}
                             td.td_search #{shoppinglist[i].pharmacies[j].EMAIL}
-                            td.td_search #{shoppinglist[i].pharmacies[j].STREET}
+                            td.td_search #{shoppinglist[i].pharmacies[j].ADDRESS}
                             td.td_search #{shoppinglist[i].pharmacies[j].CITY}
-                            td.td_search #{shoppinglist[i].pharmacies[j].STATE}
-                            td.td_search #{shoppinglist[i].pharmacies[j].ZIP}
+                            td.td_search #{shoppinglist[i].pharmacies[j].COUNTRY}
                             td.td_search #{shoppinglist[i].pharmacies[j].OPEN_FROM}
                             td.td_search #{shoppinglist[i].pharmacies[j].OPEN_TO}
                             td.td_search #{shoppinglist[i].pharmacies[j].EXPIRY_DATE}

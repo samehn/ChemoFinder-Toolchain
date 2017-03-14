@@ -31,74 +31,68 @@ $('#change-password-form').keydown(function(event){
 });
 
 function editProfile() {
-    var user_array={};
+  var user_array={};
     
-    var name = $('#name');
-    var email = $('#email');
-    var street = $('#street');
-    var city = $('#city');
-    var state = $('#state');
-    var zip = $('#zip');
+  var name = $('#name');
+  var position = $('#position');
+  var entity_name = $('#entityName');
+  var email = $('#email');
+  var phone_number = $('#phone');
 
-    user_array[name.attr('name')] = name.val();
-    user_array[email.attr('name')] = email.val();
-    user_array[street.attr('name')] = street.val();
-    user_array[city.attr('name')] = city.val();
-    user_array[state.attr('name')] = state.val();
-    user_array[zip.attr('name')] = zip.val();
+  var address = $('#address');
+  var city = $('#city');
+  var country = $('#country');
 
-    console.log(user_array);
-    $('#loadingModal').modal('show');
-    $.ajax({
-      type: "post",
-      url: url + '/doctor/updateprofile',
-      data : user_array,
-      success:  function(data){        
-        $('#loadingModal').modal('hide');
-        console.log(data);
-        console.log(data.message);
-        $('.error-form').remove();
-        $('.message-form').remove();
-        if(data.message == "success")
-        {
-            $('#editProfile').modal('hide');
-            $('#confimUpdate').modal('show');
-        }
-        else if(data.message == "failed")
-        {
-           if(data.email_error)
-           {
-              var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.email_error + '</div>';
-              $(error_message).insertBefore($('#emailForm'));
-           }
-           if(data.name_error)
-           {
-              var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.name_error + '</div>';
-              $(error_message).insertBefore($('#nameForm'));
-           }
-           if(data.street_error)
-           {
-              var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.street_error + '</div>';
-              $(error_message).insertBefore($('#streetForm'));
-           }
-           if(data.city_error)
-           {
-              var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.city_error + '</div>';
-              $(error_message).insertBefore($('#cityForm'));
-           }
-           if(data.state_error)
-           {
-              var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.state_error + '</div>';
-              $(error_message).insertBefore($('#stateForm'));
-           }
-           if(data.zip_error)
-           {
-              var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.zip_error + '</div>';
-              $(error_message).insertBefore($('#zipForm'));
-           }
-        }
+  user_array[name.attr('name')] = name.val();
+  user_array[position.attr('name')] = position.val();
+  user_array[entity_name.attr('name')] = entity_name.val();
+
+  user_array[email.attr('name')] = email.val();
+  user_array[phone_number.attr('name')] = phone_number.val();
+
+  user_array[address.attr('name')] = address.val();
+  user_array[city.attr('name')] = city.val();
+  user_array[country.attr('name')] = country.val();
+    
+
+  console.log(user_array);
+  $('#loadingModal').modal('show');
+  $.ajax({
+    type: "post",
+    url: url + '/doctor/updateprofile',
+    data : user_array,
+    success:  function(data){        
+      $('#loadingModal').modal('hide');
+      console.log(data);
+      console.log(data.message);
+      $('.error-form').remove();
+      $('.message-form').remove();
+      if(data.message == "success")
+      {
+        $('#editProfile').modal('hide');
+        $('#confimUpdate').modal('show');
       }
+      else if(data.message == "failed")
+      {
+        showError(data.name_error, $('#nameForm'));
+        showError(data.position_error, $('#positionForm'));
+        showError(data.entity_name_error, $('#entityNameForm'));
+        showError(data.email_error, $('#emailForm'));
+        showError(data.phone_number_error, $('#phoneForm'));
+        showError(data.address_error, $('#addressForm'));
+        showError(data.city_error, $('#cityForm'));
+        showError(data.country_error, $('#countryForm'));
+      }
+    }
   });
+}
+
+function showError(error_data, position) {
+  if(error_data)
+  {
+    var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + error_data + '</div>';
+    $(error_message).insertBefore(position);
+  }
 }
 
 function changePassword() {

@@ -35,6 +35,7 @@ module.exports = function(app){
 
 	//Routes+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	app.get('/', home_controller.home_page);
+	app.get('/terms_and_conditions', home_controller.terms_and_conditions_page);
 	app.post('/getmedicinebygenericandform', home_controller.get_medicines_by_generic_and_form)
 	app.post('/getavailablepharmaciesbyid', home_controller.get_pharmacies);
 	app.get('/getapprovedmedicines', home_controller.get_medicines);

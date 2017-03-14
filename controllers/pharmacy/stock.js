@@ -3,6 +3,7 @@ controller 					= require('../controller');
 function stock(){
 	tomodel = {};
 	user_model 	= require('../../models/user_model');
+    user_pharmacy_model  = require('../../models/user_pharmacy_model');
     stock_list_model  = require('../../models/stock_list_model');
     medicine_model = require('../../models/medicine_model');
 };
@@ -133,7 +134,7 @@ stock.prototype.update_medicine =  function(req, res) {
             tomodel.quantity = data.quantity;
             tomodel.avg_monthly_consumption = data.avg_monthly_consumption;
             stock_list_model.update_stock_record(tomodel);
-            user_model.update_stock_time(tomodel);
+            user_pharmacy_model.update_stock_time(tomodel);
             res.send({message: "success"});
         }
         else {
@@ -499,7 +500,7 @@ function parsingStockList(req, res) {
                     if(stock_list_medicine.length > 0) {
                         tomodel.stock_id = stock_list_medicine[0].ID;
                         stock_list_model.update_stock_record(tomodel);
-                        user_model.update_stock_time(tomodel);
+                        user_pharmacy_model.update_stock_time(tomodel);
                     }
                     else {
                         stock_list_model.insert_new_record(tomodel);
@@ -564,8 +565,13 @@ function updated_medicine_validations(data) {
     }
     
     data.expiry_date = new Date(data.expiry_date);
-    data.expiry_date = controller.moment(data.expiry_date).format('MM/DD/YYYY');
-    if(!controller.moment(data.expiry_date, 'MM/DD/YYYY',true).isValid()) {
+    if(controller.moment(data.expiry_date).isValid()) {
+        data.expiry_date = controller.moment(data.expiry_date).format('DD/MM/YYYY');
+        if(!controller.moment(data.expiry_date, 'DD/MM/YYYY',true).isValid()) {
+            validation_array = controller.mergeArrays(validation_array, {expiry_date_error: 'This is not a valid date'});
+        }
+    }
+    else {
         validation_array = controller.mergeArrays(validation_array, {expiry_date_error: 'This is not a valid date'});
     }
 
@@ -613,8 +619,13 @@ function approved_medicine_validations(data) {
     }
     
     data.expiry_date = new Date(data.expiry_date);
-    data.expiry_date = controller.moment(data.expiry_date).format('MM/DD/YYYY');
-    if(!controller.moment(data.expiry_date, 'MM/DD/YYYY',true).isValid()) {
+    if(controller.moment(data.expiry_date).isValid()) {
+        data.expiry_date = controller.moment(data.expiry_date).format('DD/MM/YYYY');
+        if(!controller.moment(data.expiry_date, 'DD/MM/YYYY',true).isValid()) {
+            validation_array = controller.mergeArrays(validation_array, {expiry_date_error: 'This is not a valid date'});
+        }
+    }
+    else {
         validation_array = controller.mergeArrays(validation_array, {expiry_date_error: 'This is not a valid date'});
     }
 
@@ -680,8 +691,13 @@ function new_medicine_validations(data) {
     }
 
     data.expiry_date = new Date(data.expiry_date);
-    data.expiry_date = controller.moment(data.expiry_date).format('MM/DD/YYYY');
-    if(!controller.moment(data.expiry_date, 'MM/DD/YYYY',true).isValid()) {
+    if(controller.moment(data.expiry_date).isValid()) {
+        data.expiry_date = controller.moment(data.expiry_date).format('DD/MM/YYYY');
+        if(!controller.moment(data.expiry_date, 'DD/MM/YYYY',true).isValid()) {
+            validation_array = controller.mergeArrays(validation_array, {expiry_date_error: 'This is not a valid date'});
+        }    
+    }
+    else {
         validation_array = controller.mergeArrays(validation_array, {expiry_date_error: 'This is not a valid date'});
     }
 

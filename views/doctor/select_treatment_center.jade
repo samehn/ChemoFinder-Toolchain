@@ -40,7 +40,7 @@ block content
             option(value=0) Select Treatment Center
             -  if(treatmentCenters.length > 0) { 
               -  for (var i = 0; i < treatmentCenters.length; i++) {
-                  option(value=treatmentCenters[i].ID) #{treatmentCenters[i].NAME} 
+                  option(value=treatmentCenters[i].ID) #{treatmentCenters[i].ENTITY_NAME} 
               - } 
           - }
     h4.table-title Treatment Center Details
@@ -51,12 +51,12 @@ block content
             th.th_search Name
             th.th_search Phone
             th.th_search Email
-            th.th_search Street
+            th.th_search Address
             th.th_search City
-            th.th_search State
-            th.th_search ZIP
+            th.th_search Country
             th.th_search Open From
             th.th_search Open To
+            th.th_search Last Update
         tbody#treatment-center-details
           tr.tr_search
             td.empty_table.td_search(style="text-align: center;", valign="top", colspan="9") No treatment center has been chosen yet     

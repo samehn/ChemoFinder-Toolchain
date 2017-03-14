@@ -5,7 +5,7 @@ user_model.prototype     		= model;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 user_model.prototype.select_pharmacy_by_medicine_id = function(data) {
-	var query = "SELECT U.ID AS ID, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, U.STOCK_UPDATE AS LAST_UPDATE FROM DASH5082.CHEMO_MEDICINE M JOIN CHEMO_STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE M.APPROVED = TRUE AND M.ID =" + data.medicine_id + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)";
+	var query = "SELECT U.ID AS ID, U.EMAIL, U.ENTITY_NAME, U.PHONE_NUMBER, U.ADDRESS, U.CITY, U.COUNTRY, UP.OPEN_FROM, UP.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, UP.STOCK_UPDATE AS LAST_UPDATE FROM DASH5082.CHEMO_MEDICINE M JOIN CHEMO_STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN DASH5082.CHEMO_USER U ON U.ID = S.PHARMACY_ID JOIN DASH5082.CHEMO_USER_PHARMACY UP ON U.ID = UP.PHARMACY_ID WHERE M.APPROVED = TRUE AND M.ID =" + data.medicine_id + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)";
 	return this.dbQuerySync(query);
 };
 
@@ -15,84 +15,74 @@ user_model.prototype.get_all_approved_medicines = function() {
 };
 
 user_model.prototype.select_user_by_email = function(data) {
-	var query = "SELECT * from DASH5082.USER WHERE EMAIL ='" + data.email + "';";
+	var query = "SELECT * from DASH5082.CHEMO_USER WHERE EMAIL ='" + data.email + "';";
 	return this.dbQuerySync(query);
 };
 
 user_model.prototype.select_user_by_id = function(data) {
-	var query = "SELECT * from DASH5082.USER WHERE ID ='" + data.user_id + "';";
+	var query = "SELECT * from DASH5082.CHEMO_USER WHERE ID ='" + data.user_id + "';";
+	return this.dbQuerySync(query);
+};
+
+user_model.prototype.select_pharmacy_by_id = function(data) {
+	var query = "SELECT * from DASH5082.CHEMO_USER U JOIN CHEMO_USER_PHARMACY UP ON U.ID = UP.PHARMACY_ID WHERE U.ID ='" + data.user_id + "';";
 	return this.dbQuerySync(query);
 };
 
 user_model.prototype.insert_user = function(data) {
-	var query = "INSERT INTO DASH5082.USER (EMAIL, PASSWORD, NAME, PHONE_NUMBER, STREET, CITY, STATE, ZIP, OPEN_FROM, OPEN_TO, TYPE, FIRST_LOGIN, ACTIVE, APPROVE) VALUES ('" + data.email + "','" + data.password + "','" + data.name + "','" + data.phone_number + "','" + data.street + "','" + data.city + "','" + data.state + "','" + data.zip + "','" + data.open_from + "','" + data.open_to + "','" + data.type + "', '" + data.first_login + "', '" + data.active + "', '" + data.approve + "');";
+	var query = "INSERT INTO DASH5082.CHEMO_USER (ENTITY_NAME, PERSON_NAME, PERSON_POSITION, EMAIL, PASSWORD, PHONE_NUMBER, ADDRESS, CITY, COUNTRY, TYPE, FIRST_LOGIN, ACTIVE, APPROVE) VALUES ('" + data.entity_name + "', '" + data.name + "', '" + data.position + "', '" + data.email + "', '" + data.password + "', '" + data.phone_number + "', '" + data.address + "', '" + data.city + "', '" + data.country + "', '" + data.type + "', '" + data.first_login + "', '" + data.active + "', '" + data.approve + "')";
 	console.log(query);
 	return this.dbQuerySync(query);
 };
 
 user_model.prototype.update_user_password = function(data) {
-	var query = "UPDATE DASH5082.USER SET PASSWORD ='" + data.password + "' WHERE ID =" + data.user_id + ";";
+	var query = "UPDATE DASH5082.CHEMO_USER SET PASSWORD ='" + data.password + "', UPDATED_AT=CURRENT_TIMESTAMP WHERE ID =" + data.user_id + ";";
 	return this.dbQuerySync(query);
 };
 
 user_model.prototype.select_users_approval_option = function(data) {
-	var query = "SELECT * from DASH5082.USER WHERE APPROVE='" + data.approve + "'";
+	var query = "SELECT * from DASH5082.CHEMO_USER WHERE APPROVE='" + data.approve + "'";
 	return this.dbQuerySync(query);
 };
 
 user_model.prototype.update_user_approve = function(data) {
-	var query = "UPDATE DASH5082.USER SET APPROVE='" + data.approve + "' WHERE ID=" + data.user_id + ";";
+	var query = "UPDATE DASH5082.CHEMO_USER SET APPROVE='" + data.approve + "', UPDATED_AT=CURRENT_TIMESTAMP WHERE ID=" + data.user_id + ";";
 	return this.dbQuerySync(query);
 };
 
 user_model.prototype.update_user_active = function(data) {
-	var query = "UPDATE DASH5082.USER SET ACTIVE='" + data.active + "' WHERE ID=" + data.user_id + ";";
+	var query = "UPDATE DASH5082.CHEMO_USER SET ACTIVE='" + data.active + "', UPDATED_AT=CURRENT_TIMESTAMP WHERE ID=" + data.user_id + ";";
 	return this.dbQuerySync(query);
 };
 
 user_model.prototype.delete_user = function(data) {
-	var query = "DELETE FROM USER WHERE ID=" + data.user_id + ";";
+	var query = "DELETE FROM DASH5082.CHEMO_USER WHERE ID=" + data.user_id + ";";
 	return this.dbQuerySync(query);
 };
 
 user_model.prototype.update_user_first_password = function(data) {
-	var query = "UPDATE DASH5082.USER SET PASSWORD ='" + data.password + "', FIRST_LOGIN = '0' WHERE ID =" + data.user_id + ";";
-	return this.dbQuerySync(query);
-};
-
-user_model.prototype.update_password = function(data) {
-	var query = "UPDATE DASH5082.USER SET PASSWORD ='" + data.password + "' WHERE ID =" + data.user_id + ";";
+	var query = "UPDATE DASH5082.CHEMO_USER SET PASSWORD ='" + data.password + "', FIRST_LOGIN = '0' WHERE ID =" + data.user_id + ";";
 	return this.dbQuerySync(query);
 };
 
 user_model.prototype.update_user = function(data) {
-	query = "UPDATE DASH5082.USER SET EMAIL='" + data.email + "', NAME ='" + data.name + "', STREET ='" + data.street + "', CITY ='" + data.city + "', STATE ='" + data.state + "', ZIP ='" + data.zip + "', PHONE_NUMBER ='" + data.phone_number + "', OPEN_FROM='" + data.open_from + "', OPEN_TO='" + data.open_to + "' WHERE ID =" + data.user_id;
-	return this.dbQuerySync(query);
-};
-
-user_model.prototype.update_user_doctor = function(data) {
-	query = "UPDATE DASH5082.USER SET EMAIL='" + data.email + "', NAME ='" + data.name + "', STREET ='" + data.street + "', CITY ='" + data.city + "', STATE ='" + data.state + "', ZIP ='" + data.zip + "' WHERE ID =" + data.user_id;
+	query = "UPDATE DASH5082.CHEMO_USER SET EMAIL='" + data.email + "', PERSON_NAME ='" + data.name + "', PERSON_POSITION ='" + data.position + "', ENTITY_NAME='" + data.entity_name + "', PHONE_NUMBER ='" + data.phone_number + "', ADDRESS ='" + data.address + "', CITY ='" + data.city + "', COUNTRY ='" + data.country + "', UPDATED_AT = CURRENT_TIMESTAMP WHERE ID =" + data.user_id;
 	return this.dbQuerySync(query);
 };
 
 user_model.prototype.select_treatment_centers = function() {
-	var query = "SELECT * FROM DASH5082.USER WHERE TYPE = 'TREATMENT CENTER'";
+	var query = "SELECT * FROM DASH5082.CHEMO_USER WHERE TYPE = 'treatment center'";
 	return this.dbQuerySync(query);
 };
 
 user_model.prototype.select_treatment_center_by_id = function(data) {
-	var query = "SELECT * FROM DASH5082.USER WHERE TYPE = 'TREATMENT CENTER' AND ID=" + data.user_id;
+	var query = "SELECT * FROM DASH5082.CHEMO_USER U JOIN DASH5082.CHEMO_USER_PHARMACY UP ON U.ID = UP.PHARMACY_ID WHERE U.TYPE = 'treatment center' AND U.ID=" + data.user_id;
 	return this.dbQuerySync(query);
 };
 
 user_model.prototype.select_pharmacies_by_medicine_and_quantity = function(data) {
-	var query = "SELECT U.ID AS ID, U.EMAIL, U.NAME, U.PHONE_NUMBER, U.STREET, U.CITY, U.STATE, U.ZIP, U.OPEN_FROM, U.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, U.STOCK_UPDATE FROM DASH5082.CHEMO_MEDICINE M JOIN DASH5082.CHEMO_STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN USER U ON U.ID = S.PHARMACY_ID WHERE M.APPROVED = TRUE AND U.TYPE='PHARMACY' AND M.ID =" + data.medicine_id + " AND S.AVAILABLE_STOCK >=" + data.quantity + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)";
+	var query = "SELECT U.ID AS ID, U.EMAIL, U.ENTITY_NAME, U.PHONE_NUMBER, U.ADDRESS, U.CITY, U.COUNTRY, UP.OPEN_FROM, UP.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, UP.STOCK_UPDATE AS LAST_UPDATE FROM DASH5082.CHEMO_MEDICINE M JOIN DASH5082.CHEMO_STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN DASH5082.CHEMO_USER U ON U.ID = S.PHARMACY_ID JOIN DASH5082.CHEMO_USER_PHARMACY UP ON U.ID = UP.PHARMACY_ID WHERE M.APPROVED = TRUE AND U.TYPE='pharmacy' AND M.ID =" + data.medicine_id + " AND S.AVAILABLE_STOCK >=" + data.quantity + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)";
 	return this.dbQuerySync(query);	
-};
-
-user_model.prototype.update_stock_time = function(data) {
-	var query = "UPDATE DASH5082.USER SET STOCK_UPDATE = CURRENT_TIMESTAMP WHERE ID = " + data.user_id;
-	return this.dbQuerySync(query);
 };
 
 module.exports = new user_model();
