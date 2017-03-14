@@ -33,6 +33,14 @@ manage_medicines.prototype.manage_medicines_page =  function(req, res) {
 
 manage_medicines.prototype.add_new_medicine =  function(req, res) {
 	var data = controller.xssClean(req.body);
+	data.approval_date = req.body.approval_date;
+	if(controller.moment(data.approval_date, 'YYYY-MM-DD').isValid()) {
+		data.approval_date = controller.moment(data.approval_date).format('DD/MM/YYYY');
+	}
+	data.extract_date = req.body.extract_date;
+	if(controller.moment(data.extract_date, 'YYYY-MM-DD').isValid()) {
+		data.extract_date = controller.moment(data.extract_date).format('DD/MM/YYYY');
+	}
 	console.log(data);
     var validation_array = medicine_validations(data);
     if(Object.keys(validation_array).length > 0){
@@ -50,10 +58,12 @@ manage_medicines.prototype.add_new_medicine =  function(req, res) {
     	if(medicine.length == 0) {
     		tomodel.route = data.route;
     		tomodel.sra = data.sra;
-    		if(!data.approval_date) {
-    			data.approval_date = '01/01/0001';
-    		}
-    		tomodel.approval_date = data.approval_date;
+    		if(controller.moment(data.approval_date, 'DD/MM/YYYY').isValid()) {
+				tomodel.approval_date = data.approval_date;
+			}
+			else {
+				tomodel.approval_date = controller.moment(new Date()).format('DD/MM/YYYY');		
+			}
     		tomodel.source = data.source;
     		tomodel.extract_date = data.extract_date;
     		tomodel.specification_form = data.specification_form;
@@ -82,6 +92,14 @@ manage_medicines.prototype.add_new_medicine =  function(req, res) {
 
 manage_medicines.prototype.update_medicine =  function(req, res) {
 	var data = controller.xssClean(req.body);
+	data.approval_date = req.body.approval_date;
+	if(controller.moment(data.approval_date, 'YYYY-MM-DD').isValid()) {
+		data.approval_date = controller.moment(data.approval_date).format('DD/MM/YYYY');
+	}
+	data.extract_date = req.body.extract_date;
+	if(controller.moment(data.extract_date, 'YYYY-MM-DD').isValid()) {
+		data.extract_date = controller.moment(data.extract_date).format('DD/MM/YYYY');
+	}
     var validation_array = medicine_validations(data);
     if(Object.keys(validation_array).length > 0){
         var result = controller.mergeArrays(validation_array, {message:'failed'});
@@ -100,10 +118,12 @@ manage_medicines.prototype.update_medicine =  function(req, res) {
 		    	tomodel.manufacturer = data.manufacturer;
 		    	tomodel.route = data.route;
 	    		tomodel.sra = data.sra;
-	    		if(!data.approval_date) {
-	    			data.approval_date = '01/01/0001';
-	    		}
-	    		tomodel.approval_date = data.approval_date;
+	    		if(controller.moment(data.approval_date, 'DD/MM/YYYY').isValid()) {
+					tomodel.approval_date = data.approval_date;
+				}
+				else {
+					tomodel.approval_date = controller.moment(new Date()).format('DD/MM/YYYY');		
+				}
 	    		tomodel.source = data.source;
 	    		tomodel.extract_date = data.extract_date;
 	    		tomodel.specification_form = data.specification_form;
@@ -504,13 +524,8 @@ function parsing_approved_medicines(req, res) {
 	        }
 
 	        var new_data = controller.xssClean(data);
-	        new_data['extract_date'] = data.extract_date;
-	        new_data['approval_date'] = data.approval_date;
-	        console.log(data.extract_date);
-	        console.log(new_data.extract_date);
-	        console.log(data.approval_date);
-	        console.log(new_data.approval_date);
-	        console.log(new_data);
+	        new_data['extract_date'] = new Date(data.extract_date);
+	        new_data['approval_date'] = new Date(data.approval_date);
     		var validation_array = medicine_validations(new_data);
 	        console.log(new_data);
 	        if(Object.keys(validation_array).length > 0){
@@ -534,12 +549,18 @@ function parsing_approved_medicines(req, res) {
 		    	var medicine = medicine_model.select_medicine_by_main_keys(tomodel);
 		    	tomodel.route = new_data.route;
 	    		tomodel.sra = new_data.sra;
-	    		if(!new_data.approval_date) {
-	    			new_data.approval_date = '01/01/0001';
-	    		}
-	    		tomodel.approval_date = new_data.approval_date;
+	    		console.log(new_data.approval_date);
+	    		console.log(new_data.extract_date);
+    			if(controller.moment(new_data.approval_date).isValid()) {
+    				tomodel.approval_date = controller.moment(new_data.approval_date).format('DD/MM/YYYY');
+    			}
+    			else {
+    				tomodel.approval_date = controller.moment(new Date()).format('DD/MM/YYYY');		
+    			}
 	    		tomodel.source = new_data.source;
-	    		tomodel.extract_date = new_data.extract_date;
+	    		tomodel.extract_date = controller.moment(new_data.extract_date).format('DD/MM/YYYY');
+	    		console.log(tomodel.approval_date);
+	    		console.log(tomodel.extract_date);
 	    		tomodel.specification_form = new_data.specification_form;
 	    		tomodel.pack_type = new_data.pack_type;
 	    		tomodel.units_per_pack = new_data.units_per_pack;
@@ -621,30 +642,16 @@ function medicine_validations(data) {
         validation_array = controller.mergeArrays(validation_array, route);
     }
     
-    
-    data.extract_date = new Date(data.extract_date);
-    if(controller.moment(data.extract_date).isValid()) {
-    	data.extract_date = controller.moment(data.extract_date).format('DD/MM/YYYY');
-		if(!controller.moment(data.extract_date, 'DD/MM/YYYY',true).isValid()) {
-			validation_array = controller.mergeArrays(validation_array, {extract_date_error: 'This is not a valid date'});
-		}
-    }
-    else {
+    if(!controller.moment(data.extract_date, 'DD/MM/YYYY', true).isValid() && !controller.moment(data.extract_date, 'DD-MM-YYYY', true).isValid() && !controller.moment(data.extract_date, 'DD-MMM-YYYY', true).isValid()) {
     	validation_array = controller.mergeArrays(validation_array, {extract_date_error: 'This is not a valid date'});
+    	// data.extract_date = controller.moment(data.extract_date).format('MM/DD/YYYY');
     }
-	
 
     if(data.approval_date && data.approval_date.length > 0) {
-    	data.approval_date = new Date(data.approval_date);
-    	if(controller.moment(data.approval_date).isValid()) {
-	    	data.approval_date = controller.moment(data.approval_date).format('DD/MM/YYYY');
-			if(!controller.moment(data.approval_date, 'DD/MM/YYYY',true).isValid()) {
-				validation_array = controller.mergeArrays(validation_array, {approval_date_error: 'This is not a valid date'});
-			}
-		}
-		else {
-			validation_array = controller.mergeArrays(validation_array, {approval_date_error: 'This is not a valid date'});
-		}
+		if(!controller.moment(data.approval_date, 'DD/MM/YYYY', true).isValid() && !controller.moment(data.approval_date, 'DD-MM-YYYY', true).isValid() && !controller.moment(data.approval_date, 'DD-MMM-YYYY', true).isValid()) {
+	    	validation_array = controller.mergeArrays(validation_array, {approval_date_error: 'This is not a valid date'});
+	    	// data.approval_date = controller.moment(data.approval_date).format('MM/DD/YYYY');
+	    }
     }
     
     var specification_form = controller.validate({specification_form: data.specification_form},['length:0-60']);
