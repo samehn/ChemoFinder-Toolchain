@@ -93,6 +93,34 @@ var routes = require('./config/routes')(app);
 //     var base = req.protocol + '://' + req.get('host');
 //     res.render('admin/dashboard', { base: base });
 // });
+// var async = require('async');
+  
+// app.get('/test', function(req, res) {
+//     var entries = [];
+//     for (var i = 0; i < 1000; i++) {
+//         var entry = {name:"lolo", test: i};
+//         entries.push(entry);
+//     }
+//     console.log(entries);
+//     async.eachLimit(entries, 1, function(entrie, callback){                      
+//         var query = "SELECT * from DASH5082.MEDICINE";
+//         db.dbQuery(query, function(result) {
+//            callback();     
+//         });
+//         //model.insert_in_db(entrie, function(rows) {callback()});
+//     },function(err){
+//           if( err ) {
+//              // One of the iterations produced an error.
+//              // All processing will now stop.
+//              console.log('A file failed to process');
+//           } else {
+//               console.log('All files have been processed successfully');
+//           }
+//     });
+
+    
+//     res.send('done');
+// });
 
 app.get('/generaterandompassword', function(req, res) {
     var random = new RandExp(/(?=.*[A-Za-z\d])@[A-Za-z\d]{8,10}/).gen();

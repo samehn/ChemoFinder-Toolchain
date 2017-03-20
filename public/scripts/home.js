@@ -256,11 +256,15 @@ function search() {
   $('.error-form').remove();
   var searchData = $('#tags').val();
   var splitedData = searchData.split(' ');
-  if(splitedData.length == 2) {
+  if(splitedData.length >= 2) {
     var data = {};
-    data['generic_name'] = splitedData[0];
-    data['form'] = splitedData[1];
-    // console.log(data);
+    var generic_name ='';
+    for (var i = 0; i < splitedData.length - 1; i++) {
+      generic_name = generic_name + ' ' + splitedData[i];
+    }
+    data['generic_name'] = generic_name.substring(1);
+    data['form'] = splitedData[splitedData.length - 1];
+    console.log(data);
     $.ajax({
       type: "post",
       url: url + '/getmedicinebygenericandform',

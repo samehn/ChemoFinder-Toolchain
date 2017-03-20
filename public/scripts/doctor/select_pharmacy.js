@@ -17,7 +17,7 @@ function addMedicine(element) {
 	$(element).parent().parent().remove();
 	$('#selected-pharmacy-body').append(newHtml);
 	if($('.unselected-pharmacy').length == 0) {
-		$('#unselected-pharmacy-body').html('<td style="text-align: center;" valign="top" colspan="14" class="empty_table td_search">No pharmacy available</td>');
+		$('#unselected-pharmacy-body').html('<td style="text-align: center;" valign="top" colspan="13" class="empty_table td_search">No pharmacy available</td>');
 	}
 	// console.log(newHtml);
 }
@@ -32,7 +32,7 @@ function removeMedicine(element) {
 	$(element).parent().parent().remove();
 	$('#unselected-pharmacy-body').append(newHtml);
 	if($('.selected-pharmacy').length == 0) {
-		$('#selected-pharmacy-body').html('<td style="text-align: center;" valign="top" colspan="14" class="empty_table td_search">No pharmacy has been chosen yet</td>');
+		$('#selected-pharmacy-body').html('<td style="text-align: center;" valign="top" colspan="13" class="empty_table td_search">No pharmacy has been chosen yet</td>');
 	}
 	//console.log(newHtml);
 }
@@ -60,6 +60,9 @@ function nextStep() {
 	      	}
 	      	if(pair[0] == 'm') {
 	      		data['medicine'] = pair[1];
+	      	}
+	      	if(pair[0] == 'p') {
+	      		data['price'] = pair[1];
 	      	}
 	  	}
 	  	data['pharmacies'] = [];

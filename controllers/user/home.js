@@ -55,7 +55,7 @@ home.prototype.get_medicines_by_generic_and_form = function(req, res) {
     else {
         tomodel.generic_name = data.generic_name;
         tomodel.form = data.form
-        var medicines = medicine_model.select_medicine_by_generic_and_form(tomodel);
+        var medicines = medicine_model.select_medicine_by_generic_and_form_in_pharmacies(tomodel);
         var result = {message: "success"};
         result['medicines'] = medicines; 
         res.send(result);

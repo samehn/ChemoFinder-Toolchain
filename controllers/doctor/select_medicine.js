@@ -36,7 +36,7 @@ select_medicine.prototype.select_medicine_details =  function(req, res) {
     else {
         tomodel.generic_name = data.generic_name;
         tomodel.form = data.form;
-        var medicines = medicine_model.select_medicine_by_generic_and_form(tomodel);
+        var medicines = medicine_model.select_medicine_by_generic_and_form_grouped_by_price(tomodel);
         if(medicines.length > 0) {
             res.send({message: "success", medicines: medicines})
         }

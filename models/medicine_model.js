@@ -53,14 +53,30 @@ medicine_model.prototype.insert_new_medicine_by_main_keys = function(data) {
 	return this.dbQuerySync(query);
 };
 
+
+// SELECT * FROM DASH5082.CHEMO_MEDICINE AS G1 JOIN (SELECT SL.MEDICINE_ID, SL.PRICE_PER_PACK from DASH5082.CHEMO_MEDICINE M JOIN DASH5082.CHEMO_STOCK_LIST SL ON M.ID = SL.MEDICINE_ID WHERE M.GENERIC_NAME ='Carboplatin' AND M.FORM = 'vial' AND APPROVED = TRUE AND SL.AVAILABLE_STOCK > 0 GROUP BY SL.MEDICINE_ID, SL.PRICE_PER_PACK ORDER BY SL.PRICE_PER_PACK) AS G2 ON G2.MEDICINE_ID = G1.ID
+
+// SELECT DISTINCT SL.MEDICINE_ID, M.* from DASH5082.CHEMO_MEDICINE M JOIN DASH5082.CHEMO_STOCK_LIST SL ON M.ID = SL.MEDICINE_ID WHERE M.GENERIC_NAME ='Methotrexate Sodium Preservative Free' AND M.FORM = 'vial' AND APPROVED = TRUE;
 medicine_model.prototype.select_medicine_by_generic_and_form = function(data) {
 	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE GENERIC_NAME ='" + this.mysql_real_escape_string(data.generic_name) + "' AND FORM = '" + this.mysql_real_escape_string(data.form) + "' AND APPROVED = TRUE;";
 	console.log(query);
 	return this.dbQuerySync(query);
 };
 
+medicine_model.prototype.select_medicine_by_generic_and_form_grouped_by_price = function(data) {
+	var query = "SELECT * FROM DASH5082.CHEMO_MEDICINE AS G1 JOIN (SELECT SL.MEDICINE_ID, SL.PRICE_PER_PACK from DASH5082.CHEMO_MEDICINE M JOIN DASH5082.CHEMO_STOCK_LIST SL ON M.ID = SL.MEDICINE_ID WHERE M.GENERIC_NAME ='" + this.mysql_real_escape_string(data.generic_name) + "' AND M.FORM = '" + this.mysql_real_escape_string(data.form) + "' AND APPROVED = TRUE AND SL.AVAILABLE_STOCK > 0 GROUP BY SL.MEDICINE_ID, SL.PRICE_PER_PACK ORDER BY SL.PRICE_PER_PACK) AS G2 ON G2.MEDICINE_ID = G1.ID";
+	console.log(query);
+	return this.dbQuerySync(query);
+};
+
+medicine_model.prototype.select_medicine_by_generic_and_form_in_pharmacies = function(data) {
+	var query = "SELECT DISTINCT SL.MEDICINE_ID, M.* from DASH5082.CHEMO_MEDICINE M JOIN DASH5082.CHEMO_STOCK_LIST SL ON M.ID = SL.MEDICINE_ID WHERE M.GENERIC_NAME ='" + this.mysql_real_escape_string(data.generic_name) + "' AND M.FORM = '" + this.mysql_real_escape_string(data.form) + "' AND APPROVED = TRUE AND SL.AVAILABLE_STOCK > 0";
+	console.log(query);
+	return this.dbQuerySync(query);
+};
+
 medicine_model.prototype.select_medicine_not_in_treatment_center = function(data) {
-	var query = "SELECT DISTINCT GENERIC_NAME, FORM FROM DASH5082.CHEMO_MEDICINE WHERE APPROVED = TRUE AND (GENERIC_NAME, FORM) NOT IN (SELECT DISTINCT M.GENERIC_NAME, FORM FROM DASH5082.CHEMO_MEDICINE M JOIN CHEMO_STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN DASH5082.CHEMO_USER U ON U.ID = S.PHARMACY_ID WHERE U.ID = "  + this.mysql_real_escape_string(data.user_id) + ")";
+	var query = "SELECT DISTINCT GENERIC_NAME, FORM FROM DASH5082.CHEMO_MEDICINE WHERE APPROVED = TRUE AND (GENERIC_NAME, FORM) NOT IN (SELECT DISTINCT M.GENERIC_NAME, FORM FROM DASH5082.CHEMO_MEDICINE M JOIN CHEMO_STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN DASH5082.CHEMO_USER U ON U.ID = S.PHARMACY_ID WHERE U.ID = "  + this.mysql_real_escape_string(data.user_id) + ") ORDER BY GENERIC_NAME";
 	return this.dbQuerySync(query);
 };
 

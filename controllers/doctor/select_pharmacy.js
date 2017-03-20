@@ -9,7 +9,7 @@ select_pharmacy.prototype.constructor = select_pharmacy;
 
 
 select_pharmacy.prototype.select_pharmacy_page =  function(req, res) {
-    var data = controller.xssClean({treatment_center: req.param('t'), quantity: req.param('q'), medicine: req.param('m')});
+    var data = controller.xssClean({treatment_center: req.param('t'), quantity: req.param('q'), medicine: req.param('m'), price: req.param('p')});
     var validation_array = parameters_validations(data);
     if(Object.keys(validation_array).length > 0){
         res.send("404 Not Found");
@@ -22,7 +22,8 @@ select_pharmacy.prototype.select_pharmacy_page =  function(req, res) {
         }
         else {
             tomodel.quantity = data.quantity;
-            var pharmacies = user_model.select_pharmacies_by_medicine_and_quantity(tomodel);
+            tomodel.price = data.price;
+            var pharmacies = user_model.select_pharmacies_by_medicine_and_quantity_and_price(tomodel);
             res.render('doctor/select_pharmacy', {medicine: medicine, pharmacies: pharmacies});
         }
     }
@@ -53,6 +54,10 @@ function parameters_validations(data) {
         validation_array = controller.mergeArrays(validation_array, medicine);
     }
 
+    var price = controller.validate({price: data.price},['required','integer']);
+    if(price){
+        validation_array = controller.mergeArrays(validation_array, price);
+    }
     return validation_array;
 }
 module.exports = new select_pharmacy();

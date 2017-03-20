@@ -74,11 +74,12 @@ shopping_list.prototype.save_medicine_session =  function(req, res) {
             var item = {};
             item['medicine'] = medicine[0];
             item['quantity'] = data.quantity;
+            item['price'] = data.price;
             if(data.pharmacies) {
                 var pharmacies = [];
                 for (var i = 0; i < data.pharmacies.length; i++) {
                     tomodel.user_id = data.pharmacies[i];
-                    var pharmacy = user_model.select_pharmacies_by_medicine_and_quantity(tomodel);
+                    var pharmacy = user_model.select_pharmacies_by_medicine_and_quantity_and_price(tomodel);
                     if(pharmacy.length > 0) {
                         pharmacies.push(pharmacy[0]);
                     }
@@ -120,6 +121,11 @@ function save_session_validations(data) {
     var quantity = controller.validate({quantity: data.quantity},['required','integer']);
     if(quantity){
         validation_array = controller.mergeArrays(validation_array, quantity);
+    }
+
+    var price = controller.validate({price: data.price},['required','integer']);
+    if(price){
+        validation_array = controller.mergeArrays(validation_array, price);
     }
 
     if(data.pharmacies && data.pharmacies.length > 0){
