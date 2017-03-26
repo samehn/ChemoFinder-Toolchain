@@ -10,25 +10,27 @@ manage_medicines.prototype.constructor = manage_medicines;
 
 
 manage_medicines.prototype.manage_medicines_page =  function(req, res) {
-	var approved_medicines = medicine_model.select_approved_medicines();
-	var non_approved_medicines = medicine_model.select_non_approved_medicines();
-    var data = {approved_medicines: approved_medicines,  non_approved_medicines: non_approved_medicines};
-    if(req.session.extention_error)
-    {
-        data['extention_error'] = true;
-        req.session.extention_error = null;
-    }
-    if(req.session.format_error)
-    {
-        data['format_error'] = req.session.format_error;
-        req.session.format_error = null;
-    }  
-    if(req.session.success_message)
-    {
-        data['success_message'] = req.session.success_message;
-        req.session.success_message = null;
-    } 
-    res.render('admin/manage_medicines', data);
+	medicine_model.async_select_approved_medicines(function(approved_medicines) {
+		medicine_model.async_select_non_approved_medicines(function(non_approved_medicines) {
+			var data = {approved_medicines: approved_medicines,  non_approved_medicines: non_approved_medicines};
+		    if(req.session.extention_error)
+		    {
+		        data['extention_error'] = true;
+		        req.session.extention_error = null;
+		    }
+		    if(req.session.format_error)
+		    {
+		        data['format_error'] = req.session.format_error;
+		        req.session.format_error = null;
+		    }  
+		    if(req.session.success_message)
+		    {
+		        data['success_message'] = req.session.success_message;
+		        req.session.success_message = null;
+		    } 
+		    res.render('admin/manage_medicines', data);
+		});
+	});
 }
 
 manage_medicines.prototype.add_new_medicine =  function(req, res) {
@@ -54,69 +56,9 @@ manage_medicines.prototype.add_new_medicine =  function(req, res) {
     	tomodel.strength = data.strength;
     	tomodel.strength_unit = data.strength_unit;
     	tomodel.manufacturer = data.manufacturer;
-    	var medicine = medicine_model.select_medicine_by_main_keys(tomodel);
-    	if(medicine.length == 0) {
-    		tomodel.route = data.route;
-    		tomodel.sra = data.sra;
-    		if(controller.moment(data.approval_date, 'DD/MM/YYYY').isValid()) {
-				tomodel.approval_date = data.approval_date;
-			}
-			else {
-				tomodel.approval_date = controller.moment(new Date()).format('DD/MM/YYYY');		
-			}
-    		tomodel.source = data.source;
-    		tomodel.extract_date = data.extract_date;
-    		tomodel.specification_form = data.specification_form;
-    		tomodel.pack_type = data.pack_type;
-    		tomodel.units_per_pack = data.units_per_pack;
-    		if(!data.units_per_pack) {
-    			tomodel.units_per_pack = 0;
-    		}
-    		tomodel.status = data.status;
-    		tomodel.comments = data.comments;
-    		if(data.approve == 'true') {
-    			tomodel.approve = true;
-    		}
-    		else {
-    			tomodel.approve = false;
-    		}
-    		medicine_model.insert_new_medicine(tomodel);
-            res.send({message: 'success'});
-    	}
-    	else {
-    		var result = controller.mergeArrays(validation_array, {generic_name_error: 'This Medicine is already exists', message:'failed'});
-    		res.send(result);
-    	}
-    }                  
-}
-
-manage_medicines.prototype.update_medicine =  function(req, res) {
-	var data = controller.xssClean(req.body);
-	data.approval_date = req.body.approval_date;
-	if(controller.moment(data.approval_date, 'YYYY-MM-DD').isValid()) {
-		data.approval_date = controller.moment(data.approval_date).format('DD/MM/YYYY');
-	}
-	data.extract_date = req.body.extract_date;
-	if(controller.moment(data.extract_date, 'YYYY-MM-DD').isValid()) {
-		data.extract_date = controller.moment(data.extract_date).format('DD/MM/YYYY');
-	}
-    var validation_array = medicine_validations(data);
-    if(Object.keys(validation_array).length > 0){
-        var result = controller.mergeArrays(validation_array, {message:'failed'});
-        res.send(result);
-    }
-    else {
-    	if(data.medicine_id && Number.isInteger(parseInt(data.medicine_id))) {
-    		tomodel.medicine_id = data.medicine_id;
-	    	var medicine = medicine_model.select_medicine_by_id(tomodel);
-	    	if(medicine.length > 0) {
-	    		tomodel.generic_name = data.generic_name;
-		    	tomodel.brand_name = data.brand_name;
-		    	tomodel.form = data.form;
-		    	tomodel.strength = data.strength;
-		    	tomodel.strength_unit = data.strength_unit;
-		    	tomodel.manufacturer = data.manufacturer;
-		    	tomodel.route = data.route;
+    	medicine_model.async_select_medicine_by_main_keys(tomodel, function(medicine) {
+    		if(medicine.length == 0) {
+	    		tomodel.route = data.route;
 	    		tomodel.sra = data.sra;
 	    		if(controller.moment(data.approval_date, 'DD/MM/YYYY').isValid()) {
 					tomodel.approval_date = data.approval_date;
@@ -140,13 +82,77 @@ manage_medicines.prototype.update_medicine =  function(req, res) {
 	    		else {
 	    			tomodel.approve = false;
 	    		}
-	    		medicine_model.update_medicine(tomodel);
-	    		res.send({message: 'success'});
+	    		medicine_model.async_insert_new_medicine(tomodel, function(rows) {
+	    			res.send({message: 'success'});
+	    		});
 	    	}
 	    	else {
-	    		var result = controller.mergeArrays(validation_array, {generic_name_error: 'This is not a valid medicine', message:'failed'});
+	    		var result = controller.mergeArrays(validation_array, {generic_name_error: 'This Medicine is already exists', message:'failed'});
 	    		res.send(result);
 	    	}
+    	});
+    }                  
+}
+
+manage_medicines.prototype.update_medicine =  function(req, res) {
+	var data = controller.xssClean(req.body);
+	data.approval_date = req.body.approval_date;
+	if(controller.moment(data.approval_date, 'YYYY-MM-DD').isValid()) {
+		data.approval_date = controller.moment(data.approval_date).format('DD/MM/YYYY');
+	}
+	data.extract_date = req.body.extract_date;
+	if(controller.moment(data.extract_date, 'YYYY-MM-DD').isValid()) {
+		data.extract_date = controller.moment(data.extract_date).format('DD/MM/YYYY');
+	}
+    var validation_array = medicine_validations(data);
+    if(Object.keys(validation_array).length > 0){
+        var result = controller.mergeArrays(validation_array, {message:'failed'});
+        res.send(result);
+    }
+    else {
+    	if(data.medicine_id && Number.isInteger(parseInt(data.medicine_id))) {
+    		tomodel.medicine_id = data.medicine_id;
+	    	medicine_model.async_select_medicine_by_id(tomodel, function(medicine) {
+	    		if(medicine.length > 0) {
+		    		tomodel.generic_name = data.generic_name;
+			    	tomodel.brand_name = data.brand_name;
+			    	tomodel.form = data.form;
+			    	tomodel.strength = data.strength;
+			    	tomodel.strength_unit = data.strength_unit;
+			    	tomodel.manufacturer = data.manufacturer;
+			    	tomodel.route = data.route;
+		    		tomodel.sra = data.sra;
+		    		if(controller.moment(data.approval_date, 'DD/MM/YYYY').isValid()) {
+						tomodel.approval_date = data.approval_date;
+					}
+					else {
+						tomodel.approval_date = controller.moment(new Date()).format('DD/MM/YYYY');		
+					}
+		    		tomodel.source = data.source;
+		    		tomodel.extract_date = data.extract_date;
+		    		tomodel.specification_form = data.specification_form;
+		    		tomodel.pack_type = data.pack_type;
+		    		tomodel.units_per_pack = data.units_per_pack;
+		    		if(!data.units_per_pack) {
+		    			tomodel.units_per_pack = 0;
+		    		}
+		    		tomodel.status = data.status;
+		    		tomodel.comments = data.comments;
+		    		if(data.approve == 'true') {
+		    			tomodel.approve = true;
+		    		}
+		    		else {
+		    			tomodel.approve = false;
+		    		}
+		    		medicine_model.async_update_medicine(tomodel, function(rows) {
+		    			res.send({message: 'success'});
+		    		});
+		    	}
+		    	else {
+		    		var result = controller.mergeArrays(validation_array, {generic_name_error: 'This is not a valid medicine', message:'failed'});
+		    		res.send(result);
+		    	}
+	    	});
     	}
     	else {
     		var result = controller.mergeArrays(validation_array, {generic_name_error: 'This is not a valid medicine', message:'failed'});
@@ -158,24 +164,29 @@ manage_medicines.prototype.update_medicine =  function(req, res) {
 manage_medicines.prototype.delete_approved_medicine =  function(req, res) {
 	if(req.body.medicine_id && Number.isInteger(parseInt(req.body.medicine_id))) {
 		tomodel.medicine_id = req.body.medicine_id;
-    	var medicine = medicine_model.select_medicine_by_id(tomodel);
-    	if(medicine.length > 0) {
-    		var stocks = stock_list_model.select_stocks_by_medicine_id(tomodel);
-    		var result = {message: "success"};
-    		if(stocks.length > 0) {
-    			result['action'] = 'non_approved';
-    			tomodel.approve = 'FALSE';
-    			medicine_model.update_medicine_approval(tomodel);
-    		}
-    		else {
-    			result['action'] = 'delete';
-    			medicine_model.delete_medicine(tomodel);
-    		}
-    		res.send(result);
-    	}
-    	else {
-    		res.send({message: "failed", medicine_error: "This is not a valid medicine"});
-    	}
+    	medicine_model.async_select_medicine_by_id(tomodel, function(medicine) {
+    		if(medicine.length > 0) {
+	    		stock_list_model.async_select_stocks_by_medicine_id(tomodel, function(stocks) {
+	    			var result = {message: "success"};
+		    		if(stocks.length > 0) {
+		    			result['action'] = 'non_approved';
+		    			tomodel.approve = 'FALSE';
+		    			medicine_model.async_update_medicine_approval(tomodel, function(rows) {
+		    				res.send(result);
+		    			});
+		    		}
+		    		else {
+		    			result['action'] = 'delete';
+		    			medicine_model.async_delete_medicine(tomodel, function(rows) {
+		    				res.send(result);
+		    			});
+		    		}
+	    		});
+	    	}
+	    	else {
+	    		res.send({message: "failed", medicine_error: "This is not a valid medicine"});
+	    	}
+    	});
 	}
 	else {
 		res.send({message: "failed", medicine_error: "This is not a valid medicine"});
@@ -185,22 +196,26 @@ manage_medicines.prototype.delete_approved_medicine =  function(req, res) {
 manage_medicines.prototype.delete_non_approved_medicine =  function(req, res) {
 	if(req.body.medicine_id && Number.isInteger(parseInt(req.body.medicine_id))) {
 		tomodel.medicine_id = req.body.medicine_id;
-    	var medicine = medicine_model.select_medicine_by_id(tomodel);
-    	if(medicine.length > 0) {
-    		var stocks = stock_list_model.select_stocks_by_medicine_id(tomodel);
-    		var result = {message: "success"};
-    		if(stocks.length > 0) {
-    			result['action'] = "no_delete"
-    		}
-    		else {
-    			result['action'] = 'delete';
-    			medicine_model.delete_medicine(tomodel);
-    		}
-    		res.send(result);
-    	}
-    	else {
-    		res.send({message: "failed", medicine_error: "This is not a valid medicine"});
-    	}
+    	medicine_model.async_select_medicine_by_id(tomodel, function(medicine) {
+    		if(medicine.length > 0) {
+	    		stock_list_model.async_select_stocks_by_medicine_id(tomodel, function(stocks) {
+	    			var result = {message: "success"};
+		    		if(stocks.length > 0) {
+		    			result['action'] = "no_delete";
+		    			res.send(result);
+		    		}
+		    		else {
+		    			result['action'] = 'delete';
+		    			medicine_model.async_delete_medicine(tomodel, function(rows) {
+		    				res.send(result);
+		    			});
+		    		}
+	    		});
+	    	}
+	    	else {
+	    		res.send({message: "failed", medicine_error: "This is not a valid medicine"});
+	    	}
+    	});
 	}
 	else {
 		res.send({message: "failed", medicine_error: "This is not a valid medicine"});
@@ -210,13 +225,14 @@ manage_medicines.prototype.delete_non_approved_medicine =  function(req, res) {
 manage_medicines.prototype.get_medicine_by_id =  function(req, res) {
 	if(req.params.id && Number.isInteger(parseInt(req.params.id))) {
 		tomodel.medicine_id = req.params.id;
-    	var medicine = medicine_model.select_medicine_by_id(tomodel);
-    	if(medicine.length > 0) {
-    		res.send({message: "success", medicine: medicine});
-    	}
-    	else {
-    		res.send({message: "failed", medicine_error: "This is not a valid medicine"});
-    	}
+    	medicine_model.async_select_medicine_by_id(tomodel, function(medicine) {
+    		if(medicine.length > 0) {
+	    		res.send({message: "success", medicine: medicine});
+	    	}
+	    	else {
+	    		res.send({message: "failed", medicine_error: "This is not a valid medicine"});
+	    	}
+    	});
 	}
 	else {
 		res.send({message: "failed", medicine_error: "This is not a valid medicine"});
@@ -226,36 +242,6 @@ manage_medicines.prototype.get_medicine_by_id =  function(req, res) {
 manage_medicines.prototype.download_medicines_template =  function(req, res) {
 	var file = './public/downloads/medicinelist_example_data.xlsx';
   	res.download(file); // Set disposition and send it.
-}
-
-manage_medicines.prototype.upload_medicines_list =  function(req, res) {
-	var sampleFile;
-    if (!req.files) {
-        res.send('No files were uploaded.');
-        console.log('No files were uploaded.');
-        return;
-    }
-    sampleFile = req.files.sampleFile;
-    var fileArray = sampleFile.name.split('.');
-    var extension = fileArray[fileArray.length - 1];
-    if(extension == "xlsx")
-    {
-        sampleFile.mv('./public/uploads/medicines/approved_medicines.xlsx', function(err) {
-            if (err) {
-                res.status(500).send(err);
-            }
-            else {
-                parsing_approved_medicines(req, res);
-                res.redirect('/admin/manage_medicines');
-                console.log('File uploaded!');
-            }
-        });
-    }
-    else
-    {
-        req.session.extention_error = true;
-        res.redirect('/admin/manage_medicines');
-    }
 }
 
 manage_medicines.prototype.upload_stock_list =  function(req, res) {
@@ -289,29 +275,55 @@ manage_medicines.prototype.upload_stock_list =  function(req, res) {
     }
 }
 
-function validate_medicine_list_sheet(worksheet) {
-	var str = "ABCDEFGHIJKLMNOPQ";
-	var titles = ["id", "generic name", "brand name", "form", "strength", "strength unit", "specification form", "pack type", "units per pack", "route", "manufacturer", "current stringent regulatory authority", "approval date", "source", "extract date", "status", "comments"];
-    for(var i=0; i<str.length; i++)
+manage_medicines.prototype.upload_medicines_list =  function(req, res) {
+	var sampleFile;
+    if (!req.files) {
+        res.send('No files were uploaded.');
+        console.log('No files were uploaded.');
+        return;
+    }
+    sampleFile = req.files.sampleFile;
+    var fileArray = sampleFile.name.split('.');
+    var extension = fileArray[fileArray.length - 1];
+    if(extension == "xlsx")
     {
-        var char = str.charAt(i);
-		var address = char + '1';
-   		var cell = worksheet[address];
-	    if(cell == undefined)
-	    {
-	        return false;
-	    }
-	    else
-	    {
-	        if(!(cell.v && cell.v.toLowerCase().startsWith(titles[i]))) {
-	        	return false;
-	        }
-	    }
-	}
-	return true;
+        sampleFile.mv('./public/uploads/medicines/approved_medicines.xlsx', function(err) {
+            if (err) {
+                res.status(500).send(err);
+            }
+            else {
+                var medicines = parsing_approved_medicines(req, res);
+                console.log('File uploaded!');
+                res.redirect('/admin/manage_medicines');
+                if(medicines.length > 0) {
+				    controller.async.eachLimit(medicines, 1, function(medicine, callback){                      
+				        saveMedicinesList(req, res, medicine, function() {
+                            console.log("done");
+				        	callback();
+                        });
+				        
+				    },function(err){
+			          	if( err ) {
+			             // One of the iterations produced an error.
+			             // All processing will now stop.
+			             console.log('A file failed to process');
+			          	} else {
+			              	console.log('All files have been processed successfully');
+			          	}
+				    });
+                }
+            }
+        });
+    }
+    else
+    {
+        req.session.extention_error = true;
+        res.redirect('/admin/manage_medicines');
+    }
 }
 
 function parsing_approved_medicines(req, res) {
+	var medicines = [];
 	var workbook = controller.XLSX.readFile('./public/uploads/medicines/approved_medicines.xlsx');
     var first_sheet_name = workbook.SheetNames[0];
     var worksheet = workbook.Sheets[first_sheet_name];
@@ -491,7 +503,7 @@ function parsing_approved_medicines(req, res) {
 
 	        var extract_date_address = 'O'+i;
 	        var extract_date_cell = worksheet[extract_date_address];
-	        console.log(extract_date_cell);
+	        // console.log(extract_date_cell);
 	        if(extract_date_cell != undefined)
 	        {
 	            data['extract_date'] = "'" + extract_date_cell.w + "'";
@@ -527,7 +539,7 @@ function parsing_approved_medicines(req, res) {
 	        new_data['extract_date'] = new Date(data.extract_date);
 	        new_data['approval_date'] = new Date(data.approval_date);
     		var validation_array = medicine_validations(new_data);
-	        console.log(new_data);
+	        // console.log(new_data);
 	        if(Object.keys(validation_array).length > 0){
 	        	format_error_flag = true;
 		        var result = validation_array;
@@ -540,48 +552,38 @@ function parsing_approved_medicines(req, res) {
 	            warning_message = warning_message + wm;
 		    }
 		    else {
-		    	tomodel.generic_name = new_data.generic_name;
-		    	tomodel.brand_name = new_data.brand_name;
-		    	tomodel.form = new_data.form;
-		    	tomodel.strength = new_data.strength;
-		    	tomodel.strength_unit = new_data.strength_unit;
-		    	tomodel.manufacturer = new_data.manufacturer;
-		    	var medicine = medicine_model.select_medicine_by_main_keys(tomodel);
-		    	tomodel.route = new_data.route;
-	    		tomodel.sra = new_data.sra;
-	    		console.log(new_data.approval_date);
-	    		console.log(new_data.extract_date);
-    			if(controller.moment(new_data.approval_date).isValid()) {
-    				tomodel.approval_date = controller.moment(new_data.approval_date).format('DD/MM/YYYY');
+		    	var medicine = {};
+		    	medicine['generic_name'] = new_data.generic_name;
+		    	medicine['brand_name'] = new_data.brand_name;
+		    	medicine['form'] = new_data.form;
+		    	medicine['strength'] = new_data.strength;
+		    	medicine['strength_unit'] = new_data.strength_unit; 
+		    	medicine['manufacturer'] = new_data.manufacturer;
+		    	medicine['route'] = new_data.route;
+		    	medicine['sra'] = new_data.sra;
+		    	if(controller.moment(new_data.approval_date).isValid()) {
+    				medicine['approval_date'] = controller.moment(new_data.approval_date).format('DD/MM/YYYY');
     			}
     			else {
-    				tomodel.approval_date = controller.moment(new Date()).format('DD/MM/YYYY');		
+    				medicine['approval_date'] = controller.moment(new Date()).format('DD/MM/YYYY');		
     			}
-	    		tomodel.source = new_data.source;
-	    		tomodel.extract_date = controller.moment(new_data.extract_date).format('DD/MM/YYYY');
-	    		console.log(tomodel.approval_date);
-	    		console.log(tomodel.extract_date);
-	    		tomodel.specification_form = new_data.specification_form;
-	    		tomodel.pack_type = new_data.pack_type;
-	    		tomodel.units_per_pack = new_data.units_per_pack;
+    			medicine['source'] = new_data.source;
+    			medicine['extract_date'] = controller.moment(new_data.extract_date).format('DD/MM/YYYY');
+    			medicine['specification_form'] = new_data.specification_form;
+	    		medicine['pack_type'] = new_data.pack_type;
+	    		medicine['units_per_pack'] = new_data.units_per_pack;
 	    		if(!new_data.units_per_pack) {
-	    			tomodel.units_per_pack = 0;
+	    			medicine['units_per_pack'] = 0;
 	    		}
-	    		tomodel.status = new_data.status;
-	    		tomodel.comments = new_data.comments;
+	    		medicine['status'] = new_data.status;
+	    		medicine['comments'] = new_data.comments;
 	    		if(new_data.approve == 'true') {
-	    			tomodel.approve = true;
+	    			medicine['approve'] = true;
 	    		}
 	    		else {
-	    			tomodel.approve = false;
+	    			medicine['approve'] = false;
 	    		}
-		    	if(medicine.length == 0) {
-		    		medicine_model.insert_new_medicine(tomodel);
-		    	}
-		    	else {
-		    		tomodel.medicine_id = medicine[0].ID;
-		    		medicine_model.update_medicine(tomodel);
-		    	}
+	    		medicines.push(medicine);
 		    }
 	        i++;
 	    }	
@@ -589,7 +591,48 @@ function parsing_approved_medicines(req, res) {
     else {
     	req.session.format_error = "<div class='alert alert-danger error-form'> Wrong format please download the template and follow the convention </div>";
     }
+    return medicines;
 }
+
+var saveMedicinesList = function(req, res, medicine, callback) {
+	medicine_model.async_select_medicine_by_main_keys(medicine, function(rows) {
+		if(rows.length > 0) {
+			medicine['medicine_id'] = rows[0].ID;
+			medicine_model.async_update_medicine(medicine, function(rows) {
+				callback();
+			});
+		}
+		else {
+			medicine_model.async_insert_new_medicine(medicine, function(rows) {
+				callback();
+			});
+		}
+	});
+}
+
+
+function validate_medicine_list_sheet(worksheet) {
+	var str = "ABCDEFGHIJKLMNOPQ";
+	var titles = ["id", "generic name", "brand name", "form", "strength", "strength unit", "specification form", "pack type", "units per pack", "route", "manufacturer", "current stringent regulatory authority", "approval date", "source", "extract date", "status", "comments"];
+    for(var i=0; i<str.length; i++)
+    {
+        var char = str.charAt(i);
+		var address = char + '1';
+   		var cell = worksheet[address];
+	    if(cell == undefined)
+	    {
+	        return false;
+	    }
+	    else
+	    {
+	        if(!(cell.v && cell.v.toLowerCase().startsWith(titles[i]))) {
+	        	return false;
+	        }
+	    }
+	}
+	return true;
+}
+
 
 function medicine_validations(data) {
 	console.log(data);

@@ -14,4 +14,16 @@ user_suspension_model.prototype.insert_user_suspension = function(data) {
 	return this.dbQuerySync(query);
 };
 
+//+++++++++++++++++++++++ASYNC+++++++++++++++++++++++++++++++++++
+
+user_suspension_model.prototype.async_select_user_suspension = function(data, callback) {
+	var query = "SELECT * from DASH5082.USER_SUSPENSION WHERE USER_ID = " + this.mysql_real_escape_string(data.user_id) ;
+	return this.dbQuery(query, callback);
+};
+
+user_suspension_model.prototype.async_insert_user_suspension = function(data, callback) {
+	var query = "INSERT INTO DASH5082.USER_SUSPENSION (USER_ID, SUSPENSION_REASON, TYPE, CREATED_AT) VALUES (" + this.mysql_real_escape_string(data.user_id) + ", '" + this.mysql_real_escape_string(data.suspension_reason) + "', " + this.mysql_real_escape_string(data.type) + ", CURRENT_TIMESTAMP);";
+	return this.dbQuery(query, callback);
+};
+
 module.exports = new user_suspension_model();

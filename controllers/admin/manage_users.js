@@ -11,23 +11,26 @@ manage_users.prototype.constructor = manage_users;
 
 manage_users.prototype.manage_users_page =  function(req, res) {
     tomodel.approve = '0';
-    var non_approved_users = user_model.select_users_approval_option(tomodel);
-    tomodel.approve = '1';
-    var approved_users = user_model.select_users_approval_option(tomodel);
-    res.render('admin/manage_users', {non_approved_users: non_approved_users, approved_users: approved_users, admin_type: req.session.admin_type});
+    user_model.async_select_users_approval_option(tomodel, function(non_approved_users) {
+        tomodel.approve = '1';
+        user_model.async_select_users_approval_option(tomodel, function(approved_users) {
+           res.render('admin/manage_users', {non_approved_users: non_approved_users, approved_users: approved_users, admin_type: req.session.admin_type});
+        });
+    });
 }
 
 manage_users.prototype.get_user_history =  function(req, res) {
     var user_id = req.body.id;
     if(Number.isInteger(parseInt(user_id))) {
         tomodel.user_id = user_id;
-        var user_suspension_history = user_suspension_model.select_user_suspension(tomodel);
-        if(user_suspension_history.length > 0){
-            res.send({message:'success', results: user_suspension_history});
-        }
-        else{
-            res.send({message:'failed'});
-        }
+        user_suspension_model.async_select_user_suspension(tomodel, function(user_suspension_history) {
+            if(user_suspension_history.length > 0){
+                res.send({message:'success', results: user_suspension_history});
+            }
+            else{
+                res.send({message:'failed'});
+            }
+        });
     }
     else {
         res.send({message:'failed'});
@@ -58,36 +61,40 @@ manage_users.prototype.add_new_user =  function(req, res) {
             tomodel.first_login = '1';
             tomodel.active = '1';
             tomodel.approve = '1';
-            user_model.insert_user(tomodel);
-
-            if(data.type == 'pharmacy' || data.type == 'treatment center') {
-                var user = user_model.select_user_by_email(tomodel);
-                tomodel.user_id = user[0].ID;
-                tomodel.open_from = data.open_from;
-                tomodel.open_to = data.open_to;
-                if(!data.open_from || !data.open_to) {
-                    tomodel.open_from = '12:00:00';
-                    tomodel.open_to = '12:00:00';
+            user_model.async_insert_user(tomodel, function(rows) {
+                if(data.type == 'pharmacy' || data.type == 'treatment center') {
+                    user_model.async_select_user_by_email(tomodel, function(user) {
+                        tomodel.user_id = user[0].ID;
+                        tomodel.open_from = data.open_from;
+                        tomodel.open_to = data.open_to;
+                        if(!data.open_from || !data.open_to) {
+                            tomodel.open_from = '12:00:00';
+                            tomodel.open_to = '12:00:00';
+                        }
+                        //insert new pharmacy
+                        user_pharmacy_model.async_insert_user_pharmacy(tomodel, function(rows) {
+                            res.send({message: "success"});
+                        }); 
+                    });
                 }
-                //insert new pharmacy
-                user_pharmacy_model.insert_user_pharmacy(tomodel);
-            }
-            
-            //Send Confirmation Email
-            var link = req.protocol + '://' + req.get('host');
-            var mailOptions = {
-                from: 'chemofinder@gmail.com', // sender address
-                to: data.email, // list of receivers
-                subject: 'New Account', // Subject line
-                template: 'new_account_mail',
-                context: {
-                    link: link,
-                    password: data.password
+                else {
+                    res.send({message: "success"});
                 }
-                //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
-            };
-            controller.sendEmail(mailOptions);
-            res.send({message: "success"});
+                //Send Confirmation Email
+                var link = req.protocol + '://' + req.get('host');
+                var mailOptions = {
+                    from: 'chemofinder@gmail.com', // sender address
+                    to: data.email, // list of receivers
+                    subject: 'New Account', // Subject line
+                    template: 'new_account_mail',
+                    context: {
+                        link: link,
+                        password: data.password
+                    }
+                    //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
+                };
+                controller.sendEmail(mailOptions);
+            });
         });
     }       
 }
@@ -106,23 +113,23 @@ manage_users.prototype.add_new_admin =  function(req, res) {
             tomodel.password = hash;
             tomodel.username = data.name;
             tomodel.type = data.type;
-            var user = user_model.insert_admin(tomodel);
-            
-            //Send Confirmation Email
-            var link = req.protocol + '://' + req.get('host');
-            var mailOptions = {
-                from: 'chemofinder@gmail.com', // sender address
-                to: data.email, // list of receivers
-                subject: 'New Account', // Subject line
-                template: 'new_account_mail',
-                context: {
-                    link: link,
-                    password: data.password
-                }
-                //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
-            };
-            controller.sendEmail(mailOptions);
-            res.send({message: "success"});
+            user_model.async_insert_admin(tomodel, function(user) {
+                //Send Confirmation Email
+                var link = req.protocol + '://' + req.get('host');
+                var mailOptions = {
+                    from: 'chemofinder@gmail.com', // sender address
+                    to: data.email, // list of receivers
+                    subject: 'New Account', // Subject line
+                    template: 'new_account_mail',
+                    context: {
+                        link: link,
+                        password: data.password
+                    }
+                    //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
+                };
+                controller.sendEmail(mailOptions);
+                res.send({message: "success"});
+            });
         });
     }
 }
@@ -138,28 +145,30 @@ manage_users.prototype.approve_user =  function(req, res) {
     else {
         tomodel.approve = '1';
         tomodel.user_id = data.id;
-        user_model.update_user_approve(tomodel);
-        var user = user_model.select_user_by_id(tomodel);
-        if(user.length > 0)
-        {
-            var link = req.protocol + '://' + req.get('host');
-            var mailOptions = {
-                from: 'chemofinder@gmail.com', // sender address
-                to: user[0].EMAIL, // list of receivers
-                subject: 'Account Approval', // Subject line
-                template: 'account_approval_mail',
-                context: {
-                    link: link
+        user_model.async_update_user_approve(tomodel, function(rows) {
+            user_model.async_select_user_by_id(tomodel, function(user) {
+                if(user.length > 0)
+                {
+                    var link = req.protocol + '://' + req.get('host');
+                    var mailOptions = {
+                        from: 'chemofinder@gmail.com', // sender address
+                        to: user[0].EMAIL, // list of receivers
+                        subject: 'Account Approval', // Subject line
+                        template: 'account_approval_mail',
+                        context: {
+                            link: link
+                        }
+                        //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
+                    };
+                    controller.sendEmail(mailOptions);
+                    res.send({message: "success"});
                 }
-                //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
-            };
-            controller.sendEmail(mailOptions);
-            res.send({message: "success"});
-        }
-        else
-        {
-            res.send({message: "failed"});
-        }
+                else
+                {
+                    res.send({message: "failed"});
+                }
+            });
+        });
     }
 }
 
@@ -174,34 +183,37 @@ manage_users.prototype.suspend_user =  function(req, res) {
     else {
         tomodel.active = '0';
         tomodel.user_id = data.id;
-        user_model.update_user_active(tomodel);
-        tomodel.suspension_reason = data.suspension_reason;
-        tomodel.type = 0;
-        user_suspension_model.insert_user_suspension(tomodel);
-        var user = user_model.select_user_by_id(tomodel);
-        if(user.length > 0)
-        {
-            if(data.suspension_email == 'true')
-            {
-                var mailOptions = {
-                    from: 'chemofinder@gmail.com', // sender address
-                    to: user[0].EMAIL, // list of receivers
-                    subject: 'Account Suspension', // Subject line
-                    template: 'account_suspension_mail',
-                    context: {
-                        message: data.suspension_reason
+        user_model.async_update_user_active(tomodel, function(rows) {
+            tomodel.suspension_reason = data.suspension_reason;
+            tomodel.type = 0;
+            user_suspension_model.async_insert_user_suspension(tomodel, function(rows) {
+                user_model.async_select_user_by_id(tomodel, function(user) {
+                    if(user.length > 0)
+                    {
+                        if(data.suspension_email == 'true')
+                        {
+                            var mailOptions = {
+                                from: 'chemofinder@gmail.com', // sender address
+                                to: user[0].EMAIL, // list of receivers
+                                subject: 'Account Suspension', // Subject line
+                                template: 'account_suspension_mail',
+                                context: {
+                                    message: data.suspension_reason
+                                }
+                                //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
+                            };
+                            controller.sendEmail(mailOptions);    
+                        }
+                        
+                        res.send({message: "success"});
                     }
-                    //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
-                };
-                controller.sendEmail(mailOptions);    
-            }
-            
-            res.send({message: "success"});
-        }
-        else
-        {
-            res.send({message: "failed"});
-        }
+                    else
+                    {
+                        res.send({message: "failed"});
+                    }
+                });
+            });
+        });
     }
 }
 
@@ -216,31 +228,34 @@ manage_users.prototype.activate_user =  function(req, res) {
     else {
         tomodel.active = '1';
         tomodel.user_id = data.id;
-        user_model.update_user_active(tomodel);
-        tomodel.suspension_reason = data.suspension_reason;
-        tomodel.type = 1;
-        user_suspension_model.insert_user_suspension(tomodel);
-        var user = user_model.select_user_by_id(tomodel);
-        if(user.length > 0)
-        {
-            var link = req.protocol + '://' + req.get('host');
-            var mailOptions = {
-                from: 'chemofinder@gmail.com', // sender address
-                to: user[0].EMAIL, // list of receivers
-                subject: 'Account Activation', // Subject line
-                template: 'account_activation_mail',
-                context: {
-                    link: link
-                }
-                //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
-            };
-            controller.sendEmail(mailOptions);
-            res.send({message: "success"});
-        }
-        else
-        {
-            res.send({message: "failed"});
-        }
+        user_model.async_update_user_active(tomodel, function(rows) {
+            tomodel.suspension_reason = data.suspension_reason;
+            tomodel.type = 1;
+            user_suspension_model.async_insert_user_suspension(tomodel, function(rows) {
+                user_model.async_select_user_by_id(tomodel, function(user) {
+                    if(user.length > 0)
+                    {
+                        var link = req.protocol + '://' + req.get('host');
+                        var mailOptions = {
+                            from: 'chemofinder@gmail.com', // sender address
+                            to: user[0].EMAIL, // list of receivers
+                            subject: 'Account Activation', // Subject line
+                            template: 'account_activation_mail',
+                            context: {
+                                link: link
+                            }
+                            //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
+                        };
+                        controller.sendEmail(mailOptions);
+                        res.send({message: "success"});
+                    }
+                    else
+                    {
+                        res.send({message: "failed"});
+                    }
+                });
+            });
+        });
     }
 }
 
@@ -254,8 +269,9 @@ manage_users.prototype.delete_user =  function(req, res) {
     }
     else {
         tomodel.user_id = data.id;
-        user_model.delete_user(tomodel);
-        res.send({message: "success"});
+        user_model.async_delete_user(tomodel, function(rows) {
+            res.send({message: "success"});
+        });
     }
 }
 

@@ -23,4 +23,26 @@ admin_forgot_password_model.prototype.admin_insert_forgot_password = function(da
 	return this.dbQuerySync(query);
 };
 
+//+++++++++++++++++++++++ASYNC+++++++++++++++++++++++++++++++++++
+
+admin_forgot_password_model.prototype.async_admin_select_forgot_password_by_token = function(data, callback) {
+	var query = "SELECT * FROM DASH5082.ADMIN_FORGOT_PASSWORD WHERE TOKEN ='" + this.mysql_real_escape_string(data.token) + "'";
+	console.log(query);
+	return this.dbQuery(query, callback);
+};
+
+admin_forgot_password_model.prototype.async_admin_delete_forgot_password_by_id = function(data, callback) {
+	console.log(query);
+	var query = "DELETE FROM DASH5082.ADMIN_FORGOT_PASSWORD WHERE ADMIN_ID ='" + this.mysql_real_escape_string(data.admin_id) + "';";
+	console.log(query);
+	return this.dbQuery(query, callback);
+};
+
+admin_forgot_password_model.prototype.async_admin_insert_forgot_password = function(data, callback) {
+	var query = "INSERT INTO DASH5082.ADMIN_FORGOT_PASSWORD (ADMIN_ID, TOKEN, CREATED_AT) values (" + this.mysql_real_escape_string(data.admin_id) + ", '" + this.mysql_real_escape_string(data.token) + "', CURRENT_TIMESTAMP);";
+	console.log(query);
+	return this.dbQuery(query, callback);
+};
+
+
 module.exports = new admin_forgot_password_model();

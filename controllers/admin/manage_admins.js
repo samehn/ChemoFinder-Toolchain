@@ -7,9 +7,10 @@ function manage_admins(){
 manage_admins.prototype.constructor = manage_admins;
 
 manage_admins.prototype.admins_list_page =  function(req, res) {
-    var admins = admin_model.select_admins();
-    var data = {admins: admins, admin_type: req.session.admin_type, admin_id: req.session.admin_id};  
-    res.render('admin/admins_list', data);
+    admin_model.async_select_admins(function(admins) {
+        var data = {admins: admins, admin_type: req.session.admin_type, admin_id: req.session.admin_id};  
+        res.render('admin/admins_list', data);
+    });
 }
 
 manage_admins.prototype.change_type =  function(req, res) {
@@ -23,8 +24,9 @@ manage_admins.prototype.change_type =  function(req, res) {
     {
         tomodel.admin_id = data.id;
         tomodel.type = data.type;
-        admin_model.change_admin_type(tomodel);
-        res.send({message: "success"});
+        admin_model.async_change_admin_type(tomodel, function(rows) {
+            res.send({message: "success"});
+        });
     }
 }
 
@@ -39,8 +41,9 @@ manage_admins.prototype.activate_admin =  function(req, res) {
     {
         tomodel.admin_id = data.id;
         tomodel.active = data.active;
-        admin_model.update_admin_active(tomodel);
-        res.send({message: "success"});
+        admin_model.async_update_admin_active(tomodel, function(rows) {
+            res.send({message: "success"});
+        });
     }
 }
 

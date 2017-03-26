@@ -21,35 +21,34 @@ authentication.prototype.login =  function(req, res) {
     else
     {
         tomodel.key = data.email;
-        var user =  user_model.select_admin_by_key(tomodel);
-        if(user.length > 0)
-        {
-            controller.bcrypt.compare(data.password, user[0].PASSWORD, function(err, cmp) {
-                // res == true
-                if(cmp)
-                {
-                    if(user[0].ACTIVE == '0')
+        admin_model.async_select_admin_by_key(tomodel, function(user) {
+            if(user.length > 0)
+            {
+                controller.bcrypt.compare(data.password, user[0].PASSWORD, function(err, cmp) {
+                    // res == true
+                    if(cmp)
                     {
-                        res.send({message: "failed", login_error: "Your account is suspended"});
+                        if(user[0].ACTIVE == '0')
+                        {
+                            res.send({message: "failed", login_error: "Your account is suspended"});
+                        }
+                        else {
+                            req.session.admin_id = user[0].ID;
+                            req.session.admin_type = user[0].TYPE;
+                            res.send({message: "success"});    
+                        }
                     }
-                    else {
-                        req.session.admin_id = user[0].ID;
-                        req.session.admin_type = user[0].TYPE;
-                        res.send({message: "success"});    
+                    else
+                    {
+                        res.send({message: "failed", login_error: "Invalid Credentials"});
                     }
-                }
-                else
-                {
-                    res.send({message: "failed", login_error: "Invalid Credentials"});
-                }
-            });
-            
-        }
-        else
-        {
-            res.send({message: "failed", login_error: "Invalid Credentials"});
-        }
-        
+                });
+            }
+            else
+            {
+                res.send({message: "failed", login_error: "Invalid Credentials"});
+            }
+        });
     }
 }
 

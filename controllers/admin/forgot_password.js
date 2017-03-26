@@ -33,40 +33,41 @@ forgot_password.prototype.forgot_password_process =  function(req, res) {
         	}
         }
         tomodel.key = data.email;
-        var admin = admin_model.select_admin_by_key(tomodel);
-        //Delete old tokens if exists
-        tomodel.admin_id = admin[0].ID;
-        admin_forgot_password_model.admin_delete_forgot_password_by_id(tomodel);
-        
-        //insert new token into the database
-        admin_forgot_password_model.admin_insert_forgot_password(tomodel);
-        res.send({message: "success"});
-        var base = req.protocol + '://' + req.get('host');
-        var link = base + '/admin/resetpassword/' + tomodel.token;
-        //send email
-        var mailOptions = {
-            from: 'chemofinder@gmail.com', // sender address
-            to: data.email, // list of receivers
-            subject: 'Password Recovery', // Subject line
-            template: 'forgot_password_mail',
-            context: {
-                link: link
-            }
-            //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
-        };
-        controller.sendEmail(mailOptions);        
+        admin_model.async_select_admin_by_key(tomodel, function(admin) {
+            //Delete old tokens if exists
+            tomodel.admin_id = admin[0].ID;
+            admin_forgot_password_model.async_admin_delete_forgot_password_by_id(tomodel, function(rows) {
+                //insert new token into the database
+                admin_forgot_password_model.async_admin_insert_forgot_password(tomodel, function(rows) {
+                    res.send({message: "success"});
+                    var base = req.protocol + '://' + req.get('host');
+                    var link = base + '/admin/resetpassword/' + tomodel.token;
+                    //send email
+                    var mailOptions = {
+                        from: 'chemofinder@gmail.com', // sender address
+                        to: data.email, // list of receivers
+                        subject: 'Password Recovery', // Subject line
+                        template: 'forgot_password_mail',
+                        context: {
+                            link: link
+                        }
+                        //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
+                    };
+                    controller.sendEmail(mailOptions);
+                });
+            });
+        });        
     }
 }
 
 function forgot_password_validations(data) {
-	var validation_array = {};
-    console.log(data);
+    var validation_array = {};
     var email = controller.validate({email: data.email},['required']);
     if(email){
         validation_array = controller.mergeArrays(validation_array, email);
     }
     else {
-    	tomodel.key = data.email;
+        tomodel.key = data.email;
         var admin =  admin_model.select_admin_by_key(tomodel);
         if(admin.length == 0) {
             validation_array = controller.mergeArrays(validation_array, {email_error: 'This email is not registered'});
@@ -74,4 +75,5 @@ function forgot_password_validations(data) {
     }
     return validation_array;
 }
+
 module.exports = new forgot_password();
