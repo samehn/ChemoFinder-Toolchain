@@ -24,6 +24,8 @@ function selectMedicine(element) {
 	      url: url +'/doctor/selectmedicinedetails',
 	      data : data,
 	      success:  function(result){
+	      	$('.error-form').remove();
+      		$('.message-form').remove();
 	      	console.log(result);
 	      	$('#medicinesDetails').html('<tr class="tr_search"><td style="text-align: center;" valign="top" colspan="9" class="empty_table td_search">No medicines are chosen yet</td></tr>');
 	      	if(result.message == 'success') {

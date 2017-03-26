@@ -22,6 +22,8 @@ function selectTreatmentCenter(element) {
 	      url: url +'/doctor/gettreatmentcenter',
 	      data : data,
 	      success:  function(result){
+	      	$('.error-form').remove();
+      		$('.message-form').remove();
 	      	console.log(result);
 	      	if(result.message == "success") {
 	      		var html = '<tr class="tr_search_row"><td class="td_search">' + result.treatmentCenter[0].ENTITY_NAME + '</td><td class="td_search">' + result.treatmentCenter[0].PHONE_NUMBER + '</td><td class="td_search">' + result.treatmentCenter[0].EMAIL + '</td><td class="td_search">' + result.treatmentCenter[0].ADDRESS + '</td><td class="td_search">' + result.treatmentCenter[0].CITY + '</td><td class="td_search">' + result.treatmentCenter[0].COUNTRY + '</td><td class="td_search">' + result.treatmentCenter[0].OPEN_FROM + '</td><td class="td_search">' + result.treatmentCenter[0].OPEN_TO + '</td><td class="td_search">' + result.treatmentCenter[0].STOCK_UPDATE + '</td></tr>';

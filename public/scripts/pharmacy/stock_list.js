@@ -168,25 +168,27 @@ function updateStockRecord(stock_id) {
 
 function deleteStockRecord(stock_id, element) {
   if (confirm("Are you sure you want to remove this medicine from your stock ?") == true) {
-        var data_array={};
+    var data_array={};
     data_array['stock_id'] = stock_id;
+    $('#loadingModal').modal('show');
     $.ajax({
-          type: "post",
-          url: url + '/pharmacy/deletemedicine',
-          data : data_array,
-          success:  function(data){
-            console.log(data);
-            if(data.message == "success")
-            {
-              $(element).parent().parent().remove();
-              var message = '<div class="alert alert-success info-form"><button class="close" data-close="alert"></button>The medicine is deleted successfuly from your stock </div>';
-              $(message).insertAfter($('.page__subtitle'));
-            }
-            else {
-              var message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>This is not a valid medicine </div>';
-              $(message).insertAfter($('.page__subtitle'));
-            }
-          }
+      type: "post",
+      url: url + '/pharmacy/deletemedicine',
+      data : data_array,
+      success:  function(data){
+        $('#loadingModal').modal('hide');
+        console.log(data);
+        $('.error-form').remove();
+        $('.message-form').remove();
+        if(data.message == "success")
+        {
+          $('#confimDeleteMedicine').modal('show');
+        }
+        else {
+          var message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>This is not a valid medicine </div>';
+          $(message).insertAfter($('.page__subtitle'));
+        }
+      }
     }); 
   }
 }

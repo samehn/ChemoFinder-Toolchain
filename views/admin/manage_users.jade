@@ -258,7 +258,47 @@ block modals
         // /.modal-body
       // /.modal-content
     // /.modal-dialog
-  // /.modal                          
+  // /.modal
+  #loadingModal.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog.modal-sm
+      .modal-content
+        .modal-body
+          h2
+            span.glyphicon.glyphicon-refresh.glyphicon-refresh-animate
+            |   Loading...
+  #confimAddNewUser.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+          h4#myModalLabel.modal-title Add New User
+        // /.modal-header
+        .modal-body
+          | The account is created successfully
+        // /.modal-body
+        .modal-footer
+          button.form-control.btn.btn-primary(onclick='location.reload();') OK
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal
+  if admin_type
+    #confimAddNewAdmin.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+      .modal-dialog
+        .modal-content
+          .modal-header
+            button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+            h4#myModalLabel.modal-title Add New Admin
+          // /.modal-header
+          .modal-body
+            | The account is created successfully
+          // /.modal-body
+          .modal-footer
+            button.form-control.btn.btn-primary(onclick='location.reload();') OK
+          // /.modal-footer
+        // /.modal-content
+      // /.modal-dialog
+    // /.modal
 block scripts
   script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js')
   script(type='text/javascript', src=base+'/scripts/bootstrap-timepicker.min.js')  

@@ -35,7 +35,7 @@ block content
         // end ngRepeat: tab in tabBarCtrl.tabs
     h4.table-title Shopping List
     p Your treatment center is 
-      strong #{treatmentCenter[0].NAME}
+      strong #{treatmentCenter[0].ENTITY_NAME}
     -  if (shoppinglist.length > 0) {
       -  for (var i = 0; i < shoppinglist.length; i++) {
           h5.medicine-title x#{shoppinglist[i].quantity} #{shoppinglist[i].medicine.GENERIC_NAME} #{shoppinglist[i].medicine.BRAND_NAME} #{shoppinglist[i].medicine.FORM} #{shoppinglist[i].medicine.STRENGTH} #{shoppinglist[i].medicine.STRENGTH_UNIT} #{shoppinglist[i].medicine.MANUFACTURER}

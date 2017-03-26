@@ -375,7 +375,7 @@ block modals
           h4#myModalLabel.modal-title Add New Medicine
         // /.modal-header
         .modal-body
-          |  The medicine is added successfuly
+          |  The medicine is added successfully
         // /.modal-body
         .modal-footer
           button.form-control.btn.btn-primary(onclick='location.reload();') OK
@@ -390,14 +390,29 @@ block modals
           h4#myModalLabel.modal-title Add New Medicine
         // /.modal-header
         .modal-body
-          |  The medicine is updated successfuly
+          |  The medicine is updated successfully
         // /.modal-body
         .modal-footer
           button.form-control.btn.btn-primary(onclick='location.reload();') OK
         // /.modal-footer
       // /.modal-content
     // /.modal-dialog
-  // /.modal                              
+  // /.modal
+  #confimDeleteMedicine.modal.fade(role='dialog', data-backdrop='static', data-show='true', data-keyboard='false')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h4#myModalLabel.modal-title Delete Medicine
+        // /.modal-header
+        .modal-body
+          |  The medicine is deleted successfully from your stock
+        // /.modal-body
+        .modal-footer
+          button.form-control.btn.btn-primary(onclick='location.reload();') OK
+        // /.modal-footer
+      // /.modal-content
+    // /.modal-dialog
+  // /.modal
 block scripts
   script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js')
   script(type='text/javascript', src=base+'/scripts/pharmacy/stock_list.js')

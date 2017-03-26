@@ -32,6 +32,18 @@ $(document).ready(function(){
 	});
 });
 
+$("#addNewUser").on("show.bs.modal", function () {
+  $("html").addClass("modal-open");
+}).on("hidden.bs.modal", function () {
+  $("html").removeClass("modal-open");
+});
+
+$("#addNewAdmin").on("show.bs.modal", function () {
+  $("html").addClass("modal-open");
+}).on("hidden.bs.modal", function () {
+  $("html").removeClass("modal-open");
+});
+
 $(document).click(function() {
     $('.error-form').remove();
 });
@@ -187,7 +199,7 @@ function add_new_user() {
     user_array[open_from.attr('name')] = open_from.val();
     user_array[open_to.attr('name')] = open_to.val();
   }
-
+  $('#loadingModal').modal('show');
   console.log(user_array);
   $.ajax({
     type: "post",
@@ -198,19 +210,20 @@ function add_new_user() {
       console.log(data.message);
       $('.error-form').remove();
       $('.message-form').remove();
+      $('#loadingModal').modal('hide');
       if(data.message == "success")
       {
-        var message = '<div class="alert alert-success message-form"><button class="close" data-close="alert"></button> The account is created successfuly</div>';
-        $(message).insertBefore($('#typeUserForm'));
+        $('#addNewUser').modal('hide');
+        $('#confimAddNewUser').modal('show');
       }
       else if(data.message == "failed")
       {
         showError(data.type_error, $('#typeUserForm'));
         showError(data.name_error, $('#nameUserForm'));
-        showError(data.position_error, $('#positionUser'));
-        showError(data.entity_name, $('#entityNameUser'));
+        showError(data.position_error, $('#positionUserForm'));
+        showError(data.entity_name, $('#entityNameUserForm'));
         showError(data.phone_number_error, $('#phoneUserForm'));
-        showError(data.address_error, $('#addressUser'));
+        showError(data.address_error, $('#addressUserForm'));
         showError(data.city_error, $('#cityUserForm'));
         showError(data.country_error, $('#countryUserForm'));
         showError(data.email_error, $('#emailUserForm'));
@@ -231,59 +244,58 @@ function showError(error_data, position) {
 }
 
 function add_new_admin() {
-	var user_array={};
-    
-    
-    var name = $('#nameAdmin');
-    var email = $('#emailAdmin');
-    var password = $('#passwordAdmin');
-    var type = $('#typeAdmin');
-   
-    user_array[name.attr('name')] = name.val();
-    user_array[email.attr('name')] = email.val();
-    user_array[password.attr('name')] = password.val();
-    user_array[type.attr('name')] = type.val();
+	var user_array={};  
+  var name = $('#nameAdmin');
+  var email = $('#emailAdmin');
+  var password = $('#passwordAdmin');
+  var type = $('#typeAdmin');
+ 
+  user_array[name.attr('name')] = name.val();
+  user_array[email.attr('name')] = email.val();
+  user_array[password.attr('name')] = password.val();
+  user_array[type.attr('name')] = type.val();
+  $('#loadingModal').modal('show');
+  console.log(user_array);
+  $.ajax({
+    type: "post",
+    url: url + '/admin/addnewadmin',
+    data : user_array,
+    success:  function(data){
+      console.log(data);
+      console.log(data.message);
+      $('#loadingModal').modal('hide');
+      $('.error-form').remove();
+      $('.message-form').remove();
+      if(data.message == "success")
+      {
+        $('#addNewAdmin').modal('hide');
+        $('#confimAddNewAdmin').modal('show');
+      }
+      else if(data.message == "failed")
+      {
+         if(data.email_error)
+         {
+            var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.email_error + '</div>';
+            $(error_message).insertBefore($('#emailAdminForm'));
+         }
+         if(data.password_error)
+         {
+            var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.password_error + '</div>';
+            $(error_message).insertBefore($('#passwordAdminForm'));
+         }
+         
+         if(data.name_error)
+         {
+            var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.name_error + '</div>';
+            $(error_message).insertBefore($('#nameAdminForm'));
+         }
 
-    console.log(user_array);
-     $.ajax({
-        type: "post",
-        url: url + '/admin/addnewadmin',
-        data : user_array,
-        success:  function(data){
-            console.log(data);
-            console.log(data.message);
-            $('.error-form').remove();
-            $('.message-form').remove();
-            if(data.message == "success")
-            {
-                var message = '<div class="alert alert-success message-form"><button class="close" data-close="alert"></button> The account is created successfuly</div>';
-                $(message).insertBefore($('#nameAdminForm'));
-            }
-            else if(data.message == "failed")
-            {
-               if(data.email_error)
-               {
-                  var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.email_error + '</div>';
-                  $(error_message).insertBefore($('#emailAdminForm'));
-               }
-               if(data.password_error)
-               {
-                  var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.password_error + '</div>';
-                  $(error_message).insertBefore($('#passwordAdminForm'));
-               }
-               
-               if(data.name_error)
-               {
-                  var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.name_error + '</div>';
-                  $(error_message).insertBefore($('#nameAdminForm'));
-               }
-
-               if(data.type_error)
-               {
-                  var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.type_error + '</div>';
-                  $(error_message).insertBefore($('#typeAdminForm'));
-               }
-            }
-        }
-    });
+         if(data.type_error)
+         {
+            var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.type_error + '</div>';
+            $(error_message).insertBefore($('#typeAdminForm'));
+         }
+      }
+    }
+  });
 }
