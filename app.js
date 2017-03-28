@@ -34,8 +34,7 @@ app.use(cookieParser());
 app.use(session({
     secret: "297e6dwdt7dtw7dtta",
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: true }
+    saveUninitialized: true
 }));
 app.use(fileUpload());
 
