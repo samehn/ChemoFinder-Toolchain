@@ -31,7 +31,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); 
 // app.use(upload.array());
 app.use(cookieParser());
-app.use(session({secret: "297e6dwdt7dtw7dtta"}));
+app.use(session({
+    secret: "297e6dwdt7dtw7dtta",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: true }
+}));
 app.use(fileUpload());
 
 // all environments
@@ -127,33 +132,33 @@ app.get('/generaterandompassword', function(req, res) {
     res.send({random: random});
 });
 
-app.get('/doctor/getapprovedmedicines', function(req, res){
-    var query = "SELECT * from DASH5082.MEDICINE WHERE SRA IS NOT NULL";
-    db.dbQuery(query, function(result) {
-        res.send({medicines: result});    
-    });
-});
+// app.get('/doctor/getapprovedmedicines', function(req, res){
+//     var query = "SELECT * from DASH5082.MEDICINE WHERE SRA IS NOT NULL";
+//     db.dbQuery(query, function(result) {
+//         res.send({medicines: result});    
+//     });
+// });
 
-app.get('/getmedicinebyid/:id', function(req, res){
-    var query = "SELECT * from DASH5082.MEDICINE WHERE ID =" + req.params.id;
-    db.dbQuery(query, function(result) {
-        res.send({medicine: result});    
-    });
-});
+// app.get('/getmedicinebyid/:id', function(req, res){
+//     var query = "SELECT * from DASH5082.MEDICINE WHERE ID =" + req.params.id;
+//     db.dbQuery(query, function(result) {
+//         res.send({medicine: result});    
+//     });
+// });
 
-app.post('/getmedicineid', function(req, res) {
-    var query = "SELECT ID from DASH5082.MEDICINE WHERE GENERIC_NAME ='" + req.body.generic_name + "' AND BRAND_NAME = '" + req.body.brand_name + "' AND FORM = '" + req.body.form + "' AND STRENGTH = '" + req.body.strength + "' AND STRENGTH_UNIT = '" + req.body.strength_unit + "' AND MANUFACTURER = '" + req.body.manufacturer + "';";
-    db.dbQuery(query, function(result) {
-        if(result.length != 0)
-        {
-            res.send({message:"success", medicine_id: result[0].ID});
-        }
-        else
-        {
-            res.send({message:"failed"});
-        }
-    });
-});
+// app.post('/getmedicineid', function(req, res) {
+//     var query = "SELECT ID from DASH5082.MEDICINE WHERE GENERIC_NAME ='" + req.body.generic_name + "' AND BRAND_NAME = '" + req.body.brand_name + "' AND FORM = '" + req.body.form + "' AND STRENGTH = '" + req.body.strength + "' AND STRENGTH_UNIT = '" + req.body.strength_unit + "' AND MANUFACTURER = '" + req.body.manufacturer + "';";
+//     db.dbQuery(query, function(result) {
+//         if(result.length != 0)
+//         {
+//             res.send({message:"success", medicine_id: result[0].ID});
+//         }
+//         else
+//         {
+//             res.send({message:"failed"});
+//         }
+//     });
+// });
 
 
 ///////////////////////////////////////////////////////////////////////////

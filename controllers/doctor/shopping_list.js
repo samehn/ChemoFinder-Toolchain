@@ -17,13 +17,14 @@ shopping_list.prototype.shopping_list_page =  function(req, res) {
     }
     else {
         tomodel.user_id = data.treatment_center;
-        var treatment_center = user_model.select_treatment_center_by_id(tomodel);
-        if(treatment_center.length > 0) {
-            res.render('doctor/medicines_shopping_list', {treatmentCenter: treatment_center, shoppinglist: req.session.shoppinglist});
-        }
-        else {
-            res.send("404 Not Found");
-        }
+        user_model.async_select_treatment_center_by_id(tomodel, function(treatment_center) {
+            if(treatment_center.length > 0) {
+                res.render('doctor/medicines_shopping_list', {treatmentCenter: treatment_center, shoppinglist: req.session.shoppinglist});
+            }
+            else {
+                res.send("404 Not Found");
+            }
+        });
     }
 }
 
@@ -37,25 +38,26 @@ shopping_list.prototype.send_email =  function(req, res) {
     }
     else {
         tomodel.user_id = data.treatment_center;
-        var treatment_center = user_model.select_treatment_center_by_id(tomodel);
-        if(treatment_center.length > 0) {
-            var mailOptions = {
-                from: 'chemofinder@gmail.com', // sender address
-                to: data.email, // list of receivers
-                subject: 'Chemofinder Shopping List', // Subject line
-                template: 'shopping_list',
-                context: {
-                    treatmentCenter: treatment_center[0].NAME, shoppinglist: req.session.shoppinglist
-                }
-                //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
-            };
-            controller.sendEmail(mailOptions);
-            res.send({message: 'success'});
-        }
-        else {
-            var result = controller.mergeArrays(validation_array, {message:'failed'});
-            res.send(result);       
-        }
+        user_model.async_select_treatment_center_by_id(tomodel, function(treatment_center) {
+            if(treatment_center.length > 0) {
+                var mailOptions = {
+                    from: 'chemofinder@gmail.com', // sender address
+                    to: data.email, // list of receivers
+                    subject: 'Chemofinder Shopping List', // Subject line
+                    template: 'shopping_list',
+                    context: {
+                        treatmentCenter: treatment_center[0].NAME, shoppinglist: req.session.shoppinglist
+                    }
+                    //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
+                };
+                controller.sendEmail(mailOptions);
+                res.send({message: 'success'});
+            }
+            else {
+                var result = controller.mergeArrays(validation_array, {message:'failed'});
+                res.send(result);       
+            }
+        });
     }
 }
 
@@ -69,34 +71,35 @@ shopping_list.prototype.save_medicine_session =  function(req, res) {
     }
     else {
         tomodel.medicine_id = data.medicine;
-        var medicine = medicine_model.select_approved_medicine_by_id(tomodel);
-        if(medicine.length > 0) {
-            var item = {};
-            item['medicine'] = medicine[0];
-            item['quantity'] = data.quantity;
-            item['price'] = data.price;
-            if(data.pharmacies) {
-                var pharmacies = [];
-                for (var i = 0; i < data.pharmacies.length; i++) {
-                    tomodel.user_id = data.pharmacies[i];
-                    var pharmacy = user_model.select_pharmacies_by_medicine_and_quantity_and_price(tomodel);
-                    if(pharmacy.length > 0) {
-                        pharmacies.push(pharmacy[0]);
+        medicine_model.async_select_approved_medicine_by_id(tomodel, function(medicine) {
+            if(medicine.length > 0) {
+                var item = {};
+                item['medicine'] = medicine[0];
+                item['quantity'] = data.quantity;
+                item['price'] = data.price;
+                if(data.pharmacies) {
+                    var pharmacies = [];
+                    for (var i = 0; i < data.pharmacies.length; i++) {
+                        tomodel.user_id = data.pharmacies[i];
+                        var pharmacy = user_model.select_pharmacies_by_medicine_and_quantity_and_price(tomodel);
+                        if(pharmacy.length > 0) {
+                            pharmacies.push(pharmacy[0]);
+                        }
                     }
+                    item['pharmacies'] = pharmacies;    
                 }
-                item['pharmacies'] = pharmacies;    
+                
+                if(req.session.shoppinglist == null) {
+                    req.session.shoppinglist = [];
+                }
+                req.session.shoppinglist.push(item);
+                res.send({message:"success", shoppinglist: req.session.shoppinglist});
             }
-            
-            if(req.session.shoppinglist == null) {
-                req.session.shoppinglist = [];
+            else {
+                var result = controller.mergeArrays(validation_array, {message:'failed'});
+                res.send(result);
             }
-            req.session.shoppinglist.push(item);
-            res.send({message:"success", shoppinglist: req.session.shoppinglist});
-        }
-        else {
-            var result = controller.mergeArrays(validation_array, {message:'failed'});
-            res.send(result);
-        }
+        });
     }
 }
 

@@ -10,8 +10,9 @@ treatment_center.prototype.constructor = treatment_center;
 
 treatment_center.prototype.treatment_center_page =  function(req, res) {
     req.session.shoppinglist = null;
-    var treatmentCenters = user_model.select_treatment_centers();
-    res.render('doctor/select_treatment_center', {treatmentCenters: treatmentCenters});
+    user_model.async_select_treatment_centers(function(treatmentCenters) {
+        res.render('doctor/select_treatment_center', {treatmentCenters: treatmentCenters});
+    });
 }
 
 treatment_center.prototype.get_treatment_center_details =  function(req, res) {
@@ -23,13 +24,14 @@ treatment_center.prototype.get_treatment_center_details =  function(req, res) {
     }
     else {
         tomodel.user_id = data.id;
-        var treatment_center = user_model.select_treatment_center_by_id(tomodel);
-        if(treatment_center.length > 0) {
-            res.send({ message: 'success', treatmentCenter: treatment_center});
-        }
-        else {
-            res.send({message:'failed'});
-        }
+        user_model.async_select_treatment_center_by_id(tomodel, function(treatment_center) {
+            if(treatment_center.length > 0) {
+                res.send({ message: 'success', treatmentCenter: treatment_center});
+            }
+            else {
+                res.send({message:'failed'});
+            }
+        });
     }
 }
 

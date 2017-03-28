@@ -297,7 +297,7 @@ manage_medicines.prototype.upload_medicines_list =  function(req, res) {
                 res.redirect('/admin/manage_medicines');
                 if(medicines.length > 0) {
 				    controller.async.eachLimit(medicines, 1, function(medicine, callback){                      
-				        saveMedicinesList(req, res, medicine, function() {
+				        save_medicines_list(req, res, medicine, function() {
                             console.log("done");
 				        	callback();
                         });
@@ -594,7 +594,7 @@ function parsing_approved_medicines(req, res) {
     return medicines;
 }
 
-var saveMedicinesList = function(req, res, medicine, callback) {
+var save_medicines_list = function(req, res, medicine, callback) {
 	medicine_model.async_select_medicine_by_main_keys(medicine, function(rows) {
 		if(rows.length > 0) {
 			medicine['medicine_id'] = rows[0].ID;

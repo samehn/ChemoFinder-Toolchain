@@ -16,16 +16,18 @@ select_pharmacy.prototype.select_pharmacy_page =  function(req, res) {
     }
     else {
         tomodel.medicine_id = data.medicine;
-        var medicine = medicine_model.select_approved_medicine_by_id(tomodel);
-        if(medicine.length == 0) {
-            res.send("404 Not Found");
-        }
-        else {
-            tomodel.quantity = data.quantity;
-            tomodel.price = data.price;
-            var pharmacies = user_model.select_pharmacies_by_medicine_and_quantity_and_price(tomodel);
-            res.render('doctor/select_pharmacy', {medicine: medicine, pharmacies: pharmacies});
-        }
+        medicine_model.async_select_approved_medicine_by_id(tomodel, function(medicine) {
+            if(medicine.length == 0) {
+                res.send("404 Not Found");
+            }
+            else {
+                tomodel.quantity = data.quantity;
+                tomodel.price = data.price;
+                user_model.async_select_pharmacies_by_medicine_and_quantity_and_price(tomodel, function(pharmacies) {
+                    res.render('doctor/select_pharmacy', {medicine: medicine, pharmacies: pharmacies});
+                });
+            }
+        });
     }
 }
 

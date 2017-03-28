@@ -25,9 +25,10 @@ first_login.prototype.change_password =  function(req, res) {
           // Store hash in your password DB.
           tomodel.user_id = req.session.pharmacy_id;
           tomodel.password = hash;
-          user_model.update_user_first_password(tomodel);
-            req.session.pharmacy_first_login = '0';  
-            res.send({message: "success"});
+          user_model.async_update_user_first_password(tomodel, function(rows) {
+                req.session.pharmacy_first_login = '0';  
+                res.send({message: "success"});
+          });
         });
     }  
 }

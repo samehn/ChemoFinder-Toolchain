@@ -12,14 +12,16 @@ select_medicine.prototype.select_medicine_page =  function(req, res) {
    var treatment_center_id = req.param('t');
    if(treatment_center_id && Number.isInteger(parseInt(treatment_center_id))) {
         tomodel.user_id = treatment_center_id;
-        var treatment_center = user_model.select_treatment_center_by_id(tomodel);
-        if(treatment_center.length > 0) {
-            var medicines = medicine_model.select_medicine_not_in_treatment_center(tomodel);
-            res.render('doctor/select_medicine', {medicines: medicines});  
-        }
-        else {
-            res.send("404 Not Found");
-        }
+        user_model.async_select_treatment_center_by_id(tomodel, function(treatment_center) {
+            if(treatment_center.length > 0) {
+                medicine_model.async_select_medicine_not_in_treatment_center(tomodel, function(medicines) {
+                    res.render('doctor/select_medicine', {medicines: medicines});
+                });
+            }
+            else {
+                res.send("404 Not Found");
+            }
+        });
    }
    else {
         res.send("404 Not Found");
@@ -36,13 +38,14 @@ select_medicine.prototype.select_medicine_details =  function(req, res) {
     else {
         tomodel.generic_name = data.generic_name;
         tomodel.form = data.form;
-        var medicines = medicine_model.select_medicine_by_generic_and_form_grouped_by_price(tomodel);
-        if(medicines.length > 0) {
-            res.send({message: "success", medicines: medicines})
-        }
-        else {
-            res.send({message: 'failed'});
-        }
+        medicine_model.async_select_medicine_by_generic_and_form_grouped_by_price(tomodel, function(medicines) {
+            if(medicines.length > 0) {
+                res.send({message: "success", medicines: medicines})
+            }
+            else {
+                res.send({message: 'failed'});
+            }
+        });
     }
 }
 

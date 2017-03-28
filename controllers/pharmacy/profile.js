@@ -9,8 +9,9 @@ profile.prototype.constructor = profile;
 
 profile.prototype.profile_page =  function(req, res) {
     tomodel.user_id = req.session.pharmacy_id;
-    var pharmacy_info = user_model.select_pharmacy_by_id(tomodel);
-    res.render('pharmacy/profile', {info: pharmacy_info});
+    user_model.async_select_pharmacy_by_id(tomodel, function(pharmacy_info) {
+        res.render('pharmacy/profile', {info: pharmacy_info});
+    });
 }
 
 profile.prototype.update_profile =  function(req, res) {
@@ -31,17 +32,18 @@ profile.prototype.update_profile =  function(req, res) {
         tomodel.city = data.city;
         tomodel.country = data.country;
         tomodel.email = data.email;
-        var user = user_model.update_user(tomodel);
-
-        tomodel.open_from = data.open_from;
-        tomodel.open_to = data.open_to;
-        if(!data.open_from || !data.open_to) {
-            tomodel.open_from = '12:00:00';
-            tomodel.open_to = '12:00:00';
-        }
-        user_pharmacy_model.update_user_pharmacy(tomodel);
-        res.send({message: "success"});
-    }       
+        user_model.async_update_user(tomodel, function(user) {
+            tomodel.open_from = data.open_from;
+            tomodel.open_to = data.open_to;
+            if(!data.open_from || !data.open_to) {
+                tomodel.open_from = '12:00:00';
+                tomodel.open_to = '12:00:00';
+            }
+            user_pharmacy_model.async_update_user_pharmacy(tomodel, function(rows) {
+                res.send({message: "success"});
+            });
+        });
+    }
 }
 
 profile.prototype.change_password =  function(req, res) {
@@ -54,21 +56,23 @@ profile.prototype.change_password =  function(req, res) {
     else
     {
         tomodel.user_id = req.session.pharmacy_id;
-        var result = user_model.select_user_by_id(tomodel);
-        controller.bcrypt.compare(data.old_password, result[0].PASSWORD, function(err, cmp) {
-            // res == true
-            if(cmp)
-            {
-                controller.bcrypt.hash(data.new_password, controller.saltRounds, function(err, hash) {
-                    tomodel.password = hash;
-                    user_model.update_user_password(tomodel);
-                    res.send({message: "success"});
-                });
-            }
-            else
-            {
-                res.send({message: "failed", old_password_error: "Wrong Password"});
-            }
+        user_model.async_select_user_by_id(tomodel, function(result) {
+            controller.bcrypt.compare(data.old_password, result[0].PASSWORD, function(err, cmp) {
+                // res == true
+                if(cmp)
+                {
+                    controller.bcrypt.hash(data.new_password, controller.saltRounds, function(err, hash) {
+                        tomodel.password = hash;
+                        user_model.async_update_user_password(tomodel, function(rows) {
+                            res.send({message: "success"});
+                        });
+                    });
+                }
+                else
+                {
+                    res.send({message: "failed", old_password_error: "Wrong Password"});
+                }
+            });
         });
     }
 }

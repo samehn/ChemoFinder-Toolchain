@@ -11,33 +11,36 @@ stock.prototype.constructor = stock;
 
 stock.prototype.stock_page =  function(req, res) {
     tomodel.user_id = req.session.pharmacy_id;
-    var stock_list = stock_list_model.select_stock_list_by_id(tomodel);
-    var medicines = medicine_model.select_approved_medicines();    
-    var data = {stock_list: stock_list, medicines: medicines};
-    if(req.session.extention_error)
-    {
-        data['extention_error'] = true;
-        req.session.extention_error = null;
-    }
-    if(req.session.format_error)
-    {
-        data['format_error'] = req.session.format_error;
-        req.session.format_error = null;
-    }
-    res.render('pharmacy/stock_list', data);
+    stock_list_model.async_select_stock_list_by_id(tomodel, function(stock_list) {
+        medicine_model.async_select_approved_medicines(function(medicines) {
+            var data = {stock_list: stock_list, medicines: medicines};
+            if(req.session.extention_error)
+            {
+                data['extention_error'] = true;
+                req.session.extention_error = null;
+            }
+            if(req.session.format_error)
+            {
+                data['format_error'] = req.session.format_error;
+                req.session.format_error = null;
+            }
+            res.render('pharmacy/stock_list', data);
+        });
+    });
 }
 
 stock.prototype.get_stock_record =  function(req, res) {
     if(Number.isInteger(parseInt(req.body.stock_id))) {
         tomodel.stock_id = req.body.stock_id;
         tomodel.user_id = req.session.pharmacy_id; 
-        var stock_list_record = stock_list_model.select_stock_list_record_by_id(tomodel);       
-        if(stock_list_record.length > 0){
-            res.send({message:"success", result: stock_list_record});
-        }
-        else{
-            res.send({message:"failed"});        
-        }
+        stock_list_model.async_select_stock_list_record_by_id(tomodel, function(stock_list_record) {
+            if(stock_list_record.length > 0){
+                res.send({message:"success", result: stock_list_record});
+            }
+            else{
+                res.send({message:"failed"});        
+            }
+        });
     }
     else{
         res.send({message:"failed"});
@@ -62,33 +65,39 @@ stock.prototype.add_new_medicine =  function(req, res) {
         tomodel.strength = data.strength;
         tomodel.strength_unit = data.strength_unit;
         tomodel.manufacturer = data.manufacturer;
-        var medicine = medicine_model.select_medicine_by_main_keys(tomodel);
-        tomodel.batch_number = data.batch_number;
-        tomodel.expiry_date = data.expiry_date;
-        tomodel.pack_size = data.pack_size;
-        tomodel.price = data.price;
-        tomodel.quantity = data.quantity;
-        tomodel.avg_monthly_consumption = data.avg_monthly_consumption;
-        tomodel.user_id = req.session.pharmacy_id;
-        if(medicine.length > 0) {
-            tomodel.medicine_id = medicine[0].ID;
+        medicine_model.async_select_medicine_by_main_keys(tomodel, function(medicine) {
+            tomodel.batch_number = data.batch_number;
+            tomodel.expiry_date = data.expiry_date;
+            tomodel.pack_size = data.pack_size;
+            tomodel.price = data.price;
+            tomodel.quantity = data.quantity;
+            tomodel.avg_monthly_consumption = data.avg_monthly_consumption;
             tomodel.user_id = req.session.pharmacy_id;
-            var stock_list_medicine = stock_list_model.select_stock_list_by_medicine(tomodel);
-            if(stock_list_medicine.length > 0) {
-                res.send({message: "failed", generic_name_error: "This Medicine is already exists in your stock"});
+            if(medicine.length > 0) {
+                tomodel.medicine_id = medicine[0].ID;
+                tomodel.user_id = req.session.pharmacy_id;
+                stock_list_model.async_select_stock_list_by_medicine(tomodel, function(stock_list_medicine) {
+                    if(stock_list_medicine.length > 0) {
+                        res.send({message: "failed", generic_name_error: "This Medicine is already exists in your stock"});
+                    }
+                    else {
+                        stock_list_model.async_insert_new_record(tomodel, function(rows) {
+                            res.send({message: "success"});
+                        });
+                    }
+                });
             }
             else {
-                stock_list_model.insert_new_record(tomodel);
-                res.send({message: "success"});
+                medicine_model.async_insert_new_medicine_by_main_keys(tomodel, function(rows) {
+                    medicine_model.async_select_medicine_by_main_keys(tomodel, function(medicine) {
+                        tomodel.medicine_id = medicine[0].ID;
+                        stock_list_model.async_insert_new_record(tomodel, function(rows) {
+                            res.send({message: "success"});
+                        });
+                    });
+                });
             }
-        }
-        else {
-            medicine_model.insert_new_medicine_by_main_keys(tomodel);
-            var medicine = medicine_model.select_medicine_by_main_keys(tomodel);
-            tomodel.medicine_id = medicine[0].ID;
-            stock_list_model.insert_new_record(tomodel);
-            res.send({message: "success"});
-        }
+        });
     }    
 }
 
@@ -102,20 +111,22 @@ stock.prototype.add_new_approved_medicine =  function(req, res) {
     else {
         tomodel.medicine_id = data.medicine;
         tomodel.user_id = req.session.pharmacy_id;
-        var stock_list_medicine = stock_list_model.select_stock_list_by_medicine(tomodel);
-        if(stock_list_medicine.length > 0) {
-            res.send({message: "failed", medicine_error: "This Medicine is already exists in your stock"});
-        }
-        else {
-            tomodel.batch_number = data.batch_number;
-            tomodel.expiry_date = data.expiry_date;
-            tomodel.pack_size = data.pack_size;
-            tomodel.price = data.price;
-            tomodel.quantity = data.quantity;
-            tomodel.avg_monthly_consumption = data.avg_monthly_consumption;
-            stock_list_model.insert_new_record(tomodel);
-            res.send({message: "success"});
-        }
+        stock_list_model.async_select_stock_list_by_medicine(tomodel, function(stock_list_medicine) {
+            if(stock_list_medicine.length > 0) {
+                res.send({message: "failed", medicine_error: "This Medicine is already exists in your stock"});
+            }
+            else {
+                tomodel.batch_number = data.batch_number;
+                tomodel.expiry_date = data.expiry_date;
+                tomodel.pack_size = data.pack_size;
+                tomodel.price = data.price;
+                tomodel.quantity = data.quantity;
+                tomodel.avg_monthly_consumption = data.avg_monthly_consumption;
+                stock_list_model.async_insert_new_record(tomodel, function(rows) {
+                    res.send({message: "success"});
+                });
+            }
+        });
     }     
 }
 
@@ -129,21 +140,24 @@ stock.prototype.update_medicine =  function(req, res) {
     else {
         tomodel.stock_id = data.stock_id;
         tomodel.user_id = req.session.pharmacy_id;
-        var stock_list_record = stock_list_model.select_stock_record_by_pharmacy(tomodel);
-        if(stock_list_record.length > 0) {
-            tomodel.batch_number = data.batch_number;
-            tomodel.expiry_date = data.expiry_date;
-            tomodel.pack_size = data.pack_size;
-            tomodel.price = data.price;
-            tomodel.quantity = data.quantity;
-            tomodel.avg_monthly_consumption = data.avg_monthly_consumption;
-            stock_list_model.update_stock_record(tomodel);
-            user_pharmacy_model.update_stock_time(tomodel);
-            res.send({message: "success"});
-        }
-        else {
-            res.send({message: "failed", batch_number_error: "This Medicine is not exists in your stock"});
-        }
+        stock_list_model.async_select_stock_record_by_pharmacy(tomodel, function(stock_list_record) {
+            if(stock_list_record.length > 0) {
+                tomodel.batch_number = data.batch_number;
+                tomodel.expiry_date = data.expiry_date;
+                tomodel.pack_size = data.pack_size;
+                tomodel.price = data.price;
+                tomodel.quantity = data.quantity;
+                tomodel.avg_monthly_consumption = data.avg_monthly_consumption;
+                stock_list_model.async_update_stock_record(tomodel, function(rows) {
+                    user_pharmacy_model.async_update_stock_time(tomodel, function(rows) {
+                        res.send({message: "success"});
+                    });
+                });
+            }
+            else {
+                res.send({message: "failed", batch_number_error: "This Medicine is not exists in your stock"});
+            }
+        });
     }
 }
 
@@ -157,46 +171,17 @@ stock.prototype.delete_medicine =  function(req, res) {
     else {
         tomodel.stock_id = data.stock_id;
         tomodel.user_id = req.session.pharmacy_id;
-        var stock_list_record = stock_list_model.select_stock_record_by_pharmacy(tomodel);
-        if(stock_list_record.length > 0) {
-            stock_list_model.delete_stock_record(tomodel);
-            res.send({message: "success"});
-        }
-        else {
-            res.send({message: "failed", medicine_error: "This Medicine is not exists in your stock"});
-        }
-    } 
-}
-
-stock.prototype.upload_stock_list =  function(req, res) {
-    var sampleFile;
- 
-    if (!req.files) {
-        res.send('No files were uploaded.');
-        console.log('No files were uploaded.');
-        return;
-    }
-    sampleFile = req.files.sampleFile;
-    var fileArray = sampleFile.name.split('.');
-    var extension = fileArray[fileArray.length - 1];
-    if(extension == "xlsx")
-    {
-        sampleFile.mv('./public/uploads/stocks/stock_list_' + req.session.pharmacy_id + '.xlsx', function(err) {
-            if (err) {
-                res.status(500).send(err);
+        stock_list_model.async_select_stock_record_by_pharmacy(tomodel, function(stock_list_record) {
+            if(stock_list_record.length > 0) {
+                stock_list_model.async_delete_stock_record(tomodel, function(rows) {
+                    res.send({message: "success"});
+                });
             }
             else {
-                parsingStockList(req, res);
-                res.redirect('/pharmacy');
-                console.log('File uploaded!');
+                res.send({message: "failed", medicine_error: "This Medicine is not exists in your stock"});
             }
         });
-    }
-    else
-    {
-        req.session.extention_error = true;
-        res.redirect('/pharmacy');
-    }
+    } 
 }
 
 stock.prototype.download_stock_list_template =  function(req, res) {
@@ -246,27 +231,74 @@ stock.prototype.download_last_stock =  function(req, res) {
     }
     tomodel.user_id = req.session.pharmacy_id;
 
-    var stock_list = stock_list_model.select_stock_list_by_id(tomodel);
-    
-    if(stock_list.length > 0) {
-        for (var i = 0; i < stock_list.length; i++) {
-            worksheet.addRow([stock_list[i].ID, stock_list[i].GENERIC_NAME, stock_list[i].FORM, stock_list[i].STRENGTH, stock_list[i].STRENGTH_UNIT, stock_list[i].BRAND_NAME, stock_list[i].MANUFACTURER, stock_list[i].BATCH_NUMBER, stock_list[i].EXPIRY_DATE, stock_list[i].SRA, stock_list[i].PACK_SIZE, stock_list[i].PRICE_PER_PACK, stock_list[i].AVAILABLE_STOCK, stock_list[i].AVG_MONTHLY_CONSUMPTION]);
-        }
-        var path = './public/uploads/stocks/stock_list_' + req.session.pharmacy_id + '_' + Date.now() + '.xlsx';
-        if(controller.fs.existsSync(path)) {
-            controller.fs.unlinkSync(path);
-        }
-        // you can create xlsx file now.
-        workbook.xlsx.writeFile(path).then(function() {
-            console.log("xlsx file is written.");
-            res.download(path, 'stock_list.xlsx', function(err){
-              //CHECK FOR ERROR
-              controller.fs.unlink(path);
+    stock_list_model.async_select_stock_list_by_id(tomodel, function(stock_list) {
+        if(stock_list.length > 0) {
+            for (var i = 0; i < stock_list.length; i++) {
+                worksheet.addRow([stock_list[i].ID, stock_list[i].GENERIC_NAME, stock_list[i].FORM, stock_list[i].STRENGTH, stock_list[i].STRENGTH_UNIT, stock_list[i].BRAND_NAME, stock_list[i].MANUFACTURER, stock_list[i].BATCH_NUMBER, stock_list[i].EXPIRY_DATE, stock_list[i].SRA, stock_list[i].PACK_SIZE, stock_list[i].PRICE_PER_PACK, stock_list[i].AVAILABLE_STOCK, stock_list[i].AVG_MONTHLY_CONSUMPTION]);
+            }
+            var path = './public/uploads/stocks/stock_list_' + req.session.pharmacy_id + '_' + Date.now() + '.xlsx';
+            if(controller.fs.existsSync(path)) {
+                controller.fs.unlinkSync(path);
+            }
+            // you can create xlsx file now.
+            workbook.xlsx.writeFile(path).then(function() {
+                console.log("xlsx file is written.");
+                res.download(path, 'stock_list.xlsx', function(err){
+                  //CHECK FOR ERROR
+                  controller.fs.unlink(path);
+                });
             });
+        }    
+        else {
+            req.session.format_error = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button> You have no previous stocks to be downloaded </div>';
+            res.redirect('/pharmacy');
+        }
+    });
+}
+
+stock.prototype.upload_stock_list =  function(req, res) {
+    var sampleFile;
+ 
+    if (!req.files) {
+        res.send('No files were uploaded.');
+        console.log('No files were uploaded.');
+        return;
+    }
+    sampleFile = req.files.sampleFile;
+    var fileArray = sampleFile.name.split('.');
+    var extension = fileArray[fileArray.length - 1];
+    if(extension == "xlsx")
+    {
+        sampleFile.mv('./public/uploads/stocks/stock_list_' + req.session.pharmacy_id + '.xlsx', function(err) {
+            if (err) {
+                res.status(500).send(err);
+            }
+            else {
+                var medicines = parsing_stock_list(req, res);
+                console.log(medicines);
+                console.log('File uploaded!');
+                res.redirect('/pharmacy');
+                if(medicines.length > 0) {
+                    controller.async.eachLimit(medicines, 1, function(medicine, callback) {
+                        save_medicines_stock_list(req, res, medicine, function() {
+                            console.log("done");
+                            callback();
+                        });
+                    }, function(err) {
+                        if(err) {
+                            console.log('A file failed to process');
+                        }
+                        else {
+                            console.log('All files have been processed successfully');
+                        }
+                    });
+                }
+            }
         });
-    }    
-    else {
-        req.session.format_error = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button> You have no previous stocks to be downloaded </div>';
+    }
+    else
+    {
+        req.session.extention_error = true;
         res.redirect('/pharmacy');
     }
 }
@@ -293,7 +325,43 @@ function validate_stock_list_sheet(worksheet) {
     return true;
 }
 
-function parsingStockList(req, res) {
+var save_medicines_stock_list = function(req, res, medicine, callback) {
+    medicine_model.async_select_medicine_by_main_keys(medicine, function(main_medicine) {
+        if(main_medicine.length > 0) {
+            medicine['medicine_id'] = main_medicine[0].ID;
+            medicine['user_id']= req.session.pharmacy_id;
+            stock_list_model.async_select_stock_list_by_medicine(medicine, function(stock_list_medicine) {
+                if(stock_list_medicine.length > 0) {
+                    medicine['stock_id'] = stock_list_medicine[0].ID;
+                    stock_list_model.async_update_stock_record(medicine, function(rows) {
+                        user_pharmacy_model.async_update_stock_time(medicine, function(rows) {
+                            callback();
+                        });
+                    });
+                }
+                else {
+                    stock_list_model.async_insert_new_record(medicine, function(rows) {
+                        callback();
+                    });
+                }
+            });
+        }
+        else {
+            medicine_model.async_insert_new_medicine_by_main_keys(medicine, function(rows) {
+                medicine_model.async_select_medicine_by_main_keys(medicine, function(medicine) {
+                    medicine['medicine_id'] = medicine[0].ID;
+                    stock_list_model.async_insert_new_record(medicine, function(rows) {
+                        callback();
+                    });
+                });
+            });
+        }
+    });
+}
+
+
+function parsing_stock_list(req, res) {
+    var medicines = [];
     var workbook = controller.XLSX.readFile('./public/uploads/stocks/stock_list_' + req.session.pharmacy_id + '.xlsx');
     var first_sheet_name = workbook.SheetNames[0];
     var worksheet = workbook.Sheets[first_sheet_name];
@@ -484,46 +552,29 @@ function parsingStockList(req, res) {
                 warning_message = warning_message + wm;
             }
             else {
-                tomodel.generic_name = new_data.generic_name;
-                tomodel.brand_name = new_data.brand_name;
-                tomodel.form = new_data.form;
-                tomodel.strength = new_data.strength;
-                tomodel.strength_unit = new_data.strength_unit;
-                tomodel.manufacturer = new_data.manufacturer;
-                var medicine = medicine_model.select_medicine_by_main_keys(tomodel);
-                tomodel.batch_number = new_data.batch_number;
-                tomodel.expiry_date = controller.moment(new_data.expiry_date).format('DD/MM/YYYY');
-                tomodel.pack_size = new_data.pack_size;
-                tomodel.price = new_data.price;
-                tomodel.quantity = new_data.quantity;
-                tomodel.avg_monthly_consumption = new_data.avg_monthly_consumption;
-                tomodel.user_id = req.session.pharmacy_id;
-                if(medicine.length > 0) {
-                    tomodel.medicine_id = medicine[0].ID;
-                    tomodel.user_id = req.session.pharmacy_id;
-                    var stock_list_medicine = stock_list_model.select_stock_list_by_medicine(tomodel);
-                    if(stock_list_medicine.length > 0) {
-                        tomodel.stock_id = stock_list_medicine[0].ID;
-                        stock_list_model.update_stock_record(tomodel);
-                        user_pharmacy_model.update_stock_time(tomodel);
-                    }
-                    else {
-                        stock_list_model.insert_new_record(tomodel);
-                    }
-                }
-                else {
-                    medicine_model.insert_new_medicine_by_main_keys(tomodel);
-                    var medicine = medicine_model.select_medicine_by_main_keys(tomodel);
-                    tomodel.medicine_id = medicine[0].ID;
-                    stock_list_model.insert_new_record(tomodel);
-                }
+                var medicine = {};
+                medicine['generic_name'] = new_data.generic_name;
+                medicine['brand_name'] = new_data.brand_name;
+                medicine['form'] = new_data.form;
+                medicine['strength'] = new_data.strength;
+                medicine['strength_unit'] = new_data.strength_unit;
+                medicine['manufacturer'] = new_data.manufacturer;
+                medicine['batch_number'] = new_data.batch_number;
+                medicine['expiry_date'] = controller.moment(new_data.expiry_date).format('DD/MM/YYYY');
+                medicine['pack_size'] = new_data.pack_size;
+                medicine['price'] = new_data.price;
+                medicine['quantity'] = new_data.quantity;
+                medicine['avg_monthly_consumption'] = new_data.avg_monthly_consumption;
+                medicine['user_id'] = req.session.pharmacy_id;
+                medicines.push(medicine);
             }
             i++;
         }
     }
     else {
         req.session.format_error = "<div class='alert alert-danger error-form'> Wrong format please download the template and follow the convention </div>";
-    }    
+    }
+    return medicines;
 }
 
 function deleted_medicine_validations(data) {
