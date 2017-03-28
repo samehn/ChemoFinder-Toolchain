@@ -19,6 +19,11 @@ admin_model.prototype.select_admin_by_email = function(data) {
 	return this.dbQuerySync(query);
 };
 
+admin_model.prototype.select_admin_by_id = function(data) {
+	var query = "SELECT * from DASH5082.ADMIN WHERE ID =" + this.mysql_real_escape_string(data.admin_id) + ";";
+	return this.dbQuerySync(query);
+};
+
 admin_model.prototype.update_admin_password = function(data) {
 	var query = "UPDATE DASH5082.ADMIN SET PASSWORD ='" + this.mysql_real_escape_string(data.password) + "' WHERE ID =" + this.mysql_real_escape_string(data.admin_id) + ";";
 	return this.dbQuerySync(query);
@@ -58,6 +63,11 @@ admin_model.prototype.async_select_admin_by_username = function(data, callback) 
 
 admin_model.prototype.async_select_admin_by_email = function(data, callback) {
 	var query = "SELECT * from DASH5082.ADMIN WHERE EMAIL ='" + this.mysql_real_escape_string(data.email) + "';";
+	return this.dbQuery(query, callback);
+};
+
+admin_model.prototype.async_select_admin_by_id = function(data, callback) {
+	var query = "SELECT * from DASH5082.ADMIN WHERE ID =" + this.mysql_real_escape_string(data.admin_id) + ";";
 	return this.dbQuery(query, callback);
 };
 

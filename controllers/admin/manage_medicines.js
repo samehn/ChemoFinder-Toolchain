@@ -13,6 +13,11 @@ manage_medicines.prototype.manage_medicines_page =  function(req, res) {
 	medicine_model.async_select_approved_medicines(function(approved_medicines) {
 		medicine_model.async_select_non_approved_medicines(function(non_approved_medicines) {
 			var data = {approved_medicines: approved_medicines,  non_approved_medicines: non_approved_medicines};
+		    if(req.session.uploading_message)
+            {
+                data['uploading_message'] = req.session.uploading_message;
+                req.session.uploading_message = null;
+            }
 		    if(req.session.extention_error)
 		    {
 		        data['extention_error'] = true;
@@ -262,7 +267,7 @@ manage_medicines.prototype.upload_stock_list =  function(req, res) {
                 res.status(500).send(err);
             }
             else {
-                req.session.success_message = '<div class="alert alert-success message-form"> The file is uploaded successfuly</div>'
+                req.session.success_message = '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> The file is uploaded successfuly</div>'
                 res.redirect('/admin/manage_medicines');
                 console.log('File uploaded!');
             }
@@ -294,9 +299,10 @@ manage_medicines.prototype.upload_medicines_list =  function(req, res) {
             else {
                 var medicines = parsing_approved_medicines(req, res);
                 console.log('File uploaded!');
-                res.redirect('/admin/manage_medicines');
                 if(medicines.length > 0) {
-				    controller.async.eachLimit(medicines, 1, function(medicine, callback){                      
+				    req.session.uploading_message = "<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + medicines.length + " medicines will be added/updated in the background you will be notify by an email once this operation is done</div>";
+                	res.redirect('/admin/manage_medicines');
+				    controller.async.eachLimit(medicines, 5, function(medicine, callback){                      
 				        save_medicines_list(req, res, medicine, function() {
                             console.log("done");
 				        	callback();
@@ -309,8 +315,27 @@ manage_medicines.prototype.upload_medicines_list =  function(req, res) {
 			             console.log('A file failed to process');
 			          	} else {
 			              	console.log('All files have been processed successfully');
+			              	tomodel.admin_id = req.session.admin_id;
+			              	admin_model.async_select_admin_by_id(tomodel, function(admin) {
+                                //Send Confirmation Email
+                                var link = req.protocol + '://' + req.get('host') + '/admin/manage_medicines';
+                                var mailOptions = {
+                                    from: 'chemofinder@gmail.com', // sender address
+                                    to: admin[0].EMAIL, // list of receivers
+                                    subject: 'Uploading Medicines List is Completed Successfully', // Subject line
+                                    template: 'upload_medicines_list_mail',
+                                    context: {
+                                        link: link
+                                    }
+                                    //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
+                                };
+                                controller.sendEmail(mailOptions);
+                            });
 			          	}
 				    });
+                }
+                else {
+                	res.redirect('/admin/manage_medicines');
                 }
             }
         });
@@ -331,7 +356,7 @@ function parsing_approved_medicines(req, res) {
     	var flag = true;
 	    var format_error_flag = false;
     	var i = 2;
-	    var warning_message = "<div class='alert alert-danger error-form'> Some medicines cannot be added/updated due to the following: <ul>";
+	    var warning_message = "<div class='alert alert-danger'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a> Some medicines cannot be added/updated due to the following: <ul>";
 	    while(flag)
 	    {
 	        var wm = "<li> On line " + i + ":";
@@ -589,7 +614,7 @@ function parsing_approved_medicines(req, res) {
 	    }	
     }
     else {
-    	req.session.format_error = "<div class='alert alert-danger error-form'> Wrong format please download the template and follow the convention </div>";
+    	req.session.format_error = "<div class='alert alert-danger'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a> Wrong format please download the template and follow the convention </div>";
     }
     return medicines;
 }

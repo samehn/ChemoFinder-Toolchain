@@ -22,8 +22,13 @@ block account
     span.main-actions|                         Logout        
 block content
   .page__subtitle.ng-binding Manage Medicines
+  - if(uploading_message) {
+      !{uploading_message}
+  - }
   - if(extention_error) {
-      .alert.alert-danger.error-form This file extension is not allowed, only files with xlsx extension are allowed
+      .alert.alert-danger
+        a.close(href='#' data-dismiss='alert' aria-label='close') &times;
+        |  This file extension is not allowed, only files with xlsx extension are allowed
   - }
   - if(format_error) {
       !{format_error} 

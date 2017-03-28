@@ -14,15 +14,20 @@ stock.prototype.stock_page =  function(req, res) {
     stock_list_model.async_select_stock_list_by_id(tomodel, function(stock_list) {
         medicine_model.async_select_approved_medicines(function(medicines) {
             var data = {stock_list: stock_list, medicines: medicines};
-            if(req.session.extention_error)
+            if(req.session.stock_uploading_message)
+            {
+                data['uploading_message'] = req.session.stock_uploading_message;
+                req.session.stock_uploading_message = null;
+            }
+            if(req.session.stock_extention_error)
             {
                 data['extention_error'] = true;
-                req.session.extention_error = null;
+                req.session.stock_extention_error = null;
             }
-            if(req.session.format_error)
+            if(req.session.stock_format_error)
             {
-                data['format_error'] = req.session.format_error;
-                req.session.format_error = null;
+                data['format_error'] = req.session.stock_format_error;
+                req.session.stock_format_error = null;
             }
             res.render('pharmacy/stock_list', data);
         });
@@ -250,7 +255,7 @@ stock.prototype.download_last_stock =  function(req, res) {
             });
         }    
         else {
-            req.session.format_error = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button> You have no previous stocks to be downloaded </div>';
+            req.session.stock_format_error = '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> You have no previous stocks to be downloaded </div>';
             res.redirect('/pharmacy');
         }
     });
@@ -277,8 +282,9 @@ stock.prototype.upload_stock_list =  function(req, res) {
                 var medicines = parsing_stock_list(req, res);
                 console.log(medicines);
                 console.log('File uploaded!');
-                res.redirect('/pharmacy');
                 if(medicines.length > 0) {
+                    req.session.stock_uploading_message = "<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + medicines.length + " medicines will be added/updated in the background you will be notify by an email once this operation is done</div>";
+                    res.redirect('/pharmacy');
                     controller.async.eachLimit(medicines, 1, function(medicine, callback) {
                         save_medicines_stock_list(req, res, medicine, function() {
                             console.log("done");
@@ -290,15 +296,34 @@ stock.prototype.upload_stock_list =  function(req, res) {
                         }
                         else {
                             console.log('All files have been processed successfully');
+                            tomodel.user_id = req.session.pharmacy_id;
+                            user_model.async_select_user_by_id(tomodel, function(user) {
+                                //Send Confirmation Email
+                                var link = req.protocol + '://' + req.get('host') + '/pharmacy';
+                                var mailOptions = {
+                                    from: 'chemofinder@gmail.com', // sender address
+                                    to: user[0].EMAIL, // list of receivers
+                                    subject: 'Uploading Stock List is Completed Successfully', // Subject line
+                                    template: 'upload_stock_list_mail',
+                                    context: {
+                                        link: link
+                                    }
+                                    //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
+                                };
+                                controller.sendEmail(mailOptions);
+                            });
                         }
                     });
+                }
+                else {
+                    res.redirect('/pharmacy');
                 }
             }
         });
     }
     else
     {
-        req.session.extention_error = true;
+        req.session.stock_extention_error = true;
         res.redirect('/pharmacy');
     }
 }
@@ -366,7 +391,7 @@ function parsing_stock_list(req, res) {
     var first_sheet_name = workbook.SheetNames[0];
     var worksheet = workbook.Sheets[first_sheet_name];
     if(validate_stock_list_sheet(worksheet)) {
-        var warning_message = "<div class='alert alert-danger error-form'> Some medicines cannot be added due to the following: <ul>";
+        var warning_message = "<div class='alert alert-danger'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a> Some medicines cannot be added due to the following: <ul>";
         var flag = true;
         var format_error_flag = false;
         var i = 2;
@@ -384,7 +409,7 @@ function parsing_stock_list(req, res) {
                 warning_message = warning_message + '</ul></div>';
                 if(format_error_flag)
                 {
-                    req.session.format_error = warning_message;
+                    req.session.stock_format_error = warning_message;
                 }
                 break;
             }
@@ -572,7 +597,7 @@ function parsing_stock_list(req, res) {
         }
     }
     else {
-        req.session.format_error = "<div class='alert alert-danger error-form'> Wrong format please download the template and follow the convention </div>";
+        req.session.stock_format_error = "<div class='alert alert-danger'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a> Wrong format please download the template and follow the convention </div>";
     }
     return medicines;
 }
