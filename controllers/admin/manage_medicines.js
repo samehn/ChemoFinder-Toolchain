@@ -10,32 +10,32 @@ manage_medicines.prototype.constructor = manage_medicines;
 
 
 manage_medicines.prototype.manage_medicines_page =  function(req, res) {
-	medicine_model.async_select_approved_medicines(function(approved_medicines) {
-		medicine_model.async_select_non_approved_medicines(function(non_approved_medicines) {
-			var data = {approved_medicines: approved_medicines,  non_approved_medicines: non_approved_medicines};
-		    if(req.session.uploading_message)
-            {
-                data['uploading_message'] = req.session.uploading_message;
-                req.session.uploading_message = null;
-            }
-		    if(req.session.extention_error)
-		    {
-		        data['extention_error'] = true;
-		        req.session.extention_error = null;
-		    }
-		    if(req.session.format_error)
-		    {
-		        data['format_error'] = req.session.format_error;
-		        req.session.format_error = null;
-		    }  
-		    if(req.session.success_message)
-		    {
-		        data['success_message'] = req.session.success_message;
-		        req.session.success_message = null;
-		    } 
-		    res.render('admin/manage_medicines', data);
-		});
-	});
+	var approved_medicines = medicine_model.select_approved_medicines();
+	var non_approved_medicines = medicine_model.select_non_approved_medicines();
+	
+	var data = {approved_medicines: approved_medicines,  non_approved_medicines: non_approved_medicines};
+    if(req.session.uploading_message)
+    {
+        data['uploading_message'] = req.session.uploading_message;
+        req.session.uploading_message = null;
+    }
+    if(req.session.extention_error)
+    {
+        data['extention_error'] = true;
+        req.session.extention_error = null;
+    }
+    if(req.session.format_error)
+    {
+        data['format_error'] = req.session.format_error;
+        req.session.format_error = null;
+    }  
+    if(req.session.success_message)
+    {
+        data['success_message'] = req.session.success_message;
+        req.session.success_message = null;
+    } 
+    res.render('admin/manage_medicines', data);
+		
 }
 
 manage_medicines.prototype.add_new_medicine =  function(req, res) {
