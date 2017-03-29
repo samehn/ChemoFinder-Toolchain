@@ -31,7 +31,7 @@ block content
     .col-xs-6.col-md-4 
       button.form-control.btn.btn-primary.mg-btm-10(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewMedicine') Add New Medicine
     .col-xs-6.col-md-4 
-      button.form-control.btn.btn-primary.mg-btm-10(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewApprovedMedicine') Add New Approved Medicine  
+      button.form-control.btn.btn-primary.mg-btm-10(onclick="add_new_approved_medicine_modal()") Add New Approved Medicine  
     .col-xs-6.col-md-4
       form#uploadForm(ref='uploadForm', action= base + '/pharmacy/uploadstocklist', method='post', enctype='multipart/form-data')
         .fileUpload.btn.btn-primary.mg-btm-10
@@ -289,11 +289,13 @@ block modals
         .modal-body
           form#add-new-approved-medicine-form(role='form')
             #medicineFormApproved.form-group
-              select#medicineApproved.form-control(name='medicine')
-                option.form-control(value='') Select Form
-                - for( var i = 0, len = medicines.length; i < len; i++ ) {
-                option.form-control(value= medicines[i].ID) #{medicines[i].GENERIC_NAME} - #{medicines[i].BRAND_NAME} - #{medicines[i].FORM} - #{medicines[i].STRENGTH} - #{medicines[i].STRENGTH_UNIT} - #{medicines[i].MANUFACTURER} 
-                - }
+              select#medicineApproved.form-control(name='medicine', onchange="get_approved_medicine_details(this)")
+                option.form-control(value='') Select Medicine    
+              // /.input-group
+            // /.form-group
+            #medicineDetailsFormApproved.form-group
+              select#medicineDetailsApproved.form-control(name='medicine')
+                option.form-control(value='') Select Medicine Details   
               // /.input-group
             // /.form-group
             #batchNumberFormApproved.form-group

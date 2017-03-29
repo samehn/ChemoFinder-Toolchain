@@ -12,25 +12,48 @@ stock.prototype.constructor = stock;
 stock.prototype.stock_page =  function(req, res) {
     tomodel.user_id = req.session.pharmacy_id;
     stock_list_model.async_select_stock_list_by_id(tomodel, function(stock_list) {
-        medicine_model.async_select_approved_medicines(function(medicines) {
-            var data = {stock_list: stock_list, medicines: medicines};
-            if(req.session.stock_uploading_message)
-            {
-                data['uploading_message'] = req.session.stock_uploading_message;
-                req.session.stock_uploading_message = null;
-            }
-            if(req.session.stock_extention_error)
-            {
-                data['extention_error'] = true;
-                req.session.stock_extention_error = null;
-            }
-            if(req.session.stock_format_error)
-            {
-                data['format_error'] = req.session.stock_format_error;
-                req.session.stock_format_error = null;
-            }
-            res.render('pharmacy/stock_list', data);
-        });
+        var data = {stock_list: stock_list};
+        if(req.session.stock_uploading_message)
+        {
+            data['uploading_message'] = req.session.stock_uploading_message;
+            req.session.stock_uploading_message = null;
+        }
+        if(req.session.stock_extention_error)
+        {
+            data['extention_error'] = true;
+            req.session.stock_extention_error = null;
+        }
+        if(req.session.stock_format_error)
+        {
+            data['format_error'] = req.session.stock_format_error;
+            req.session.stock_format_error = null;
+        }
+        res.render('pharmacy/stock_list', data);    
+    });
+}
+
+stock.prototype.get_medicines_generic_and_form =  function(req, res) {
+    medicine_model.async_select_approved_medicines_distinct_generic_name(function(medicines) {
+        if(medicines.length > 0) {
+            res.send({message: "success", medicines: medicines});
+        }
+        else {
+            res.send({message: "failed"});
+        }
+    });
+}
+
+stock.prototype.get_medicine_by_generic_and_form =  function(req, res) {
+    var data = controller.xssClean(req.body);
+    tomodel.generic_name = data.generic_name;
+    tomodel.form = data.form;
+    medicine_model.async_select_medicine_by_generic_and_form(tomodel, function(medicines) {
+        if(medicines.length > 0) {
+            res.send({message: "success", medicines: medicines});
+        }
+        else {
+            res.send({message: "failed"});
+        }
     });
 }
 

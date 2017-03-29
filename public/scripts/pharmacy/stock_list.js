@@ -305,10 +305,56 @@ function add_new_medicine() {
   });
 }
 
+function add_new_approved_medicine_modal() {
+  $.ajax({
+    type: "get",
+    url: url + '/pharmacy/getmedicinesgenericandform',
+    success:  function(data){
+      console.log(data);
+      if(data.message == "success") {
+        var html = "";
+        for (var i = 0; i < data.medicines.length; i++) {
+          var html = html + "<option class='form-control' data-name='" + data.medicines[i].GENERIC_NAME + "' data-form='" + data.medicines[i].FORM + "'>" + data.medicines[i].GENERIC_NAME + " "  + data.medicines[i].FORM + "</option>"
+        }
+        $('#medicineApproved').append(html);
+      }
+      $('#addNewApprovedMedicine').modal('show');
+    }
+  });
+}
+
+function get_approved_medicine_details(element) {
+  $('#medicineDetailsApproved').html("<option class='form-control' value=''>Select Medicine Details</option>");
+  if($(element).val().length > 0) {
+    var item_array={};
+    item_array['generic_name'] = $(element).find(':selected').attr('data-name');
+    item_array['form'] = $(element).find(':selected').attr('data-form');
+    console.log(item_array);
+    $.ajax({
+      type: "post",
+      url: url + '/pharmacy/getmedicinebygenericandform',
+      data : item_array,
+      success:  function(data){
+        console.log(data);
+        if(data.message == "success") {
+          var html = "";
+          for (var i = 0; i < data.medicines.length; i++) {
+            var html = html + "<option class='form-control' value='" + data.medicines[i].ID + "' >" + data.medicines[i].GENERIC_NAME + " "  + data.medicines[i].FORM + " " + data.medicines[i].STRENGTH + " " + data.medicines[i].STRENGTH_UNIT + " " + data.medicines[i].BRAND_NAME + " " + data.medicines[i].MANUFACTURER + "</option>"
+          }
+          $('#medicineDetailsApproved').append(html);
+        }
+      }
+    });
+  }
+  else {
+    $('#medicineApproved').val('');
+  }
+}
+
 function add_new_approved_medicine() {
   var item_array={};
     
-  var medicine_id = $('#medicineApproved');
+  var medicine_id = $('#medicineDetailsApproved');
   var batch = $('#batchNumberApproved');
   var expiry_date = $('#expiryDateApproved');
   var pack_size = $('#packSizeApproved');

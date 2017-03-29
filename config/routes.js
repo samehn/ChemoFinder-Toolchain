@@ -87,6 +87,8 @@ module.exports = function(app){
 	app.post('/pharmacy/uploadstocklist', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_stock_controller.upload_stock_list);
 	app.get('/pharmacy/downloadtemplate', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_stock_controller.download_stock_list_template);
 	app.get('/pharmacy/downloadlaststock', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_stock_controller.download_last_stock);
+	app.get('/pharmacy/getmedicinesgenericandform', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_stock_controller.get_medicines_generic_and_form);
+	app.post('/pharmacy/getmedicinebygenericandform', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_stock_controller.get_medicine_by_generic_and_form);
 	app.get('/pharmacy/first_changepassword', pharmacy_middleware.pharmacy_check_first_login, pharmacy_first_login_controller.first_login_page);
 	app.post('/pharmacy/first_changepassword', pharmacy_middleware.pharmacy_check_first_login, pharmacy_first_login_controller.change_password);
 
