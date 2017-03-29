@@ -302,37 +302,11 @@ manage_medicines.prototype.upload_medicines_list =  function(req, res) {
                 if(medicines.length > 0) {
 				    req.session.uploading_message = "<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + medicines.length + " medicines will be added/updated in the background you will be notify by an email once this operation is done</div>";
                 	res.redirect('/admin/manage_medicines');
-				    controller.async.eachLimit(medicines, 5, function(medicine, callback){                      
-				        save_medicines_list(req, res, medicine, function() {
-                            console.log("done");
-				        	callback();
-                        });
-				        
-				    },function(err){
-			          	if( err ) {
-			             // One of the iterations produced an error.
-			             // All processing will now stop.
-			             console.log('A file failed to process');
-			          	} else {
-			              	console.log('All files have been processed successfully');
-			              	tomodel.admin_id = req.session.admin_id;
-			              	admin_model.async_select_admin_by_id(tomodel, function(admin) {
-                                //Send Confirmation Email
-                                var link = req.protocol + '://' + req.get('host') + '/admin/manage_medicines';
-                                var mailOptions = {
-                                    from: 'chemofinder@gmail.com', // sender address
-                                    to: admin[0].EMAIL, // list of receivers
-                                    subject: 'Uploading Medicines List is Completed Successfully', // Subject line
-                                    template: 'upload_medicines_list_mail',
-                                    context: {
-                                        link: link
-                                    }
-                                    //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
-                                };
-                                controller.sendEmail(mailOptions);
-                            });
-			          	}
-				    });
+				    // var args = [JSON.stringify(medicines)];
+				    var link = req.protocol + '://' + req.get('host') + '/admin/manage_medicines';
+
+					var child = require('child_process').fork('controllers/admin/uploading_medicines_list.js');
+					child.send({medicines: medicines, admin_id: req.session.admin_id, link: link});
                 }
                 else {
                 	res.redirect('/admin/manage_medicines');
@@ -617,22 +591,6 @@ function parsing_approved_medicines(req, res) {
     	req.session.format_error = "<div class='alert alert-danger'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a> Wrong format please download the template and follow the convention </div>";
     }
     return medicines;
-}
-
-var save_medicines_list = function(req, res, medicine, callback) {
-	medicine_model.async_select_medicine_by_main_keys(medicine, function(rows) {
-		if(rows.length > 0) {
-			medicine['medicine_id'] = rows[0].ID;
-			medicine_model.async_update_medicine(medicine, function(rows) {
-				callback();
-			});
-		}
-		else {
-			medicine_model.async_insert_new_medicine(medicine, function(rows) {
-				callback();
-			});
-		}
-	});
 }
 
 

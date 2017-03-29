@@ -307,35 +307,10 @@ stock.prototype.upload_stock_list =  function(req, res) {
                 if(medicines.length > 0) {
                     req.session.stock_uploading_message = "<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + medicines.length + " medicines will be added/updated in the background you will be notify by an email once this operation is done</div>";
                     res.redirect('/pharmacy');
-                    controller.async.eachLimit(medicines, 1, function(medicine, callback) {
-                        save_medicines_stock_list(req, res, medicine, function() {
-                            console.log("done");
-                            callback();
-                        });
-                    }, function(err) {
-                        if(err) {
-                            console.log('A file failed to process');
-                        }
-                        else {
-                            console.log('All files have been processed successfully');
-                            tomodel.user_id = req.session.pharmacy_id;
-                            user_model.async_select_user_by_id(tomodel, function(user) {
-                                //Send Confirmation Email
-                                var link = req.protocol + '://' + req.get('host') + '/pharmacy';
-                                var mailOptions = {
-                                    from: 'chemofinder@gmail.com', // sender address
-                                    to: user[0].EMAIL, // list of receivers
-                                    subject: 'Uploading Stock List is Completed Successfully', // Subject line
-                                    template: 'upload_stock_list_mail',
-                                    context: {
-                                        link: link
-                                    }
-                                    //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
-                                };
-                                controller.sendEmail(mailOptions);
-                            });
-                        }
-                    });
+                    var link = req.protocol + '://' + req.get('host') + '/pharmacy';
+
+                    var child = require('child_process').fork('controllers/pharmacy/uploading_stock_list.js');
+                    child.send({medicines: medicines, pharmacy_id: req.session.pharmacy_id, link: link});
                 }
                 else {
                     res.redirect('/pharmacy');
@@ -371,41 +346,6 @@ function validate_stock_list_sheet(worksheet) {
     }
     return true;
 }
-
-var save_medicines_stock_list = function(req, res, medicine, callback) {
-    medicine_model.async_select_medicine_by_main_keys(medicine, function(main_medicine) {
-        if(main_medicine.length > 0) {
-            medicine['medicine_id'] = main_medicine[0].ID;
-            medicine['user_id']= req.session.pharmacy_id;
-            stock_list_model.async_select_stock_list_by_medicine(medicine, function(stock_list_medicine) {
-                if(stock_list_medicine.length > 0) {
-                    medicine['stock_id'] = stock_list_medicine[0].ID;
-                    stock_list_model.async_update_stock_record(medicine, function(rows) {
-                        user_pharmacy_model.async_update_stock_time(medicine, function(rows) {
-                            callback();
-                        });
-                    });
-                }
-                else {
-                    stock_list_model.async_insert_new_record(medicine, function(rows) {
-                        callback();
-                    });
-                }
-            });
-        }
-        else {
-            medicine_model.async_insert_new_medicine_by_main_keys(medicine, function(rows) {
-                medicine_model.async_select_medicine_by_main_keys(medicine, function(medicine) {
-                    medicine['medicine_id'] = medicine[0].ID;
-                    stock_list_model.async_insert_new_record(medicine, function(rows) {
-                        callback();
-                    });
-                });
-            });
-        }
-    });
-}
-
 
 function parsing_stock_list(req, res) {
     var medicines = [];
