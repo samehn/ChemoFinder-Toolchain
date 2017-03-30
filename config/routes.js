@@ -25,6 +25,7 @@ module.exports = function(app){
 	var doctor_select_pharmacy_controller = require('../controllers/doctor/select_pharmacy');
 	var doctor_shopping_list_controller = require('../controllers/doctor/shopping_list');
 	
+	var generate_random_password_helper = require('../helpers/generate_random_password_helper');
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	//Middlewares++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -105,6 +106,9 @@ module.exports = function(app){
 	app.post('/doctor/savemedicinesession', doctor_middleware.doctor_check_sign_in, doctor_shopping_list_controller.save_medicine_session);
 	app.get('/doctor/first_changepassword', doctor_middleware.doctor_check_first_login, doctor_first_login_controller.first_login_page);
 	app.post('/doctor/first_changepassword', doctor_middleware.doctor_check_first_login, doctor_first_login_controller.change_password);
+
+	app.get('/generaterandompassword', generate_random_password_helper.generate_random_password);
+
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 }

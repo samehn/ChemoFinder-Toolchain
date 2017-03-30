@@ -7,7 +7,6 @@ tomodel = {};
 
 
 process.on('message', function(message){
-	console.log(message);
 	controller.async.eachLimit(message.medicines, 1, function(medicine, callback) {
 	    save_medicines_stock_list(medicine, message.pharmacy_id, function() {
 	        console.log("done");

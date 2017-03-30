@@ -5,7 +5,6 @@ stock_list_model  = require('../../models/stock_list_model');
 tomodel = {};
 //var dependency = JSON.parse(process.argv[2]);
 process.on('message', function(message){
-    console.log(message.medicines);
     controller.async.eachLimit(message.medicines, 5, function(medicine, callback){                      
         save_medicines_list(medicine, function() {
             console.log("done");

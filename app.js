@@ -1,8 +1,6 @@
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
-// var multer = require('multer');
-// var upload = multer(); 
 var fs = require('fs');
 var session = require('express-session');
 var cookieParser = require('cookie-parser');
@@ -92,73 +90,6 @@ var routes = require('./config/routes')(app);
 // setInterval(function () { 
 //     console.log('second passed'); 
 // }, 1000);
-
-// app.get('/admin/dashboard', checkAdminSignIn, function(req, res){
-//     var base = req.protocol + '://' + req.get('host');
-//     res.render('admin/dashboard', { base: base });
-// });
-// var async = require('async');
-  
-// app.get('/test', function(req, res) {
-//     var entries = [];
-//     for (var i = 0; i < 1000; i++) {
-//         var entry = {name:"lolo", test: i};
-//         entries.push(entry);
-//     }
-//     console.log(entries);
-//     async.eachLimit(entries, 1, function(entrie, callback){                      
-//         var query = "SELECT * from DASH5082.MEDICINE";
-//         db.dbQuery(query, function(result) {
-//            callback();     
-//         });
-//         //model.insert_in_db(entrie, function(rows) {callback()});
-//     },function(err){
-//           if( err ) {
-//              // One of the iterations produced an error.
-//              // All processing will now stop.
-//              console.log('A file failed to process');
-//           } else {
-//               console.log('All files have been processed successfully');
-//           }
-//     });
-
-    
-//     res.send('done');
-// });
-
-app.get('/generaterandompassword', function(req, res) {
-    var random = new RandExp(/(?=.*[A-Za-z\d])@[A-Za-z\d]{8,10}/).gen();
-    res.send({random: random});
-});
-
-// app.get('/doctor/getapprovedmedicines', function(req, res){
-//     var query = "SELECT * from DASH5082.MEDICINE WHERE SRA IS NOT NULL";
-//     db.dbQuery(query, function(result) {
-//         res.send({medicines: result});    
-//     });
-// });
-
-// app.get('/getmedicinebyid/:id', function(req, res){
-//     var query = "SELECT * from DASH5082.MEDICINE WHERE ID =" + req.params.id;
-//     db.dbQuery(query, function(result) {
-//         res.send({medicine: result});    
-//     });
-// });
-
-// app.post('/getmedicineid', function(req, res) {
-//     var query = "SELECT ID from DASH5082.MEDICINE WHERE GENERIC_NAME ='" + req.body.generic_name + "' AND BRAND_NAME = '" + req.body.brand_name + "' AND FORM = '" + req.body.form + "' AND STRENGTH = '" + req.body.strength + "' AND STRENGTH_UNIT = '" + req.body.strength_unit + "' AND MANUFACTURER = '" + req.body.manufacturer + "';";
-//     db.dbQuery(query, function(result) {
-//         if(result.length != 0)
-//         {
-//             res.send({message:"success", medicine_id: result[0].ID});
-//         }
-//         else
-//         {
-//             res.send({message:"failed"});
-//         }
-//     });
-// });
-
 
 ///////////////////////////////////////////////////////////////////////////
 
