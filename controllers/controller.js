@@ -95,31 +95,58 @@ controller.prototype.integer_validation = function(number) {
 };
 
 controller.prototype.validate = function (field, validations) {
-	if(validations.includes('required'))
+	// reguired OR required||message
+	if(checkKeyStartWith(validations, 'required'))
 	{
+		var suffix = getKeyStartWith(validations, 'required');
 		if(required(field))
 		{
-			return required(field);
+			if(suffix == 'required') {
+				return required(field);
+			}
+			else {
+				var message = suffix.split('||')[1];
+				return requiredWithMessage(field, message);
+			}
 		}
 	}
-	if(validations.includes('email'))
+
+	//email OR email||message
+	if(checkKeyStartWith(validations, 'email'))
 	{
+		var suffix = getKeyStartWith(validations, 'email');
 		if(isEmail(field))
 		{
-			return isEmail(field);
+			if(suffix == 'email') {
+				return isEmail(field);		
+			}
+			else {
+				var message = suffix.split('||')[1];
+				return isEmailWithMessage(field, message);	
+			}
+			
 		}
 	}
-	//length:min-max
+
+	//length:min-max OR length:min-max
 	if(checkKeyStartWith(validations, 'length:'))
 	{
 		var suffix = getKeyStartWith(validations, 'length:');
-		var min = suffix.split(':')[1].split('-')[0];
-		var max = suffix.split(':')[1].split('-')[1];
+		var suffixArray = suffix.split('||');
+		var min = suffixArray[0].split(':')[1].split('-')[0];
+		var max = suffixArray[0].split(':')[1].split('-')[1];
 		if(isLength(field, min, max))
 		{
-			return isLength(field, min, max);
+			if(suffixArray.length == 1) {
+				return isLength(field, min, max);
+			}
+			else {
+				var message = suffixArray[1];
+				return isLengthWithMessage(field, min, max, message);	
+			}
 		}
 	}
+
 	//match_regex:regex||message
 	if(checkKeyStartWith(validations, 'match_regex:'))
 	{
@@ -127,46 +154,61 @@ controller.prototype.validate = function (field, validations) {
 		var blocks = suffix.split('||');
 		var message = blocks[blocks.length - 1];
 		var regex = suffix.slice('match_regex:'.length,(-message.length -2));
-		message = '<p>' + message + '</p>';
+		message =  message;
 		if(validateWithRegex(regex, message, field))
 		{
 			return (validateWithRegex(regex, message, field));
 		}
 	}
 
-	//integer:min-max == integer
+	//integer:min-max OR integer OR integer:min-max||message OR integer||message
 	if(checkKeyStartWith(validations, 'integer'))
 	{
 		var suffix = getKeyStartWith(validations, 'integer');
 		var options = {};
-		var suffixArray = suffix.split(':');
+		var suffixArrayMessage = suffix.split('||');
+		var suffixArray = suffixArrayMessage[0].split(':');
 		if (suffixArray.length > 1) {
-			var min = suffix.split(':')[1].split('-')[0];
-			var max = suffix.split(':')[1].split('-')[1];
+			var min = suffixArrayMessage[0].split(':')[1].split('-')[0];
+			var max = suffixArrayMessage[0].split(':')[1].split('-')[1];
 			options['min'] = min;
 			options['max'] = max;
 		}
 		if(isInteger(field, options))
 		{
-			return isInteger(field, options);
+			if(suffixArrayMessage.length == 1) {
+				return isInteger(field, options);
+			}
+			else {
+				var message = suffixArrayMessage[1];
+				return isIntegerWithMessage(field, options, message);
+			}
 		}
 	}
 
-	//float:min-max == float
+	//float:min-max OR float OR float:min-max||message OR float||message
 	if(checkKeyStartWith(validations, 'float'))
 	{
 		var suffix = getKeyStartWith(validations, 'float');
 		var options = {};
-		var suffixArray = suffix.split(':');
+		var suffixArrayMessage = suffix.split('||');
+		var suffixArray = suffixArrayMessage[0].split(':');
 		if (suffixArray.length > 1) {
-			var min = suffix.split(':')[1].split('-')[0];
-			var max = suffix.split(':')[1].split('-')[1];
+			var min = suffixArrayMessage[0].split(':')[1].split('-')[0];
+			var max = suffixArrayMessage[0].split(':')[1].split('-')[1];
 			options['min'] = min;
 			options['max'] = max;
 		}
 		if(isFloat(field, options))
 		{
-			return isFloat(field, options);
+			if(suffixArrayMessage.length == 1) {
+				return isFloat(field, options);
+			}
+
+			else {
+				var message = suffixArrayMessage[1];
+				return isFloatWithMessage(field, options, message);
+			}
 		}
 	}
 
@@ -175,8 +217,7 @@ controller.prototype.validate = function (field, validations) {
 
 function validateWithRegex(strRegex, message, field) {
 	var regex = new RegExp(strRegex);
-	console.log(regex);
-    for (var key in field){
+	for (var key in field){
 	    if (typeof field[key] !== 'function') {
 	    	if(!regex.test(field[key]))
 			{
@@ -213,8 +254,21 @@ function required(field) {
 	    if (typeof field[key] !== 'function') {
 	    	if(controller.prototype.validator.isEmpty(field[key]))
 			{
-				var value = '<p>This filed is required</p>';
+				var value = 'This filed is required';
 				var result = {[key+'_error']: value};
+				return result;
+			}
+			return false;
+	    }
+	}
+}
+
+function requiredWithMessage(field, message) {
+	for (var key in field){
+	    if (typeof field[key] !== 'function') {
+	    	if(controller.prototype.validator.isEmpty(field[key]))
+			{
+				var result = {[key+'_error']: message};
 				return result;
 			}
 			return false;
@@ -227,8 +281,21 @@ function isEmail(field) {
 	    if (typeof field[key] !== 'function') {
 	    	if(!controller.prototype.validator.isEmail(field[key]))
 			{
-				var value = '<p>This is not a valid email</p>';
+				var value = 'This is not a valid email';
 				var result = {[key+'_error']: value};
+				return result;
+			}
+			return false;
+	    }
+	}
+}
+
+function isEmailWithMessage(field, message) {
+	for (var key in field){
+	    if (typeof field[key] !== 'function') {
+	    	if(!controller.prototype.validator.isEmail(field[key]))
+			{
+				var result = {[key+'_error']: message};
 				return result;
 			}
 			return false;
@@ -241,8 +308,21 @@ function isLength(field, min, max) {
 	    if (typeof field[key] !== 'function') {
 	    	if(!controller.prototype.validator.isLength(field[key], {min: min, max: max}))
 			{
-				var value = '<p>The length of this field should be between '+ min +' and ' + max + '</p>';
+				var value = 'The length of this field should be between '+ min +' and ' + max;
 				var result = {[key+'_error']: value};
+				return result;
+			}
+			return false;
+	    }
+	}
+}
+
+function isLengthWithMessage(field, min, max, message) {
+ 	for (var key in field){
+	    if (typeof field[key] !== 'function') {
+	    	if(!controller.prototype.validator.isLength(field[key], {min: min, max: max}))
+			{
+				var result = {[key+'_error']: message};
 				return result;
 			}
 			return false;
@@ -256,7 +336,7 @@ function isInteger(field, options) {
 	    	if(Object.keys(options).length > 0){
 	    		if(!controller.prototype.validator.isInt(field[key], {min: options['min'], max: options['max']}))
 				{
-					var value = '<p>This field should be an integer range between '+ options['min'] +' and ' + options['max'] + '</p>';
+					var value = 'This field should be an integer range between '+ options['min'] +' and ' + options['max'];
 					var result = {[key+'_error']: value};
 					return result;
 				}
@@ -264,8 +344,31 @@ function isInteger(field, options) {
 	    	else{
 	    		if(!controller.prototype.validator.isInt(field[key]))
 				{
-					var value = '<p>This field should be an integer</p>';
+					var value = 'This field should be an integer';
 					var result = {[key+'_error']: value};
+					return result;
+				}
+	    	}
+	    	
+			return false;
+	    }
+	}
+}
+
+function isIntegerWithMessage(field, options, message) {
+	for (var key in field){
+	    if (typeof field[key] !== 'function') {
+	    	if(Object.keys(options).length > 0){
+	    		if(!controller.prototype.validator.isInt(field[key], {min: options['min'], max: options['max']}))
+				{
+					var result = {[key+'_error']: message};
+					return result;
+				}
+	    	}
+	    	else{
+	    		if(!controller.prototype.validator.isInt(field[key]))
+				{
+					var result = {[key+'_error']: message};
 					return result;
 				}
 	    	}
@@ -281,7 +384,7 @@ function isFloat(field, options) {
 	    	if(Object.keys(options).length > 0){
 	    		if(!controller.prototype.validator.isFloat(field[key], {min: options['min'], max: options['max']}))
 				{
-					var value = '<p>This field should be a float range between '+ options['min'] +' and ' + options['max'] + '</p>';
+					var value = 'This field should be a float range between '+ options['min'] +' and ' + options['max'];
 					var result = {[key+'_error']: value};
 					return result;
 				}
@@ -289,8 +392,31 @@ function isFloat(field, options) {
 	    	else{
 	    		if(!controller.prototype.validator.isFloat(field[key]))
 				{
-					var value = '<p>This field should be a float</p>';
+					var value = 'This field should be a float';
 					var result = {[key+'_error']: value};
+					return result;
+				}
+	    	}
+	    	
+			return false;
+	    }
+	}
+}
+
+function isFloatWithMessage(field, options, message) {
+	for (var key in field){
+	    if (typeof field[key] !== 'function') {
+	    	if(Object.keys(options).length > 0){
+	    		if(!controller.prototype.validator.isFloat(field[key], {min: options['min'], max: options['max']}))
+				{
+					var result = {[key+'_error']: message};
+					return result;
+				}
+	    	}
+	    	else{
+	    		if(!controller.prototype.validator.isFloat(field[key]))
+				{
+					var result = {[key+'_error']: message};
 					return result;
 				}
 	    	}

@@ -220,7 +220,7 @@ function register() {
           showError(data.name_error, $('#nameRegisterForm'));
           showError(data.position_error, $('#positionRegisterForm'));
           showError(data.entity_name_error, $('#entityNameRegisterForm'));
-          showError(data.phone_error, $('#phoneRegisterForm'));
+          showError(data.phone_number_error, $('#phoneRegisterForm'));
           showError(data.address_error, $('#addressRegisterForm'));
           showError(data.city_error, $('#cityRegisterForm'));
           showError(data.country_error, $('#countryRegisterForm'));
