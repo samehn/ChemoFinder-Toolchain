@@ -5,7 +5,7 @@ module.exports = function(app){
 	var user_authentication_controller = require('../controllers/user/authentication');
 	var user_forgot_password_controller = require('../controllers/user/forgot_password');
 	var user_reset_password_controller = require('../controllers/user/reset_password');
-	
+
 
 	var admin_authentication_controller = require('../controllers/admin/authentication');
 	var admin_forgot_password_controller = require('../controllers/admin/forgot_password');
@@ -17,21 +17,21 @@ module.exports = function(app){
 	var pharmacy_first_login_controller = require('../controllers/pharmacy/first_login');
 	var pharmacy_profile_controller = require('../controllers/pharmacy/profile');
 	var pharmacy_stock_controller = require('../controllers/pharmacy/stock');
-	
+
 	var doctor_first_login_controller = require('../controllers/doctor/first_login');
 	var doctor_profile_controller = require('../controllers/doctor/profile');
 	var doctor_treatment_center_controller = require('../controllers/doctor/treatment_center');
 	var doctor_select_medicine_controller = require('../controllers/doctor/select_medicine');
 	var doctor_select_pharmacy_controller = require('../controllers/doctor/select_pharmacy');
 	var doctor_shopping_list_controller = require('../controllers/doctor/shopping_list');
-	
+
 	var generate_random_password_helper = require('../helpers/generate_random_password_helper');
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	//Middlewares++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	var admin_middleware = require('../middlewares/admin');
 	var doctor_middleware = require('../middlewares/doctor');
-	var pharmacy_middleware = require('../middlewares/pharmacy');	
+	var pharmacy_middleware = require('../middlewares/pharmacy');
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	//Routes+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -47,7 +47,7 @@ module.exports = function(app){
 	app.post('/user/forgotpassword', user_forgot_password_controller.forgot_password_process);
 	app.get('/user/resetpassword/:token', user_reset_password_controller.reset_password_page);
 	app.post('/user/resetpassword', user_reset_password_controller.reset_password_process);
-	
+
 	app.get('/admin/login', admin_authentication_controller.login_page);
 	app.post('/admin/login', admin_authentication_controller.login);
 	app.get('/admin/logout', admin_authentication_controller.logout);
@@ -86,8 +86,14 @@ module.exports = function(app){
 	app.post('/pharmacy/updatemedicine', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_stock_controller.update_medicine);
 	app.post('/pharmacy/deletemedicine', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_stock_controller.delete_medicine);
 	app.post('/pharmacy/uploadstocklist', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_stock_controller.upload_stock_list);
+
+
+	app.post('/pharmacy/uploadoutofstocklist', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_stock_controller.upload_out_of_stock_list);
 	app.get('/pharmacy/downloadtemplate', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_stock_controller.download_stock_list_template);
 	app.get('/pharmacy/downloadlaststock', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_stock_controller.download_last_stock);
+
+	app.get('/pharmacy/downloadoutofstocklist', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_stock_controller.download_out_of_stock_list);
+
 	app.get('/pharmacy/getmedicinesgenericandform', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_stock_controller.get_medicines_generic_and_form);
 	app.post('/pharmacy/getmedicinebygenericandform', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_stock_controller.get_medicine_by_generic_and_form);
 	app.get('/pharmacy/first_changepassword', pharmacy_middleware.pharmacy_check_first_login, pharmacy_first_login_controller.first_login_page);

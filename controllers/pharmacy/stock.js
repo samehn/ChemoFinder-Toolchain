@@ -28,6 +28,9 @@ stock.prototype.stock_page =  function(req, res) {
         data['format_error'] = req.session.stock_format_error;
         req.session.stock_format_error = null;
     }
+		console.log("**************** about to call pharmacy views ******************");
+		console.log("is treatment user: " + req.session.treatmentCenter_user);
+		data['treatmentCenter_user'] = req.session.treatmentCenter_user;
     res.render('pharmacy/stock_list', data);
 }
 
@@ -59,13 +62,13 @@ stock.prototype.get_medicine_by_generic_and_form =  function(req, res) {
 stock.prototype.get_stock_record =  function(req, res) {
     if(Number.isInteger(parseInt(req.body.stock_id))) {
         tomodel.stock_id = req.body.stock_id;
-        tomodel.user_id = req.session.pharmacy_id; 
+        tomodel.user_id = req.session.pharmacy_id;
         stock_list_model.async_select_stock_list_record_by_id(tomodel, function(stock_list_record) {
             if(stock_list_record.length > 0){
                 res.send({message:"success", result: stock_list_record});
             }
             else{
-                res.send({message:"failed"});        
+                res.send({message:"failed"});
             }
         });
     }
@@ -125,7 +128,7 @@ stock.prototype.add_new_medicine =  function(req, res) {
                 });
             }
         });
-    }    
+    }
 }
 
 stock.prototype.add_new_approved_medicine =  function(req, res) {
@@ -154,7 +157,7 @@ stock.prototype.add_new_approved_medicine =  function(req, res) {
                 });
             }
         });
-    }     
+    }
 }
 
 stock.prototype.update_medicine =  function(req, res) {
@@ -208,7 +211,7 @@ stock.prototype.delete_medicine =  function(req, res) {
                 res.send({message: "failed", medicine_error: "This Medicine is not exists in your stock"});
             }
         });
-    } 
+    }
 }
 
 stock.prototype.download_stock_list_template =  function(req, res) {
@@ -222,13 +225,13 @@ stock.prototype.download_last_stock =  function(req, res) {
 
     // must create one more sheet.
     var worksheet = workbook.addWorksheet("Sheet1");
-    
+
     worksheet.views = [
         {zoomScale:66}
     ];
     // Add a row by contiguous Array (assign to columns A, B & C)
     worksheet.addRow(['ID', 'Generic Name', 'Form', 'Strength', 'Strength unit', 'Brand name', 'Manufacturer', 'Batch Number', 'Expiry Date (dd-mm-yyyy)', 'Current Stringent Regulatory Authority (SRA) Approvals', 'Pack Size', 'Price per Pack', 'Available Stock (Packs)', 'Average Monthly Consumption (AMC) in Packs']);
-    
+
     var str = "ABCDEFGHIJKLMN";
     for(var i=0; i<str.length; i++)
     {
@@ -247,14 +250,14 @@ stock.prototype.download_last_stock =  function(req, res) {
             size: 10,
             bold: true
         };
-        worksheet.getCell(char + '1').alignment = { wrapText: true }; 
+        worksheet.getCell(char + '1').alignment = { wrapText: true };
         var dobCol = worksheet.getColumn(char);
         if(char == 'B' || char == 'E' || char == 'F'|| char == 'I'|| char == 'J'|| char == 'N') {
-            dobCol.width = 30; 
+            dobCol.width = 30;
         }
         else {
             dobCol.width = 20;
-        }       
+        }
     }
     tomodel.user_id = req.session.pharmacy_id;
 
@@ -275,7 +278,7 @@ stock.prototype.download_last_stock =  function(req, res) {
                   controller.fs.unlink(path);
                 });
             });
-        }    
+        }
         else {
             req.session.stock_format_error = '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> You have no previous stocks to be downloaded </div>';
             res.redirect('/pharmacy');
@@ -283,9 +286,125 @@ stock.prototype.download_last_stock =  function(req, res) {
     });
 }
 
+//***********************download_out_of_stock_list**********************
+
+stock.prototype.download_out_of_stock_list =  function(req, res) {
+    // create workbook by api.
+    var workbook = new controller.Excel.Workbook();
+
+    // must create one more sheet.
+    var worksheet = workbook.addWorksheet("Sheet1");
+
+    worksheet.views = [
+        {zoomScale:66}
+    ];
+    // Add a row by contiguous Array (assign to columns A, B & C)
+    worksheet.addRow(['ID', 'Generic Name', 'Form', 'Strength', 'Strength unit', 'Brand name', 'Manufacturer', 'Batch Number', 'Expiry Date (dd-mm-yyyy)', 'Current Stringent Regulatory Authority (SRA) Approvals', 'Pack Size', 'Price per Pack', 'Available Stock (Packs)', 'Average Monthly Consumption (AMC) in Packs']);
+
+    var str = "ABCDEFGHIJKLMN";
+    for(var i=0; i<str.length; i++)
+    {
+        var char = str.charAt(i);
+        worksheet.getCell(char + '1').fill = {
+            type: 'pattern',
+            pattern:'solid',
+            // fgColor:{argb:'0001'},
+            fgColor:{argb:'FF203764'}
+        };
+        // for the wannabe graphic designers out there
+        worksheet.getCell(char + '1').font = {
+            name: 'Arial',
+            color: { argb: 'FFFFFFFF' },
+            // family: 4,
+            size: 10,
+            bold: true
+        };
+        worksheet.getCell(char + '1').alignment = { wrapText: true };
+        var dobCol = worksheet.getColumn(char);
+        if(char == 'B' || char == 'E' || char == 'F'|| char == 'I'|| char == 'J'|| char == 'N') {
+            dobCol.width = 30;
+        }
+        else {
+            dobCol.width = 20;
+        }
+    }
+    tomodel.user_id = req.session.pharmacy_id;
+
+    stock_list_model.async_select_out_of_stock_list_by_id(tomodel, function(stock_list) {
+        if(stock_list.length > 0) {
+            for (var i = 0; i < stock_list.length; i++) {
+                worksheet.addRow([stock_list[i].ID, stock_list[i].GENERIC_NAME, stock_list[i].FORM, stock_list[i].STRENGTH, stock_list[i].STRENGTH_UNIT, stock_list[i].BRAND_NAME, stock_list[i].MANUFACTURER, stock_list[i].BATCH_NUMBER, stock_list[i].EXPIRY_DATE, stock_list[i].SRA, stock_list[i].PACK_SIZE, stock_list[i].PRICE_PER_PACK, stock_list[i].AVAILABLE_STOCK, stock_list[i].AVG_MONTHLY_CONSUMPTION]);
+            }
+            var path = './public/uploads/stocks/stock_list_' + req.session.pharmacy_id + '_' + Date.now() + '.xlsx';
+            if(controller.fs.existsSync(path)) {
+                controller.fs.unlinkSync(path);
+            }
+            // you can create xlsx file now.
+            workbook.xlsx.writeFile(path).then(function() {
+                console.log("xlsx file is written.");
+                res.download(path, 'out_of_stock_list.xlsx', function(err){
+                  //CHECK FOR ERROR
+                  controller.fs.unlink(path);
+                });
+            });
+        }
+        else {
+            req.session.stock_format_error = '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> You have no previous stocks to be downloaded </div>';
+            res.redirect('/pharmacy');
+        }
+    });
+}
+
+//**********************************************************************
+
+stock.prototype.upload_out_of_stock_list =  function(req, res) {
+	console.log("***************** starting out of stock list uploading");
+	var sampleFile;
+
+	if (!req.files) {
+			res.send('No files were uploaded.');
+			console.log('No files were uploaded.');
+			return;
+	}
+	sampleFile = req.files.sampleFile;
+	var fileArray = sampleFile.name.split('.');
+	var extension = fileArray[fileArray.length - 1];
+	if(extension == "xlsx")
+	{
+			var filePath = './public/uploads/out_of_stocks/out_of_stock_list_' + req.session.pharmacy_id + '.xlsx';
+			req.stockFilePath = filePath;
+			sampleFile.mv(filePath, function(err) {
+					if (err) {
+							res.status(500).send(err);
+					}
+					else {
+							var medicines = parsing_stock_list(req, res);
+							console.log(medicines);
+							console.log('File uploaded!');
+							if(medicines.length > 0) {
+									req.session.stock_uploading_message = "<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + medicines.length + " medicines will be updated in the background you will be notify by an email once this operation is done</div>";
+									res.redirect('/pharmacy');
+									var link = req.protocol + '://' + req.get('host') + '/pharmacy';
+
+									var child = require('child_process').fork('controllers/pharmacy/uploading_out_of_stock_list.js');
+									child.send({medicines: medicines, pharmacy_id: req.session.pharmacy_id, link: link});
+							}
+							else {
+									res.redirect('/pharmacy');
+							}
+					}
+			});
+	}
+	else
+	{
+			req.session.stock_extention_error = true;
+			res.redirect('/pharmacy');
+	}
+}
+
 stock.prototype.upload_stock_list =  function(req, res) {
     var sampleFile;
- 
+
     if (!req.files) {
         res.send('No files were uploaded.');
         console.log('No files were uploaded.');
@@ -296,7 +415,9 @@ stock.prototype.upload_stock_list =  function(req, res) {
     var extension = fileArray[fileArray.length - 1];
     if(extension == "xlsx")
     {
-        sampleFile.mv('./public/uploads/stocks/stock_list_' + req.session.pharmacy_id + '.xlsx', function(err) {
+				var filePath = './public/uploads/out_of_stocks/out_of_stock_list_' + req.session.pharmacy_id + '.xlsx';
+				req.stockFilePath = filePath;
+        sampleFile.mv(filePath, function(err) {
             if (err) {
                 res.status(500).send(err);
             }
@@ -349,7 +470,7 @@ function validate_stock_list_sheet(worksheet) {
 
 function parsing_stock_list(req, res) {
     var medicines = [];
-    var workbook = controller.XLSX.readFile('./public/uploads/stocks/stock_list_' + req.session.pharmacy_id + '.xlsx');
+    var workbook = controller.XLSX.readFile(req.stockFilePath);
     var first_sheet_name = workbook.SheetNames[0];
     var worksheet = workbook.Sheets[first_sheet_name];
     if(validate_stock_list_sheet(worksheet)) {
@@ -364,7 +485,7 @@ function parsing_stock_list(req, res) {
 
             var id_address = 'A'+i;
             var id_cell = worksheet[id_address];
-            
+
             if(id_cell == undefined)
             {
                 flag = false;
@@ -412,7 +533,7 @@ function parsing_stock_list(req, res) {
             {
                 data['strength'] = '';
             }
-            
+
             var strength_unit_address = 'E'+i;
             var strength_unit_cell = worksheet[strength_unit_address];
             if(strength_unit_cell != undefined)
@@ -565,7 +686,7 @@ function parsing_stock_list(req, res) {
 }
 
 function deleted_medicine_validations(data) {
-    var validation_array = {};  
+    var validation_array = {};
 
     var stock_id = controller.validate({stock_id: data.stock_id},['required', 'integer']);
     if(stock_id){
@@ -575,7 +696,7 @@ function deleted_medicine_validations(data) {
         tomodel.stock_id = data.stock_id;
         var stock_list_record = stock_list_model.select_stock_record_by_id(tomodel);
         if(stock_list_record.length == 0) {
-            validation_array = controller.mergeArrays(validation_array, {medicine_error: "This is not a vaild medicine"});       
+            validation_array = controller.mergeArrays(validation_array, {medicine_error: "This is not a vaild medicine"});
         }
     }
 
@@ -583,7 +704,7 @@ function deleted_medicine_validations(data) {
 }
 
 function updated_medicine_validations(data) {
-    var validation_array = {};  
+    var validation_array = {};
 
     var stock_id = controller.validate({stock_id: data.stock_id},['required', 'integer']);
     if(stock_id){
@@ -593,7 +714,7 @@ function updated_medicine_validations(data) {
         tomodel.stock_id = data.stock_id;
         var stock_list_record = stock_list_model.select_stock_record_by_id(tomodel);
         if(stock_list_record.length == 0) {
-            validation_array = controller.mergeArrays(validation_array, {medicine_error: "This is not a vaild medicine"});       
+            validation_array = controller.mergeArrays(validation_array, {medicine_error: "This is not a vaild medicine"});
         }
     }
 
@@ -601,12 +722,12 @@ function updated_medicine_validations(data) {
     if(pack_size){
         validation_array = controller.mergeArrays(validation_array, pack_size);
     }
-    
+
     var batch_number = controller.validate({batch_number: data.batch_number},['required', 'length:0-100']);
     if(batch_number){
         validation_array = controller.mergeArrays(validation_array, batch_number);
     }
-    
+
     data.expiry_date = new Date(data.expiry_date);
     if(controller.moment(data.expiry_date).isValid()) {
         data.expiry_date = controller.moment(data.expiry_date).format('DD/MM/YYYY');
@@ -637,7 +758,7 @@ function updated_medicine_validations(data) {
 }
 
 function approved_medicine_validations(data) {
-    var validation_array = {};  
+    var validation_array = {};
 
     var medicine = controller.validate({medicine: data.medicine},['required', 'integer']);
     if(medicine){
@@ -647,7 +768,7 @@ function approved_medicine_validations(data) {
         tomodel.medicine_id = data.medicine;
         var medicine = medicine_model.select_medicine_by_id(tomodel);
         if(medicine.length == 0) {
-            validation_array = controller.mergeArrays(validation_array, {batch_number_error: "This is not a vaild medicine"});       
+            validation_array = controller.mergeArrays(validation_array, {batch_number_error: "This is not a vaild medicine"});
         }
     }
 
@@ -655,12 +776,12 @@ function approved_medicine_validations(data) {
     if(pack_size){
         validation_array = controller.mergeArrays(validation_array, pack_size);
     }
-    
+
     var batch_number = controller.validate({batch_number: data.batch_number},['required', 'length:0-100']);
     if(batch_number){
         validation_array = controller.mergeArrays(validation_array, batch_number);
     }
-    
+
     data.expiry_date = new Date(data.expiry_date);
     if(controller.moment(data.expiry_date).isValid()) {
         data.expiry_date = controller.moment(data.expiry_date).format('DD/MM/YYYY');
@@ -727,7 +848,7 @@ function new_medicine_validations(data) {
     if(pack_size){
         validation_array = controller.mergeArrays(validation_array, pack_size);
     }
-    
+
     var batch_number = controller.validate({batch_number: data.batch_number},['required', 'length:0-100']);
     if(batch_number){
         validation_array = controller.mergeArrays(validation_array, batch_number);

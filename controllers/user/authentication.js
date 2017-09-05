@@ -41,24 +41,32 @@ authentication.prototype.login =  function(req, res) {
                         else if(user[0].TYPE.toLowerCase() == 'pharmacy' || user[0].TYPE.toLowerCase() == 'treatment center') {
                             req.session.pharmacy_id = user[0].ID;
                             req.session.pharmacy_first_login = user[0].FIRST_LOGIN;
+
+														req.session.treatmentCenter_user = false;
+														//check on tereatment center user and set a flag to true
+														if( user[0].TYPE.toLowerCase() == 'treatment center')
+														 {
+															  req.session.treatmentCenter_user = true;
+															console.log("this is treatment center");
+															}
                         }
-                        
+
                         var type = user[0].TYPE;
-                        
+
                         res.send({message: "success", type: type});
                     }
                 }
                 else
                 {
-                   res.send({message: "failed", login_error: "Invalid Credentials"}); 
+                   res.send({message: "failed", login_error: "Invalid Credentials"});
                 }
-            });   
+            });
         }
         else
         {
             res.send({message: "failed", login_error: "Invalid Credentials"});
         }
-        
+
     }
 }
 
@@ -77,7 +85,7 @@ authentication.prototype.signup =  function(req, res) {
         res.send(result);
     }
     else
-    {    
+    {
         controller.bcrypt.hash(data.password, controller.saltRounds, function(err, hash) {
             tomodel.type = data.type;
             tomodel.name = data.name;
@@ -90,7 +98,7 @@ authentication.prototype.signup =  function(req, res) {
 
             tomodel.email = data.email;
             tomodel.password = hash;
-            
+
             tomodel.first_login = '0';
             tomodel.active = '1';
             tomodel.approve = '0';
@@ -107,7 +115,7 @@ authentication.prototype.signup =  function(req, res) {
                 //insert new pharmacy
                 user_pharmacy_model.insert_user_pharmacy(tomodel);
             }
-            
+
 
             //Send Confirmation Email
             var link = req.protocol + '://' + req.get('host') + '/admin/manage_users';
@@ -152,8 +160,8 @@ function register_validations(data) {
     else {
        var types = ['pharmacy', 'treatment center', 'doctor', 'navigator'];
        if(!types.includes(data.type)) {
-            validation_array = controller.mergeArrays(validation_array, {type_error: 'This is not a valid type'});       
-       } 
+            validation_array = controller.mergeArrays(validation_array, {type_error: 'This is not a valid type'});
+       }
     }
 
     var name = controller.validate({name: data.name},['required', 'length:0-60']);
