@@ -38,13 +38,21 @@ function selectTreatmentCenter(element) {
 }
 
 function nextStep() {
+  $('.error-form').remove();
+  $('.message-form').remove();
 	var treatmentCenter = $('#treatment-center-select').val();
+  var patientId = $('#patient-id').val();
 	if(treatmentCenter == 0) {
 		html = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>No treatment center has been chosen</div>';
 		alert('No treatment center has been chosen');
 		$(html).insertBefore('#treatment-center-select');
 	}
+  else if (patientId == ""){
+    html = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>Patient ID could not be empty</div>';
+		alert('Please provide patient ID');
+		$(html).insertBefore('#patient-id');
+  }
 	else {
-		window.location.href = url + '/doctor/selectmedicine?t='+ treatmentCenter;
+		window.location.href = url + '/doctor/selectmedicine?t='+ treatmentCenter + '&pid=' + patientId;
 	}
 }

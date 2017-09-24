@@ -9,7 +9,7 @@ block pages
     i.glyphicon.glyphicon-user
     span.main-actions|                         Profile
   .header__actions-divider
-block account    
+block account
   .header__actions-divider
   button.header__action-button.ng-binding(data-toggle="tooltip", title="Logout", onclick="location.href='" + base + "/logout';")
     i.glyphicon.glyphicon-log-out
@@ -38,11 +38,17 @@ block content
         .col-xs-4.col-xs-push-4
           select#treatment-center-select.large-form-control(onchange="selectTreatmentCenter(this)")
             option(value=0) Select Treatment Center
-            -  if(treatmentCenters.length > 0) { 
+            -  if(treatmentCenters.length > 0) {
               -  for (var i = 0; i < treatmentCenters.length; i++) {
-                  option(value=treatmentCenters[i].ID) #{treatmentCenters[i].ENTITY_NAME} 
-              - } 
+                  option(value=treatmentCenters[i].ID) #{treatmentCenters[i].ENTITY_NAME}
+              - }
           - }
+    h4.table-title Enter Patient ID
+        .row
+          .col-xs-4.col-xs-push-4
+            input#patient-id
+
+
     h4.table-title Treatment Center Details
     div.div_search
       table.table_search
@@ -59,8 +65,7 @@ block content
             th.th_search Last Update
         tbody#treatment-center-details
           tr.tr_search
-            td.empty_table.td_search(style="text-align: center;", valign="top", colspan="9") No treatment center has been chosen yet     
-    button#next-btn.btn.btn-primary.pull-right.mg-btm-70.mg-top-20(onclick="nextStep()") Next              
+            td.empty_table.td_search(style="text-align: center;", valign="top", colspan="9") No treatment center has been chosen yet
+    button#next-btn.btn.btn-primary.pull-right.mg-btm-70.mg-top-20(onclick="nextStep()") Next
 block scripts
   script(type='text/javascript', src=base+'/scripts/doctor/select_treatment_center.js')
-    

@@ -19,7 +19,7 @@ shopping_list.prototype.shopping_list_page =  function(req, res) {
         tomodel.user_id = data.treatment_center;
         user_model.async_select_treatment_center_by_id(tomodel, function(treatment_center) {
             if(treatment_center.length > 0) {
-                res.render('doctor/medicines_shopping_list', {treatmentCenter: treatment_center, shoppinglist: req.session.shoppinglist});
+                res.render('doctor/medicines_shopping_list', {treatmentCenter: treatment_center, shoppinglist: req.session.shoppinglist, patientId: req.param('pid')});
             }
             else {
                 res.send("404 Not Found");
@@ -28,7 +28,7 @@ shopping_list.prototype.shopping_list_page =  function(req, res) {
     }
 }
 
-shopping_list.prototype.send_email =  function(req, res) {                    
+shopping_list.prototype.send_email =  function(req, res) {
     var data = controller.xssClean(req.body);
     var validation_array = send_email_validations(data);
     if(Object.keys(validation_array).length > 0){
@@ -55,7 +55,7 @@ shopping_list.prototype.send_email =  function(req, res) {
             }
             else {
                 var result = controller.mergeArrays(validation_array, {message:'failed'});
-                res.send(result);       
+                res.send(result);
             }
         });
     }
@@ -86,9 +86,9 @@ shopping_list.prototype.save_medicine_session =  function(req, res) {
                             pharmacies.push(pharmacy[0]);
                         }
                     }
-                    item['pharmacies'] = pharmacies;    
+                    item['pharmacies'] = pharmacies;
                 }
-                
+
                 if(req.session.shoppinglist == null) {
                     req.session.shoppinglist = [];
                 }
@@ -135,7 +135,7 @@ function save_session_validations(data) {
         var validPharmacies = data.pharmacies.every(function checkInteger(pharmacy) { return Number.isInteger(parseInt(pharmacy));});
         if(!validPharmacies) {
             validation_array = controller.mergeArrays(validation_array, {pharmacies_error: 'Pharmacies have to be integer'});
-        }   
+        }
     }
 
     return validation_array;
