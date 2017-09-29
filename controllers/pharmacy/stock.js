@@ -415,7 +415,7 @@ stock.prototype.upload_stock_list =  function(req, res) {
     var extension = fileArray[fileArray.length - 1];
     if(extension == "xlsx")
     {
-				var filePath = './public/uploads/out_of_stocks/out_of_stock_list_' + req.session.pharmacy_id + '.xlsx';
+				var filePath = './public/uploads/stocks/stock_list_' + req.session.pharmacy_id + '.xlsx';
 				req.stockFilePath = filePath;
         sampleFile.mv(filePath, function(err) {
             if (err) {
