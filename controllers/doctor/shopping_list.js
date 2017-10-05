@@ -51,7 +51,9 @@ shopping_list.prototype.confirm_shopping_list = function(req, res) {
 
 	for(var i=0; i<req.session.shoppinglist.length; i++){
 		var data = {};
+		var sub_uuid = uuidv4(); // -> '110ec58a-a0f2-4ac4-8393-c866d813b8d1'
 		data.OPERATION_ID = uuid;
+		data.SUB_OPERATION_ID = sub_uuid;
 		data.MEDICINE_ID = req.session.shoppinglist[i].medicine_id;
 		data.TREATMENT_CENTR_ID = req.session.tc;
 		data.DOCTOR_ID = req.session.doctor_id;
@@ -121,7 +123,13 @@ shopping_list.prototype.save_medicine_session =  function(req, res) {
     var data = req.body;
     console.log("*********save medicine session##########"+data);
 		var validation_array = save_session_validations(data);
-    if(Object.keys(validation_array).length > 0){
+		console.log("checkpoint 01");
+		if(Object.keys(validation_array).length > 0){
+			console.log("checkpoint 02 ");
+			for(var i=0; i<Object.keys(validation_array).length; i++){
+				console.log(Object.keys(validation_array)[i]);
+			}
+			console.log("-------------------------------");
         var result = controller.mergeArrays(validation_array, {message:'failed'});
         res.send(result);
     }
@@ -134,8 +142,8 @@ shopping_list.prototype.save_medicine_session =  function(req, res) {
                 item['quantity'] = data.quantity;
                 item['price'] = data.price;
 								item['medicine_id'] = data.medicine;
+								var pharmacies = [];
                 if(data.pharmacies) {
-                    var pharmacies = [];
                     for (var i = 0; i < data.pharmacies.length; i++) {
                         tomodel.user_id = data.pharmacies[i];
                         var pharmacy = user_model.select_pharmacies_by_pharmacy_medicine_and_quantity_and_price(tomodel);
@@ -143,10 +151,11 @@ shopping_list.prototype.save_medicine_session =  function(req, res) {
                             pharmacies.push(pharmacy[0]);
                         }
                     }
-                    item['pharmacies'] = pharmacies;
                 }
-
+								console.log("checkpoint 1");
+								item['pharmacies'] = pharmacies;
                 if(req.session.shoppinglist == null) {
+									console.log("checkpoint 2");
                     req.session.shoppinglist = [];
                 }
                 req.session.shoppinglist.push(item);

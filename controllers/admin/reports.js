@@ -63,7 +63,7 @@ reports.prototype.download_shopping_list =  function(req, res) {
 			console.log("*******************************************************");
 				if(shopping_list.length > 0) {
             for (var i = 0; i < shopping_list.length; i++) {
-							worksheet.addRow([shopping_list[i].OPERATION_ID, shopping_list[i].OPERATION_TIME, shopping_list[i].DOCTOR_ID, shopping_list[i].TREATMENT_CENTR_ID, shopping_list[i].PATIENT_ID, shopping_list[i].MEDICINE_ID, shopping_list[i].PHARMACY_ID, shopping_list[i].ENTITY_NAME, shopping_list[i].MEDICINE_BRAND_NAME , shopping_list[i].MEDICINE_GENERIC_NAME , shopping_list[i].MEDICINE_MANUFACTURER , shopping_list[i].MEDICINE_QUANTITY , shopping_list[i].MEDICINE_FORM,  shopping_list[i].MEDICINE_STRENGTH, shopping_list[i].MEDICINE_STRENGTH_UNIT  , shopping_list[i].EXPIRY_DATE, shopping_list[i].PACK_SIZE , shopping_list[i].PRICE_PER_PACK]);
+							worksheet.addRow([shopping_list[i].OP_ID, shopping_list[i].OPERATION_TIME, shopping_list[i].DOCTOR_ID, shopping_list[i].TREATMENT_CENTR_ID, shopping_list[i].PATIENT_ID, shopping_list[i].MED_ID, shopping_list[i].PHARMACY_ID, shopping_list[i].ENTITY_NAME, shopping_list[i].MEDICINE_BRAND_NAME , shopping_list[i].MEDICINE_GENERIC_NAME , shopping_list[i].MEDICINE_MANUFACTURER , shopping_list[i].MEDICINE_QUANTITY , shopping_list[i].MEDICINE_FORM,  shopping_list[i].MEDICINE_STRENGTH, shopping_list[i].MEDICINE_STRENGTH_UNIT  , shopping_list[i].EXPIRY_DATE, shopping_list[i].PACK_SIZE , shopping_list[i].PRICE_PER_PACK]);
             }
             var path = './public/uploads/shopping_list/shopping_list' + req.session.admin_id + '_' + Date.now() + '.xlsx';
             if(controller.fs.existsSync(path)) {
@@ -80,7 +80,7 @@ reports.prototype.download_shopping_list =  function(req, res) {
         }
         else {
             req.session.admin_shopping_list_report_error = '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a> There is no shopping list to be downloaded </div>';
-            res.redirect('admin/reports');
+            res.redirect('reports');
         }
     });
 }

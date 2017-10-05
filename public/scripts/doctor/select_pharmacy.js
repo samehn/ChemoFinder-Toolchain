@@ -126,7 +126,7 @@ function continueSearch() {
 }
 
 function saveMedicine() {
-	var data = {};
+  var data = {};
 	var query = window.location.search.substring(1);
 	var vars = query.split("&");
     for (var i=0;i<vars.length;i++) {
@@ -136,6 +136,9 @@ function saveMedicine() {
       	}
       	if(pair[0] == 'm') {
       		data['medicine'] = pair[1];
+      	}
+        if(pair[0] == 'p') {
+      		data['price'] = pair[1];
       	}
   	}
   	data['pharmacies'] = [];

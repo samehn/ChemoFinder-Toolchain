@@ -6,9 +6,10 @@ shopping_list_model.prototype     		= model;
 
 shopping_list_model.prototype.insert_new_shopping_list_operation = function(data) {
 	var query = "INSERT INTO DASH5082.SHOPPING_OPERATION  " +
-  "(OPERATION_ID, MEDICINE_ID, TREATMENT_CENTR_ID, DOCTOR_ID, PATIENT_ID, MEDICINE_QUANTITY, MEDICINE_GENERIC_NAME, MEDICINE_BRAND_NAME, MEDICINE_FORM , " +
+  "(OPERATION_ID, SUB_OPERATION_ID, MEDICINE_ID, TREATMENT_CENTR_ID, DOCTOR_ID, PATIENT_ID, MEDICINE_QUANTITY, MEDICINE_GENERIC_NAME, MEDICINE_BRAND_NAME, MEDICINE_FORM , " +
   "MEDICINE_STRENGTH, MEDICINE_STRENGTH_UNIT, MEDICINE_MANUFACTURER) VALUES ('" +
-  this.mysql_real_escape_string(data.OPERATION_ID) + "','" + this.mysql_real_escape_string(data.MEDICINE_ID) + "','" +
+  this.mysql_real_escape_string(data.OPERATION_ID) + "','" + this.mysql_real_escape_string(data.SUB_OPERATION_ID) + "','" +
+	this.mysql_real_escape_string(data.MEDICINE_ID) + "','" +
   this.mysql_real_escape_string(data.TREATMENT_CENTR_ID) + "','" + this.mysql_real_escape_string(data.DOCTOR_ID) + "','" +
   this.mysql_real_escape_string(data.PATIENT_ID) + "','" +this.mysql_real_escape_string(data.MEDICINE_QUANTITY) + "','" +
   this.mysql_real_escape_string(data.MEDICINE_GENERIC_NAME) + "','" +
@@ -24,9 +25,11 @@ shopping_list_model.prototype.insert_new_shopping_list_operation = function(data
 shopping_list_model.prototype.insert_new_shopping_list_pharmacy = function(data) {
 
   var query = "INSERT INTO DASH5082.SHOPPING_OPERATION_PHARMECY  " +
-  "(OPERATION_ID,MEDICINE_ID,PHARMACY_ID, ENTITY_NAME, PHONE_NUMBER, EMAIL, ADDRESS, CITY, COUNTRY, OPEN_FROM, OPEN_TO , " +
+  "(OPERATION_ID, SUB_OPERATION_ID,MEDICINE_ID,PHARMACY_ID, ENTITY_NAME, PHONE_NUMBER, EMAIL, ADDRESS, CITY, COUNTRY, OPEN_FROM, OPEN_TO , " +
   "EXPIRY_DATE, PACK_SIZE, PRICE_PER_PACK) VALUES ('" +
-  this.mysql_real_escape_string(data.OPERATION_ID) +"','" + this.mysql_real_escape_string(data.MEDICINE_ID) + "','"+ this.mysql_real_escape_string(data.PHARMACY_ID) + "','" + this.mysql_real_escape_string(data.ENTITY_NAME) + "','" +
+  this.mysql_real_escape_string(data.OPERATION_ID) + "','" + this.mysql_real_escape_string(data.SUB_OPERATION_ID) +"','" +
+	this.mysql_real_escape_string(data.MEDICINE_ID) + "','"+ this.mysql_real_escape_string(data.PHARMACY_ID) + "','" +
+	this.mysql_real_escape_string(data.ENTITY_NAME) + "','" +
   this.mysql_real_escape_string(data.PHONE_NUMBER) + "','" + this.mysql_real_escape_string(data.EMAIL) + "','" +
   this.mysql_real_escape_string(data.ADDRESS) + "','" +this.mysql_real_escape_string(data.CITY) + "','" +
   this.mysql_real_escape_string(data.COUNTRY) + "','" +
@@ -41,7 +44,7 @@ shopping_list_model.prototype.insert_new_shopping_list_pharmacy = function(data)
 //+++++++++++++++++++ download-shopping-list+++++++++++
 
 shopping_list_model.prototype.async_download_shopping_list = function(callback) {
-	var query = "SELECT * FROM DASH5082.SHOPPING_OPERATION SL JOIN DASH5082.SHOPPING_OPERATION_PHARMECY OP ON SL.OPERATION_ID = OP.OPERATION_ID"  ;
+	var query = "SELECT *, SL.MEDICINE_ID AS MED_ID, SL.OPERATION_ID AS OP_ID FROM DASH5082.SHOPPING_OPERATION SL LEFT OUTER JOIN DASH5082.SHOPPING_OPERATION_PHARMECY OP ON SL.OPERATION_ID = OP.OPERATION_ID and SL.SUB_OPERATION_ID = OP.SUB_OPERATION_ID"  ;
 	return this.dbQuery(query, callback);
 };
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
