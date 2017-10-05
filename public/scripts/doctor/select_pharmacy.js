@@ -90,12 +90,17 @@ function nextStep() {
 function selectAnotherMedicine() {
 	var query = window.location.search.substring(1);
 	var vars = query.split("&");
-    for (var i=0;i<vars.length;i++) {
-    	var pair = vars[i].split("=");
+  var param = "";
+  for (var i=0;i<vars.length;i++) {
+      var pair = vars[i].split("=");
       	if(pair[0] == 't') {
-      		window.location.href = url + '/doctor/selectmedicine?t=' + pair[1];
+      		param = param.concat("t=",pair[1]);
       	}
+        if(pair[0] == 'pid'){
+          param = param.concat("&pid=",pair[1]);
+        }
     }
+    window.location.href = url + '/doctor/selectmedicine?' + param;
 }
 
 function goShoppingList() {
@@ -111,6 +116,7 @@ function goShoppingList() {
           param = param.concat("&pid=",pair[1]);
         }
     }
+    console.log("goshopping list param " + param)
     window.location.href = url + '/doctor/shoppinglist?' + param;
 }
 

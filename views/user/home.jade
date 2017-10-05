@@ -2,7 +2,7 @@ extends ../layout
 
 block stylesheets
   link(href=base+'/style/bootstrap-timepicker.min.css', rel='stylesheet')
-  link(rel='stylesheet', href='https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css')  
+  link(rel='stylesheet', href='https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css')
 block account
   .header__actions-divider
   button.header__action-button.ng-binding(data-toggle="tooltip", title=lang.login, onclick="loginModal()")
@@ -11,7 +11,7 @@ block account
   .header__actions-divider
   button.header__action-button.ng-binding(data-toggle="tooltip", title=lang.register, onclick="registerModal()")
     i.glyphicon.glyphicon-user
-    span.main-actions|                         #{lang.register}    
+    span.main-actions|                         #{lang.register}
 block content
   img.welcome__home-image(src=base+'/images/homeicon.svg')
   .welcome__home-message.ng-binding #{lang.welcome} ChemoFinder
@@ -31,11 +31,11 @@ block content
             th.th_search #{lang.form}
             th.th_search #{lang.strength}
             th.th_search #{lang.strength_unit}
-            th.th_search #{lang.pack_type}
+            //th.th_search #{lang.pack_type}
             th.th_search #{lang.manufacturer}
             th.th_search #{lang.pharmacies}
-        tbody#search-result       
-block modals             
+        tbody#search-result
+block modals
   #Login.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
     .modal-dialog
       .modal-content
@@ -151,7 +151,7 @@ block modals
                   i.glyphicon.glyphicon-lock
               // /.input-group
             // /.form-group
-            p.handle(style='display:none;') 
+            p.handle(style='display:none;')
               strong Open From
             #openFromRegisterForm.form-group.handle(style='display:none;')
               .input-group.bootstrap-timepicker.timepicker
@@ -171,7 +171,7 @@ block modals
               .col-xs-1
                 input#terms.checkbox-form-control(name='terms', type="checkbox")
               .col-xs-10
-                label.mg-top-10 I agree to these 
+                label.mg-top-10 I agree to these
                   a(onclick="openTermsWindow()") terms and conditions
         // /.modal-body
         .modal-footer
@@ -231,7 +231,7 @@ block modals
         // /.modal-footer
       // /.modal-content
     // /.modal-dialog
-  // /.modal          
+  // /.modal
 block scripts
   script(src='https://code.jquery.com/ui/1.12.1/jquery-ui.js')
   script(type='text/javascript', src=base+'/scripts/bootstrap-timepicker.min.js')

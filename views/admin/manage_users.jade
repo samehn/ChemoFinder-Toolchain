@@ -10,27 +10,32 @@ block pages
   button.header__action-button.ng-binding(data-toggle="tooltip", title="Manage Medicines", onclick="location.href='" + base + "/admin/manage_medicines';")
     i.glyphicon.glyphicon-list-alt
     span.main-actions|                         Manage Medicines
-  .header__actions-divider
+    .header__actions-divider
+    button.header__action-button.ng-binding(data-toggle="tooltip", title="Reports", onclick="location.href='" + base + "/admin/reports';")
+      i.glyphicon.glyphicon-list-alt
+      span.main-actions|                         Reports
+    .header__actions-divider
+
   button.header__action-button.ng-binding(data-toggle="tooltip", title="Admins List", onclick="location.href='" + base + "/admin/admins_list';")
     i.glyphicon.glyphicon-tower
     span.main-actions|                         Admins List
-  .header__actions-divider  
-block account  
+  .header__actions-divider
+block account
   .header__actions-divider
   button.header__action-button.ng-binding(data-toggle="tooltip", title="Logout", onclick="location.href='" + base + "/admin/logout';")
     i.glyphicon.glyphicon-log-out
-    span.main-actions|                         Logout        
+    span.main-actions|                         Logout
 block content
   .page__subtitle.ng-binding Manage Users
   .row
-    .col-xs-6.col-md-2 
+    .col-xs-6.col-md-2
       button.form-control.btn.btn-primary(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewUser') Add New User
-    if admin_type  
+    if admin_type
       .col-xs-6.col-md-2
         button.form-control.btn.btn-primary(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewAdmin') Add New Admin
-  hr  
+  hr
   .welcome__home-buttons
-    h4.table-title New Account Requests     
+    h4.table-title New Account Requests
     table#newAccountsTable.display(cellspacing="0", width="100%")
       thead
         tr
@@ -42,13 +47,13 @@ block content
         if non_approved_users && non_approved_users.length > 0
           - for( var i = 0, len = non_approved_users.length; i < len; i++ ) {
           tr
-            td #{non_approved_users[i].PERSON_NAME} 
+            td #{non_approved_users[i].PERSON_NAME}
             td #{non_approved_users[i].EMAIL}
             td #{non_approved_users[i].TYPE}
-            td 
+            td
               button.form-control.btn.btn-primary.auto-width(onclick='approve('+non_approved_users[i].ID+')') Approve
           - }
-    h4.table-title Users Accounts     
+    h4.table-title Users Accounts
     table#usersTable.display(cellspacing="0", width="100%")
       thead
         tr
@@ -64,7 +69,7 @@ block content
         if approved_users && approved_users.length > 0
           - for( var i = 0, len = approved_users.length; i < len; i++ ) {
           tr
-            td #{approved_users[i].PERSON_NAME} 
+            td #{approved_users[i].PERSON_NAME}
             td #{approved_users[i].EMAIL}
             td #{approved_users[i].TYPE}
             td
@@ -74,15 +79,15 @@ block content
                 input.checkbox-form-control(type='checkbox', id='chk_'+approved_users[i].ID)
               else
                 input.checkbox-form-control(type='checkbox' disabled readonly)
-            td 
+            td
               if approved_users[i].ACTIVE == 1
                 button.form-control.btn.btn-gray.auto-width(onclick='suspend('+approved_users[i].ID+')') Suspend
               else
                 button.form-control.btn.btn-success.auto-width(onclick='activate('+approved_users[i].ID+')') Activate
             td
               button.form-control.btn.btn-gray.auto-width(onclick='showHistory('+approved_users[i].ID+')') Show Suspension History
-            td 
-              button.form-control.btn.btn-danger.auto-width(onclick='delete_user('+ approved_users[i].ID+')') Delete     
+            td
+              button.form-control.btn.btn-danger.auto-width(onclick='delete_user('+ approved_users[i].ID+')') Delete
           - }
 block modals
   #addNewUser.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
@@ -165,7 +170,7 @@ block modals
                 // /.form-group
               .col-xs-4
                  button.form-control.btn.btn-primary(type='button' onclick='generate_password(this)') Generate Password
-            p.handle(style='display:none;') 
+            p.handle(style='display:none;')
               strong Open from
             #openFromUserForm.form-group.handle(style='display:none;')
               .input-group.bootstrap-timepicker.timepicker
@@ -180,7 +185,7 @@ block modals
                 input#timepicker2.form-control.input-small(name='open_to', type='text')
                 span.input-group-addon
                   i.glyphicon.glyphicon-time
-            // /.form-group      
+            // /.form-group
         // /.modal-body
         .modal-footer
           button.form-control.btn.btn-primary(onclick='add_new_user();') Submit
@@ -254,7 +259,7 @@ block modals
                   th.th_search Date
               tbody#history_details
                 tr.tr_search
-                  td#empty_search.td_search(style="text-align: center;", valign="top", colspan="3") There are no history for this user     
+                  td#empty_search.td_search(style="text-align: center;", valign="top", colspan="3") There are no history for this user
         // /.modal-body
       // /.modal-content
     // /.modal-dialog
@@ -301,5 +306,5 @@ block modals
     // /.modal
 block scripts
   script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js')
-  script(type='text/javascript', src=base+'/scripts/bootstrap-timepicker.min.js')  
+  script(type='text/javascript', src=base+'/scripts/bootstrap-timepicker.min.js')
   script(type='text/javascript', src=base+'/scripts/admin/manage_users.js')

@@ -11,6 +11,7 @@ treatment_center.prototype.constructor = treatment_center;
 treatment_center.prototype.treatment_center_page =  function(req, res) {
     req.session.shoppinglist = null;
     user_model.async_select_treatment_centers(function(treatmentCenters) {
+				req.session.treatmentCenters = treatmentCenters;
         res.render('doctor/select_treatment_center', {treatmentCenters: treatmentCenters});
     });
 }
@@ -26,7 +27,10 @@ treatment_center.prototype.get_treatment_center_details =  function(req, res) {
         tomodel.user_id = data.id;
         user_model.async_select_treatment_center_by_id(tomodel, function(treatment_center) {
             if(treatment_center.length > 0) {
-                res.send({ message: 'success', treatmentCenter: treatment_center});
+							medicine_model.async_count_medicine_not_in_treatment_center(tomodel, function (medicines_count) {
+								console.log('*************** medicines count in treatment center is ' + medicines_count.length + ' *********************');
+								res.send({ message: 'success', treatmentCenter: treatment_center, valideTreatmentCenter : medicines_count.length});
+							});
             }
             else {
                 res.send({message:'failed'});

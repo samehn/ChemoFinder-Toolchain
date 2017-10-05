@@ -1,0 +1,43 @@
+extends ../layout
+
+block pages
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Manage Users", onclick="location.href='" + base + "/admin/manage_users';")
+    i.glyphicon.glyphicon-user
+    span.main-actions|                         Manage Users
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Manage Medicines", onclick="location.href='" + base + "/admin/manage_medicines';")
+    i.glyphicon.glyphicon-list-alt
+    span.main-actions|                         Manage Medicines
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Reports", onclick="location.href='" + base + "/admin/reports';")
+    i.glyphicon.glyphicon-list-alt
+    span.main-actions|                         Reports
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Admins List", onclick="location.href='" + base + "/admin/admins_list';")
+    i.glyphicon.glyphicon-tower
+    span.main-actions|                         Admins List
+  .header__actions-divider
+block account
+  .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Logout", onclick="location.href='" + base + "/admin/logout';")
+    i.glyphicon.glyphicon-log-out
+    span.main-actions|                         Logout
+block content
+  .page__subtitle.ng-binding Reports
+
+
+
+
+    .row
+      .col-xs-4.col-md-4
+        form#downloadShoppingListForm(ref='downloadShoppingListForm', action= base + '/admin/downloadShoppingListReport', method='get', enctype='multipart/form-data')
+          button.form-control.btn.btn-primary(type="submit") Download Shoppig List Report
+      .col-xs-4.col-md-4
+            form#downloadStockListForm(ref='downloadStockListForm', action= base + '/admin/downloadStockListReport', method='get', enctype='multipart/form-data')
+              button.form-control.btn.btn-primary.mg-btm-10(type="submit") Download Stock List Report
+
+
+        block scripts
+          script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js')
+          script(type='text/javascript', src=base+'/scripts/bootstrap-timepicker.min.js')
+          script(type='text/javascript', src=base+'/scripts/admin/reports.js')

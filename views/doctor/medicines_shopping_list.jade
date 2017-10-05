@@ -36,7 +36,7 @@ block content
     h4.table-title Shopping List
     p Your treatment center is
       strong #{treatmentCenter[0].ENTITY_NAME}
-    h5.medicine-title For Patient ID: 
+    h5.medicine-title For Patient ID:
       strong #{patientId}
     -  if (shoppinglist.length > 0) {
       -  for (var i = 0; i < shoppinglist.length; i++) {
@@ -79,6 +79,7 @@ block content
                   -  }
       -  }
     -  }
+      button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20(onclick="confirm()") Confirm
     button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20(onclick="printPage()") Print
     button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20(data-toggle='modal', data-target='#sendEmail') Send Email
     button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20 Send SMS

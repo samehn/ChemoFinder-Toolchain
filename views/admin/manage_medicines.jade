@@ -10,16 +10,20 @@ block pages
   button.header__action-button.ng-binding(data-toggle="tooltip", title="Manage Medicines", onclick="location.href='" + base + "/admin/manage_medicines';")
     i.glyphicon.glyphicon-list-alt
     span.main-actions|                         Manage Medicines
-  .header__actions-divider
+    .header__actions-divider
+    button.header__action-button.ng-binding(data-toggle="tooltip", title="Reports", onclick="location.href='" + base + "/admin/reports';")
+      i.glyphicon.glyphicon-list-alt
+      span.main-actions|                         Reports
+    .header__actions-divider
   button.header__action-button.ng-binding(data-toggle="tooltip", title="Admins List", onclick="location.href='" + base + "/admin/admins_list';")
     i.glyphicon.glyphicon-tower
     span.main-actions|                         Admins List
-  .header__actions-divider  
+  .header__actions-divider
 block account
   .header__actions-divider
   button.header__action-button.ng-binding(data-toggle="tooltip", title="Logout", onclick="location.href='" + base + "/admin/logout';")
     i.glyphicon.glyphicon-log-out
-    span.main-actions|                         Logout        
+    span.main-actions|                         Logout
 block content
   .page__subtitle.ng-binding Manage Medicines
   - if(uploading_message) {
@@ -31,13 +35,13 @@ block content
         |  This file extension is not allowed, only files with xlsx extension are allowed
   - }
   - if(format_error) {
-      !{format_error} 
+      !{format_error}
   - }
   - if(success_message) {
-      !{success_message} 
+      !{success_message}
   - }
   .row
-    .col-xs-6.col-md-3 
+    .col-xs-6.col-md-3
       button.form-control.btn.btn-primary(ng-click='welcomeCtrl.newForecast()', data-toggle='modal', data-target='#addNewMedicine') Add New Medicine
     .col-xs-6.col-md-3
       form#uploadForm(ref='uploadForm', action= base + '/admin/uploadmedicines', method='post', enctype='multipart/form-data')
@@ -46,15 +50,15 @@ block content
           input.upload(type='file', name="sampleFile", onchange='$("#loadingModal").modal("show");this.form.submit();')
     .col-xs-6.col-md-3
       form#downloadForm(ref='downloadForm', action= base + '/admin/downloadtemplate', method='get', enctype='multipart/form-data')
-        button.form-control.btn.btn-primary(type="submit") Download Medicines Template        
+        button.form-control.btn.btn-primary(type="submit") Download Medicines Template
     .col-xs-6.col-md-3
       form#uploadTemplateForm(ref='uploadTemplateForm', action= base + '/admin/uploadstocklist', method='post', enctype='multipart/form-data')
         .fileUpload.btn.btn-primary(style="height: 34px;")
           span Upload Stock List Template
           input.upload(type='file', name="sampleFile", onchange='$("#loadingModal").modal("show");this.form.submit();')
-  hr  
+  hr
   .welcome__home-buttons
-    h4.table-title Approved Medicines     
+    h4.table-title Approved Medicines
     table#approvedMedicinesTable.display(cellspacing="0", width="100%")
       thead
         tr
@@ -76,15 +80,15 @@ block content
             td
               button.form-control.btn.btn-gray(onclick='deleteApprovedStockRecord(' + approved_medicines[i].ID + ', this)') Delete
             td
-              button.form-control.btn.btn-gray(onclick='showDetails(' + approved_medicines[i].ID + ')') Show Details  
-            td #{approved_medicines[i].GENERIC_NAME} 
+              button.form-control.btn.btn-gray(onclick='showDetails(' + approved_medicines[i].ID + ')') Show Details
+            td #{approved_medicines[i].GENERIC_NAME}
             td #{approved_medicines[i].BRAND_NAME}
             td #{approved_medicines[i].FORM}
             td #{approved_medicines[i].STRENGTH}
             td #{approved_medicines[i].STRENGTH_UNIT}
             td #{approved_medicines[i].MANUFACTURER}
           - }
-    h4.table-title Non Approved Medicines     
+    h4.table-title Non Approved Medicines
     table#nonApprovedMedicinesTable.display(cellspacing="0", width="100%")
       thead
         tr
@@ -106,14 +110,14 @@ block content
             td
               button.form-control.btn.btn-gray(onclick='deleteNonApprovedStockRecord(' + non_approved_medicines[i].ID + ', this)') Delete
             td
-              button.form-control.btn.btn-gray(onclick='showDetails(' + non_approved_medicines[i].ID + ')') Show Details    
-            td #{non_approved_medicines[i].GENERIC_NAME} 
+              button.form-control.btn.btn-gray(onclick='showDetails(' + non_approved_medicines[i].ID + ')') Show Details
+            td #{non_approved_medicines[i].GENERIC_NAME}
             td #{non_approved_medicines[i].BRAND_NAME}
             td #{non_approved_medicines[i].FORM}
             td #{non_approved_medicines[i].STRENGTH}
             td #{non_approved_medicines[i].STRENGTH_UNIT}
             td #{non_approved_medicines[i].MANUFACTURER}
-          - } 
+          - }
 block modals
   #medicineDetails.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
     .modal-dialog
@@ -126,99 +130,99 @@ block modals
           .row
             .col-xs-6.text-center
               label Generic Name
-            .col-xs-6.text-center  
+            .col-xs-6.text-center
               p.wrapping#genericNameShow
           hr
           .row
             .col-xs-6.text-center
               label Brand Name
-            .col-xs-6.text-center  
+            .col-xs-6.text-center
               p.wrapping#brandNameShow
           hr
           .row
             .col-xs-6.text-center
               label Form
-            .col-xs-6.text-center  
+            .col-xs-6.text-center
               p.wrapping#formShow
           hr
           .row
             .col-xs-6.text-center
               label Strength
-            .col-xs-6.text-center  
+            .col-xs-6.text-center
               p.wrapping#strengthShow
           hr
           .row
             .col-xs-6.text-center
               label Strength Unit
-            .col-xs-6.text-center  
+            .col-xs-6.text-center
               p.wrapping#strengthUnitShow
           hr
           .row
             .col-xs-6.text-center
               label Specification Form
-            .col-xs-6.text-center  
-              p.wrapping#specificationFormShow         
+            .col-xs-6.text-center
+              p.wrapping#specificationFormShow
           hr
           .row
             .col-xs-6.text-center
               label Route
-            .col-xs-6.text-center  
+            .col-xs-6.text-center
               p.wrapping#routeShow
           hr
           .row
             .col-xs-6.text-center
               label Manufacturer
-            .col-xs-6.text-center  
+            .col-xs-6.text-center
               p.wrapping#manufacturerShow
           hr
           .row
             .col-xs-6.text-center
               label Pack Type
-            .col-xs-6.text-center  
+            .col-xs-6.text-center
               p.wrapping#packTypeShow
           hr
           .row
             .col-xs-6.text-center
               label Units Per Pack
-            .col-xs-6.text-center  
+            .col-xs-6.text-center
               p.wrapping#unitsPerPackShow
           hr
           .row
             .col-xs-6.text-center
               label SRA Approvals
-            .col-xs-6.text-center  
-              p.wrapping#sraShow   
+            .col-xs-6.text-center
+              p.wrapping#sraShow
           hr
           .row
             .col-xs-6.text-center
               label Approval Date
-            .col-xs-6.text-center  
+            .col-xs-6.text-center
               p.wrapping#approvalDateShow
           hr
           .row
             .col-xs-6.text-center
               label Source
-            .col-xs-6.text-center  
-              p.wrapping#sourceShow   
+            .col-xs-6.text-center
+              p.wrapping#sourceShow
           hr
           .row
             .col-xs-6.text-center
               label Extract Date
-            .col-xs-6.text-center  
+            .col-xs-6.text-center
               p.wrapping#extractDateShow
           hr
           .row
             .col-xs-6.text-center
               label Status
-            .col-xs-6.text-center  
+            .col-xs-6.text-center
               p.wrapping#statusShow
           hr
           .row
             .col-xs-6.text-center
               label Comments
-            .col-xs-6.text-center  
-              p.wrapping#commentsShow          
-            // /.form-group  
+            .col-xs-6.text-center
+              p.wrapping#commentsShow
+            // /.form-group
         // /.modal-body
       // /.modal-content
     // /.modal-dialog
@@ -251,7 +255,7 @@ block modals
                 option.form-control(value='Solution') Solution
                 option.form-control(value='Other') Other
               // /.input-group
-            // /.form-group  
+            // /.form-group
             #strengthForm.form-group
               input#strength.form-control(name='strength', type='text', placeholder='Strength')
             // /.form-group
@@ -288,7 +292,7 @@ block modals
             #packTypeForm.form-group
               input#packType.form-control(name='pack_type', type='text', placeholder='Pack Type')
             // /.form-group
-            
+
 
 
             #unitsPerPackForm.form-group
@@ -302,7 +306,7 @@ block modals
                 input#sra.form-control(name='sra', type='text', placeholder='SRA Approval' disabled="disabled")
             // /.form-group
 
-            p 
+            p
               strong Approval Date
             #approvalDateForm.form-group
               input#approvalDate.form-control(name='approval_date', type='date', placeholder='Approval Date')
@@ -310,7 +314,7 @@ block modals
             #sourceForm.form-group
               input#source.form-control(name='source', type='text', placeholder='Source')
             // /.form-group
-            p 
+            p
               strong Extract Date
             #extractDateForm.form-group
               input#extractDate.form-control(name='extract_date', type='date', placeholder='Extract Date')
@@ -320,12 +324,12 @@ block modals
             #statusForm.form-group
               input#status.form-control(name='status', type='text', placeholder='Status')
             // /.form-group
-            
+
 
             #commentsForm.form-group
               input#comments.form-control(name='comments', type='text', placeholder='Comments')
             // /.form-group
-        
+
 
         // /.modal-body
         .modal-footer
@@ -366,7 +370,7 @@ block modals
                 option.form-control(value='Other') Other
               // /.input-group
             // /.form-group
-            label Strength  
+            label Strength
             #strengthFormUpdate.form-group
               input#strengthUpdate.form-control(name='strength', type='text', placeholder='Strength')
             // /.form-group
@@ -406,7 +410,7 @@ block modals
             #packTypeFormUpdate.form-group
               input#packTypeUpdate.form-control(name='pack_type', type='text', placeholder='Pack Type')
             // /.form-group
-            
+
 
             label Units Per Pack
             #unitsPerPackFormUpdate.form-group
@@ -433,12 +437,12 @@ block modals
             #extractDateFormUpdate.form-group
               input#extractDateUpdate.form-control(name='extract_date', type='date', placeholder='Extract Date')
             // /.form-group
-            
+
             label Status
             #statusFormUpdate.form-group
               input#statusUpdate.form-control(name='status', type='text', placeholder='Status')
             // /.form-group
-            
+
             label Comments
             #commentsFormUpdate.form-group
               input#commentsUpdate.form-control(name='comments', type='text', placeholder='Comments')
@@ -512,7 +516,7 @@ block modals
         // /.modal-body
         .modal-footer
           button.form-control.btn.btn-primary(onclick='location.reload();') OK
-        // /.modal-footer      
+        // /.modal-footer
       // /.modal-content
     // /.modal-dialog
   // /.modal
@@ -531,7 +535,7 @@ block modals
         // /.modal-footer
       // /.modal-content
     // /.modal-dialog
-  // /.modal        
+  // /.modal
 block scripts
   script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js')
   script(type='text/javascript', src=base+'/scripts/admin/manage_medicines.js')

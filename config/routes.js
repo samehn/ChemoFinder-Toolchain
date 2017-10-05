@@ -13,6 +13,7 @@ module.exports = function(app){
 	var admin_manage_users_controller = require('../controllers/admin/manage_users');
 	var admin_manage_medicines_controller = require('../controllers/admin/manage_medicines');
 	var admin_manage_admins_controller = require('../controllers/admin/manage_admins');
+	var admin_reports_controller = require('../controllers/admin/reports');
 
 	var pharmacy_first_login_controller = require('../controllers/pharmacy/first_login');
 	var pharmacy_profile_controller = require('../controllers/pharmacy/profile');
@@ -75,6 +76,10 @@ module.exports = function(app){
 	app.get('/admin/admins_list', admin_middleware.check_admin_sign_in, admin_manage_admins_controller.admins_list_page);
 	app.post('/admin/changetype', admin_middleware.check_admin_sign_in, admin_manage_admins_controller.change_type);
 	app.post('/admin/activateadmin', admin_middleware.check_admin_sign_in, admin_manage_admins_controller.activate_admin);
+	app.get('/admin/reports', admin_middleware.check_admin_sign_in, admin_reports_controller.reports_page);
+
+	app.get('/admin/downloadShoppingListReport', admin_middleware.check_admin_sign_in, admin_reports_controller.download_shopping_list);
+  app.get('/admin/downloadStockListReport', admin_middleware.check_admin_sign_in, admin_reports_controller.download_stock_list);
 
 	app.get('/pharmacy/profile', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_profile_controller.profile_page);
 	app.post('/pharmacy/updateprofile', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_profile_controller.update_profile);
@@ -109,6 +114,7 @@ module.exports = function(app){
 	app.get('/doctor/selectpharmacy', doctor_middleware.doctor_check_sign_in, doctor_select_pharmacy_controller.select_pharmacy_page);
 	app.get('/doctor/shoppinglist', doctor_middleware.doctor_check_sign_in, doctor_shopping_list_controller.shopping_list_page);
 	app.post('/doctor/shoppinglist/sendemail', doctor_middleware.doctor_check_sign_in, doctor_shopping_list_controller.send_email);
+	app.post('/doctor/shoppinglist/confirmShoppingList', doctor_middleware.doctor_check_sign_in, doctor_shopping_list_controller.confirm_shopping_list);
 	app.post('/doctor/savemedicinesession', doctor_middleware.doctor_check_sign_in, doctor_shopping_list_controller.save_medicine_session);
 	app.get('/doctor/first_changepassword', doctor_middleware.doctor_check_first_login, doctor_first_login_controller.first_login_page);
 	app.post('/doctor/first_changepassword', doctor_middleware.doctor_check_first_login, doctor_first_login_controller.change_password);

@@ -21,7 +21,7 @@ medicine_model.prototype.select_non_approved_medicines = function() {
 };
 
 medicine_model.prototype.select_medicine_by_main_keys = function(data) {
-	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE GENERIC_NAME ='" + this.mysql_real_escape_string(data.generic_name) + "' AND BRAND_NAME = '" + this.mysql_real_escape_string(data.brand_name) + "' AND FORM = '" + this.mysql_real_escape_string(data.form) + "' AND STRENGTH = '" + this.mysql_real_escape_string(data.strength) + "' AND STRENGTH_UNIT = '" + this.mysql_real_escape_string(data.strength_unit) + "' AND MANUFACTURER = '" + this.mysql_real_escape_string(data.manufacturer) + "';"; 
+	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE GENERIC_NAME ='" + this.mysql_real_escape_string(data.generic_name) + "' AND BRAND_NAME = '" + this.mysql_real_escape_string(data.brand_name) + "' AND FORM = '" + this.mysql_real_escape_string(data.form) + "' AND STRENGTH = '" + this.mysql_real_escape_string(data.strength) + "' AND STRENGTH_UNIT = '" + this.mysql_real_escape_string(data.strength_unit) + "' AND MANUFACTURER = '" + this.mysql_real_escape_string(data.manufacturer) + "';";
 	return this.dbQuerySync(query);
 };
 
@@ -72,7 +72,8 @@ medicine_model.prototype.select_medicine_by_generic_and_form_in_pharmacies = fun
 };
 
 medicine_model.prototype.select_medicine_not_in_treatment_center = function(data) {
-	var query = "SELECT DISTINCT GENERIC_NAME, FORM FROM DASH5082.CHEMO_MEDICINE WHERE APPROVED = TRUE AND (GENERIC_NAME, FORM) NOT IN (SELECT DISTINCT M.GENERIC_NAME, FORM FROM DASH5082.CHEMO_MEDICINE M JOIN CHEMO_STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN DASH5082.CHEMO_USER U ON U.ID = S.PHARMACY_ID WHERE U.ID = "  + this.mysql_real_escape_string(data.user_id) + ") ORDER BY GENERIC_NAME";
+	//var query = "SELECT DISTINCT GENERIC_NAME, FORM FROM DASH5082.CHEMO_MEDICINE WHERE APPROVED = TRUE AND (GENERIC_NAME, FORM) NOT IN (SELECT DISTINCT M.GENERIC_NAME, FORM FROM DASH5082.CHEMO_MEDICINE M JOIN CHEMO_STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN DASH5082.CHEMO_USER U ON U.ID = S.PHARMACY_ID WHERE U.ID = "  + this.mysql_real_escape_string(data.user_id) + ") ORDER BY GENERIC_NAME";
+	var query = "SELECT *, SL.ID AS STOCK_LIST_ID FROM DASH5082.CHEMO_STOCK_LIST SL JOIN DASH5082.CHEMO_MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE SL.PHARMACY_ID = " + this.mysql_real_escape_string(data.user_id)+ " AND SL.AVAILABLE_STOCK = "+ 0 ;
 	return this.dbQuerySync(query);
 };
 
@@ -106,7 +107,7 @@ medicine_model.prototype.async_select_non_approved_medicines = function(callback
 };
 
 medicine_model.prototype.async_select_medicine_by_main_keys = function(data, callback) {
-	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE GENERIC_NAME ='" + this.mysql_real_escape_string(data.generic_name) + "' AND BRAND_NAME = '" + this.mysql_real_escape_string(data.brand_name) + "' AND FORM = '" + this.mysql_real_escape_string(data.form) + "' AND STRENGTH = '" + this.mysql_real_escape_string(data.strength) + "' AND STRENGTH_UNIT = '" + this.mysql_real_escape_string(data.strength_unit) + "' AND MANUFACTURER = '" + this.mysql_real_escape_string(data.manufacturer) + "';"; 
+	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE GENERIC_NAME ='" + this.mysql_real_escape_string(data.generic_name) + "' AND BRAND_NAME = '" + this.mysql_real_escape_string(data.brand_name) + "' AND FORM = '" + this.mysql_real_escape_string(data.form) + "' AND STRENGTH = '" + this.mysql_real_escape_string(data.strength) + "' AND STRENGTH_UNIT = '" + this.mysql_real_escape_string(data.strength_unit) + "' AND MANUFACTURER = '" + this.mysql_real_escape_string(data.manufacturer) + "';";
 	return this.dbQuery(query, callback);
 };
 
@@ -157,9 +158,17 @@ medicine_model.prototype.async_select_medicine_by_generic_and_form_in_pharmacies
 };
 
 medicine_model.prototype.async_select_medicine_not_in_treatment_center = function(data, callback) {
-	var query = "SELECT DISTINCT GENERIC_NAME, FORM FROM DASH5082.CHEMO_MEDICINE WHERE APPROVED = TRUE AND (GENERIC_NAME, FORM) NOT IN (SELECT DISTINCT M.GENERIC_NAME, FORM FROM DASH5082.CHEMO_MEDICINE M JOIN CHEMO_STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN DASH5082.CHEMO_USER U ON U.ID = S.PHARMACY_ID WHERE U.ID = "  + this.mysql_real_escape_string(data.user_id) + ") ORDER BY GENERIC_NAME";
+	//var query = "SELECT DISTINCT GENERIC_NAME, FORM FROM DASH5082.CHEMO_MEDICINE WHERE APPROVED = TRUE AND (GENERIC_NAME, FORM) NOT IN (SELECT DISTINCT M.GENERIC_NAME, FORM FROM DASH5082.CHEMO_MEDICINE M JOIN CHEMO_STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN DASH5082.CHEMO_USER U ON U.ID = S.PHARMACY_ID WHERE U.ID = "  + this.mysql_real_escape_string(data.user_id) + ") ORDER BY GENERIC_NAME";
+	var query = "SELECT *, SL.ID AS STOCK_LIST_ID FROM DASH5082.CHEMO_STOCK_LIST SL JOIN DASH5082.CHEMO_MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE SL.PHARMACY_ID = " + this.mysql_real_escape_string(data.user_id)+ " AND SL.AVAILABLE_STOCK = "+ 0 ;
 	return this.dbQuery(query, callback);
 };
+
+medicine_model.prototype.async_count_medicine_not_in_treatment_center = function(data, callback) {
+	//var query = "SELECT DISTINCT GENERIC_NAME, FORM FROM DASH5082.CHEMO_MEDICINE WHERE APPROVED = TRUE AND (GENERIC_NAME, FORM) NOT IN (SELECT DISTINCT M.GENERIC_NAME, FORM FROM DASH5082.CHEMO_MEDICINE M JOIN CHEMO_STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN DASH5082.CHEMO_USER U ON U.ID = S.PHARMACY_ID WHERE U.ID = "  + this.mysql_real_escape_string(data.user_id) + ") ORDER BY GENERIC_NAME";
+	var query = "SELECT * FROM DASH5082.CHEMO_STOCK_LIST SL  WHERE SL.PHARMACY_ID = " + this.mysql_real_escape_string(data.user_id)+ " AND SL.AVAILABLE_STOCK = "+ 0 ;
+	return this.dbQuery(query, callback);
+};
+
 
 medicine_model.prototype.async_select_approved_medicine_by_id = function(data, callback) {
 	var query = "SELECT * FROM DASH5082.CHEMO_MEDICINE WHERE APPROVED = TRUE AND ID=" + this.mysql_real_escape_string(data.medicine_id);

@@ -4,6 +4,7 @@ function shopping_list(){
 	tomodel = {};
 	user_model 	= require('../../models/user_model');
     medicine_model  = require('../../models/medicine_model');
+		shopping_list_model = require('../../models/shopping_list_model');
 };
 shopping_list.prototype.constructor = shopping_list;
 
@@ -11,6 +12,13 @@ shopping_list.prototype.constructor = shopping_list;
 shopping_list.prototype.shopping_list_page =  function(req, res) {
     var data = controller.xssClean({treatment_center: req.param('t')});
     var validation_array = treatment_center_validations(data);
+		//need to change that later
+		req.session.pid = req.param('pid');
+		req.session.tc = req.param('t');
+		console.log('******************************************************');
+		console.log("doctor id for shopping list" + req.session.doctor_id);
+		console.log('patient id = ' + req.session.pid);
+		console.log('******************************************************');
     if(Object.keys(validation_array).length > 0){
         var result = controller.mergeArrays(validation_array, {message:'failed'});
         res.send(result);
@@ -28,6 +36,54 @@ shopping_list.prototype.shopping_list_page =  function(req, res) {
     }
 }
 
+
+shopping_list.prototype.confirm_shopping_list = function(req, res) {
+	console.log("############# about to call confirm shopping list #########################s");
+	var data = controller.xssClean(req.body);
+	console.log("patient id = " + req.session.pid);
+	console.log('shopping list first med id ' + req.session.shoppinglist[0].medicine_id);
+	console.log('shopping list first med id ' + req.session.shoppinglist[0].medicine.BRAND_NAME);
+
+
+	const uuidv4 = require('uuid/v4');
+  var uuid = uuidv4(); // -> '110ec58a-a0f2-4ac4-8393-c866d813b8d1'
+  console.log("UUID " + uuid);
+
+	for(var i=0; i<req.session.shoppinglist.length; i++){
+		var data = {};
+		data.OPERATION_ID = uuid;
+		data.MEDICINE_ID = req.session.shoppinglist[i].medicine_id;
+		data.TREATMENT_CENTR_ID = req.session.tc;
+		data.DOCTOR_ID = req.session.doctor_id;
+		data.PATIENT_ID = req.session.pid;
+		data.MEDICINE_QUANTITY = req.session.shoppinglist[i].quantity ;
+		data.MEDICINE_GENERIC_NAME = req.session.shoppinglist[i].medicine.GENERIC_NAME ;
+		data.MEDICINE_BRAND_NAME = req.session.shoppinglist[i].medicine.BRAND_NAME ;
+		data.MEDICINE_FORM = req.session.shoppinglist[i].medicine.FORM ;
+		data.MEDICINE_STRENGTH = req.session.shoppinglist[i].medicine.STRENGTH ;
+		data.MEDICINE_STRENGTH_UNIT = req.session.shoppinglist[i].medicine.STRENGTH_UNIT ;
+		data.MEDICINE_MANUFACTURER = req.session.shoppinglist[i].medicine.MANUFACTURER;
+		shopping_list_model.insert_new_shopping_list_operation(data);
+console.log('req.session.shoppinglist[i].pharmacies.lenght' + req.session.shoppinglist[i].pharmacies.length);
+		for(var j=0; j<req.session.shoppinglist[i].pharmacies.length; j++){
+			data.PHARMACY_ID = req.session.shoppinglist[i].pharmacies[j].ID;
+			data.ENTITY_NAME = req.session.shoppinglist[i].pharmacies[j].ENTITY_NAME;
+			data.PHONE_NUMBER  = req.session.shoppinglist[i].pharmacies[j].PHONE_NUMBER ;
+			data.EMAIL  = req.session.shoppinglist[i].pharmacies[j].EMAIL ;
+			data.ADDRESS  = req.session.shoppinglist[i].pharmacies[j].ADDRESS ;
+			data.CITY  = req.session.shoppinglist[i].pharmacies[j].CITY ;
+			data.COUNTRY  = req.session.shoppinglist[i].pharmacies[j].COUNTRY ;
+			data.OPEN_FROM  = req.session.shoppinglist[i].pharmacies[j].OPEN_FROM ;
+			data.OPEN_TO  = req.session.shoppinglist[i].pharmacies[j].OPEN_TO ;
+			data.EXPIRY_DATE  = req.session.shoppinglist[i].pharmacies[j].EXPIRY_DATE ;
+			data.PACK_SIZE  = req.session.shoppinglist[i].pharmacies[j].PACK_SIZE ;
+			data.PRICE_PER_PACK  = req.session.shoppinglist[i].pharmacies[j].PRICE_PER_PACK ;
+			shopping_list_model.insert_new_shopping_list_pharmacy(data);
+	}
+	}
+
+  res.send('success');
+}
 shopping_list.prototype.send_email =  function(req, res) {
     var data = controller.xssClean(req.body);
     var validation_array = send_email_validations(data);
@@ -63,8 +119,8 @@ shopping_list.prototype.send_email =  function(req, res) {
 
 shopping_list.prototype.save_medicine_session =  function(req, res) {
     var data = req.body;
-    console.log(data);
-    var validation_array = save_session_validations(data);
+    console.log("*********save medicine session##########"+data);
+		var validation_array = save_session_validations(data);
     if(Object.keys(validation_array).length > 0){
         var result = controller.mergeArrays(validation_array, {message:'failed'});
         res.send(result);
@@ -77,11 +133,12 @@ shopping_list.prototype.save_medicine_session =  function(req, res) {
                 item['medicine'] = medicine[0];
                 item['quantity'] = data.quantity;
                 item['price'] = data.price;
+								item['medicine_id'] = data.medicine;
                 if(data.pharmacies) {
                     var pharmacies = [];
                     for (var i = 0; i < data.pharmacies.length; i++) {
                         tomodel.user_id = data.pharmacies[i];
-                        var pharmacy = user_model.select_pharmacies_by_medicine_and_quantity_and_price(tomodel);
+                        var pharmacy = user_model.select_pharmacies_by_pharmacy_medicine_and_quantity_and_price(tomodel);
                         if(pharmacy.length > 0) {
                             pharmacies.push(pharmacy[0]);
                         }

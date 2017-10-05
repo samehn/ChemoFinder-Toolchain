@@ -8,6 +8,8 @@ $("#next-btn").click(function(e) {
     return false;
 });
 
+var valid_treatment_center = 0;
+
 function selectTreatmentCenter(element) {
 	var id = $(element).val();
 	var data = {id: id};
@@ -25,6 +27,7 @@ function selectTreatmentCenter(element) {
 	      	$('.error-form').remove();
       		$('.message-form').remove();
 	      	console.log(result);
+          valid_treatment_center = result.valideTreatmentCenter;
 	      	if(result.message == "success") {
 	      		var html = '<tr class="tr_search_row"><td class="td_search">' + result.treatmentCenter[0].ENTITY_NAME + '</td><td class="td_search">' + result.treatmentCenter[0].PHONE_NUMBER + '</td><td class="td_search">' + result.treatmentCenter[0].EMAIL + '</td><td class="td_search">' + result.treatmentCenter[0].ADDRESS + '</td><td class="td_search">' + result.treatmentCenter[0].CITY + '</td><td class="td_search">' + result.treatmentCenter[0].COUNTRY + '</td><td class="td_search">' + result.treatmentCenter[0].OPEN_FROM + '</td><td class="td_search">' + result.treatmentCenter[0].OPEN_TO + '</td><td class="td_search">' + result.treatmentCenter[0].STOCK_UPDATE + '</td></tr>';
 	      		$('#treatment-center-details').html(html);
@@ -46,7 +49,10 @@ function nextStep() {
 		html = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>No treatment center has been chosen</div>';
 		alert('No treatment center has been chosen');
 		$(html).insertBefore('#treatment-center-select');
-	}
+	}else if(valid_treatment_center == 0){
+    html = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>Selected treatment center has no out of stock medicine list</div>';
+		$(html).insertBefore('#treatment-center-select');
+  }
   else if (patientId == ""){
     html = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>Patient ID could not be empty</div>';
 		alert('Please provide patient ID');

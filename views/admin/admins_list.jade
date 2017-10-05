@@ -9,18 +9,22 @@ block pages
     i.glyphicon.glyphicon-list-alt
     span.main-actions|                         Manage Medicines
   .header__actions-divider
+  button.header__action-button.ng-binding(data-toggle="tooltip", title="Reports", onclick="location.href='" + base + "/admin/reports';")
+    i.glyphicon.glyphicon-list-alt
+    span.main-actions|                         Reports
+  .header__actions-divider
   button.header__action-button.ng-binding(data-toggle="tooltip", title="Admins List", onclick="location.href='" + base + "/admin/admins_list';")
     i.glyphicon.glyphicon-tower
     span.main-actions|                         Admins List
-  .header__actions-divider  
+  .header__actions-divider
 block account
   .header__actions-divider
   button.header__action-button.ng-binding(data-toggle="tooltip", title="Logout", onclick="location.href='" + base + "/admin/logout';")
     i.glyphicon.glyphicon-log-out
-    span.main-actions|                         Logout        
+    span.main-actions|                         Logout
 block content
   .page__subtitle.ng-binding Admins List
-  .welcome__home-buttons     
+  .welcome__home-buttons
     table#adminsTable.display(cellspacing="0", width="100%")
       thead
         tr
@@ -34,9 +38,9 @@ block content
       tbody
         if admins && admins.length > 1
           - for( var i = 0, len = admins.length; i < len; i++ ) {
-          if admins[i].ID != admin_id  
+          if admins[i].ID != admin_id
             tr
-              td #{admins[i].USERNAME} 
+              td #{admins[i].USERNAME}
               td #{admins[i].EMAIL}
               if admins[i].TYPE
                 td Super
@@ -50,7 +54,7 @@ block content
                       button.form-control.btn.btn-gray(onclick='suspend('+admins[i].ID+')') Suspend
                     else
                       button.form-control.btn.btn-success(onclick='activate('+admins[i].ID+')') Activate
-              -  }      
+              -  }
           - }
 block modals
   #changeAdminType.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
@@ -71,15 +75,14 @@ block modals
                 span.input-group-addon
                   i.glyphicon.glyphicon-briefcase
               // /.input-group
-            // /.form-group      
+            // /.form-group
         // /.modal-body
         .modal-footer
           button#change-type-btn.form-control.btn.btn-primary Change
         // /.modal-footer
       // /.modal-content
     // /.modal-dialog
-  // /.modal          
+  // /.modal
 block scripts
   script(type='text/javascript', src='https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js')
-  script(type='text/javascript', src=base+'/scripts/admin/admins_list.js')  
-  
+  script(type='text/javascript', src=base+'/scripts/admin/admins_list.js')

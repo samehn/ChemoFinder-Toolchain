@@ -10,7 +10,7 @@ $("#type").change(function() {
     if ($("#type option:selected").val() == "pharmacy") {
       $('.handle').css('display', 'inherit');
       $('#entityName').attr('placeholder', 'Pharmacy Name');
-    } 
+    }
     else if($("#type option:selected").val() == "treatment center") {
       $('.handle').css('display', 'inherit');
       $('#entityName').attr('placeholder', 'Treatment Center Name');
@@ -86,7 +86,7 @@ $( function() {
         $('#loadingModal').modal('hide');
         var availableTags = [];
         //console.log(data.medicines[0].GENERIC_NAME);
-        for (i = 0; i < data.medicines.length; i++) 
+        for (i = 0; i < data.medicines.length; i++)
         {
             var tag = data.medicines[i].GENERIC_NAME + " " + data.medicines[i].FORM;
             // console.log(tag);
@@ -110,7 +110,7 @@ function registerModal() {
 }
 
 function login() {
-    
+
     var type = $('#login-type');
     var user_array={};
     var email = $('#uEmail');
@@ -122,14 +122,14 @@ function login() {
         type: "post",
         url: url +'/user/login',
         data : user_array,
-        success:  function(data){             
+        success:  function(data){
           // console.log(data);
           // console.log(data.message);
           $('.error-form').remove();
           $('.message-form').remove();
           if(data.message == "failed")
           {
-            $('#loadingModal').modal('hide'); 
+            $('#loadingModal').modal('hide');
             if(data.login_error)
             {
               var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.login_error + '</div>';
@@ -153,7 +153,7 @@ function login() {
 
 function register() {
     var user_array={};
-    
+
     var type = $('#type');
     var name = $('#name');
     var position = $('#position');
@@ -166,7 +166,7 @@ function register() {
     var email = $('#email');
     var password = $('#password');
     var rpassword = $('#rpassword');
-    
+
     var terms = $('#terms');
 
     user_array[type.attr('name')] = type.val();
@@ -181,13 +181,13 @@ function register() {
     user_array[email.attr('name')] = email.val();
     user_array[password.attr('name')] = password.val();
     user_array[rpassword.attr('name')] = rpassword.val();
-    
+
     if(terms.is(":checked"))
     {
       user_array[terms.attr('name')] = true;
     }
     else {
-      user_array[terms.attr('name')] = false; 
+      user_array[terms.attr('name')] = false;
     }
 
     if(type.val() == "pharmacy" || type.val() == "treatment center")
@@ -203,7 +203,7 @@ function register() {
       type: "post",
       url: url + '/user/signup',
       data : user_array,
-      success:  function(data) {        
+      success:  function(data) {
         $('#loadingModal').modal('hide');
         // console.log(data);
         // console.log(data.message);
@@ -228,7 +228,7 @@ function register() {
           showError(data.email_error, $('#emailRegisterForm'));
           showError(data.password_error, $('#passwordRegisterForm'));
           showError(data.rpassword_error, $('#rpasswordRegisterForm'));
-          
+
           showError(data.open_from_error, $('#openFromRegisterForm'));
           showError(data.open_to_error, $('#openToRegisterForm'));
 
@@ -269,7 +269,7 @@ function search() {
       type: "post",
       url: url + '/getmedicinebygenericandform',
       data : data,
-      success:  function(result){  
+      success:  function(result){
         console.log(result);
         if(result.message == "success") {
           if(result.medicines.length > 0) {
@@ -282,12 +282,12 @@ function search() {
                 '<td class="td_search">' + result.medicines[i].FORM + '</td>' +
                 '<td class="td_search">' + result.medicines[i].STRENGTH + '</td>' +
                 '<td class="td_search">' + result.medicines[i].STRENGTH_UNIT + '</td>' +
-                '<td class="td_search">' + result.medicines[i].STRENGTH +' ' + result.medicines[i].STRENGTH_UNIT + '</td>' +
+              //  '<td class="td_search">' + result.medicines[i].STRENGTH +' ' + result.medicines[i].STRENGTH_UNIT + '</td>' +
                 '<td class="td_search">' + result.medicines[i].MANUFACTURER + '</td>' +
                 '<td class="td_search"><button class="btn btn-primary" onclick="showPharmacies(' + result.medicines[i].ID + ')">' + lang.show_pharmacies + '</button></td>' +
               '</tr>';
             }
-            $('#search-result').html(html); 
+            $('#search-result').html(html);
           }
           else {
             var message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>This medicine is not available in any pharmacy currently</div>';
@@ -296,7 +296,7 @@ function search() {
         }
         else {
           var message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>This is not a valid medicine</div>';
-          $(message).insertBefore($('#section-search'));            
+          $(message).insertBefore($('#section-search'));
         }
       }
     });
@@ -319,7 +319,7 @@ function showPharmacies(id) {
     url: url + '/getavailablepharmaciesbyid',
     data : {id: id},
     success:  function(data){
-      console.log(data);        
+      console.log(data);
       $('#loadingModal').modal('hide');
       $('#showPharmacies').modal('show');
       if(data.message == "success") {
@@ -339,16 +339,16 @@ function showPharmacies(id) {
                 '<td class="td_search">' + data.pharmacies[i].LAST_UPDATE + '</td>' +
               '</tr>';
             }
-            $('#pharmacies-result').html(html); 
+            $('#pharmacies-result').html(html);
           }
           else {
             var html = '<td style="text-align: center;" valign="top" colspan="11" class="empty_table td_search">No available pharmacies currently</td>';
-            $('#pharmacies-result').html(html); 
+            $('#pharmacies-result').html(html);
           }
         }
         else {
           var html = '<td style="text-align: center;" valign="top" colspan="11" class="empty_table td_search">No available pharmacies currently</td>';
-          $('#pharmacies-result').html(html);             
+          $('#pharmacies-result').html(html);
         }
     }
   });

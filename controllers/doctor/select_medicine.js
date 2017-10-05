@@ -15,7 +15,11 @@ select_medicine.prototype.select_medicine_page =  function(req, res) {
         user_model.async_select_treatment_center_by_id(tomodel, function(treatment_center) {
             if(treatment_center.length > 0) {
                 medicine_model.async_select_medicine_not_in_treatment_center(tomodel, function(medicines) {
+									if(medicines.length > 0){
                     res.render('doctor/select_medicine', {medicines: medicines});
+									}else{
+										res.render('doctor/select_treatment_center', {treatmentCenters: req.session.treatmentCenters});
+									}
                 });
             }
             else {

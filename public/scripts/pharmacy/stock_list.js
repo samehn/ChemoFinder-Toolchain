@@ -88,7 +88,7 @@ function showStockRecord(stock_id) {
         $('#approveShow').html('Approved');
       }
       else {
-        $('#approveShow').html('Not Approved'); 
+        $('#approveShow').html('Not Approved');
       }
       $('#updateDateShow').html(data.result[0].LAST_UPDATE);
       $('#medicineDetails').modal('show');
@@ -98,7 +98,7 @@ function showStockRecord(stock_id) {
 
 function updateStockRecord(stock_id) {
   var item_array={};
-    
+
   var batch = $('#batchNumberUpdate');
   var expiry_date = $('#expiryDateUpdate');
   var pack_size = $('#packSizeUpdate');
@@ -189,13 +189,13 @@ function deleteStockRecord(stock_id, element) {
           $(message).insertAfter($('.page__subtitle'));
         }
       }
-    }); 
+    });
   }
 }
 
 function add_new_medicine() {
 	var item_array={};
-    
+
   var genericName = $('#genericName');
   var form = $('#form');
   var strength = $('#strength');
@@ -210,10 +210,10 @@ function add_new_medicine() {
   var avg = $('#avgMonthlyConsumption');
 
   item_array[genericName.attr('name')] = genericName.val();
-  item_array[form.attr('name')] = form.val(); 
+  item_array[form.attr('name')] = form.val();
   item_array[strength.attr('name')] = strength.val();
   item_array[strengthUnit.attr('name')] = strengthUnit.val();
-  item_array[brandName.attr('name')] = brandName.val();  
+  item_array[brandName.attr('name')] = brandName.val();
   item_array[manufacturer.attr('name')] = manufacturer.val();
   item_array[batch.attr('name')] = batch.val();
   item_array[expiry_date.attr('name')] = expiry_date.val();
@@ -353,7 +353,7 @@ function get_approved_medicine_details(element) {
 
 function add_new_approved_medicine() {
   var item_array={};
-    
+
   var medicine_id = $('#medicineDetailsApproved');
   var batch = $('#batchNumberApproved');
   var expiry_date = $('#expiryDateApproved');
@@ -362,7 +362,7 @@ function add_new_approved_medicine() {
   var quantity = $('#quantityApproved');
   var avg = $('#avgMonthlyConsumptionApproved');
 
-    
+
   item_array[medicine_id.attr('name')] = medicine_id.val();
   item_array[batch.attr('name')] = batch.val();
   item_array[expiry_date.attr('name')] = expiry_date.val();
@@ -378,7 +378,7 @@ function add_new_approved_medicine() {
     data : item_array,
     success:  function(data){
       $('#loadingModal').modal('hide');
-      
+
       console.log(data);
       console.log(data.message);
       $('.error-form').remove();
