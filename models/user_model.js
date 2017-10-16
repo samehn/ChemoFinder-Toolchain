@@ -121,6 +121,11 @@ user_model.prototype.async_select_user_by_id = function(data, callback) {
 	return this.dbQuery(query, callback);
 };
 
+user_model.prototype.async_select_all_admin = function(callback) {
+	var query = "SELECT * from DASH5082.ADMIN ";
+	return this.dbQuery(query, callback);
+};
+
 user_model.prototype.async_select_pharmacy_by_id = function(data, callback) {
 	var query = "SELECT * from DASH5082.CHEMO_USER U JOIN CHEMO_USER_PHARMACY UP ON U.ID = UP.PHARMACY_ID WHERE U.ID ='" + data.user_id + "';";
 	return this.dbQuery(query, callback);

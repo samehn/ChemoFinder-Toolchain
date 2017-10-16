@@ -6,15 +6,21 @@ $(document).click(function() {
 function confirm()
 {
   var data = {};
+  var data1 = {};
 	var query = window.location.search.substring(1);
 	var vars = query.split("&");
     for (var i=0;i<vars.length;i++) {
-    	var pair = vars[i].split("=");
+        var pair = vars[i].split("=");
       	if(pair[0] == 't') {
       		data['treatment_center'] = pair[1];
+          data1['treatment_center'] = pair[1];
       	}
+        if(pair[0] == 'pid'){
+          data['pid'] = pair[1];
+          data1['pid'] = pair[1];
+        }
     }
-	console.log(data);
+    console.log(data);
     $.ajax({
         type: "post",
         url: url +'/doctor/shoppinglist/confirmShoppingList',
@@ -22,6 +28,7 @@ function confirm()
         success:  function(data){
           console.log(data);
           console.log(data.message);
+          window.location.href = url + '/doctor/shoppinglist?t='+ data1['treatment_center'] + '&pid=' + data1['pid'] + '&conf=true';
         }
     });
 }

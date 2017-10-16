@@ -15,6 +15,12 @@ shopping_list.prototype.shopping_list_page =  function(req, res) {
 		//need to change that later
 		req.session.pid = req.param('pid');
 		req.session.tc = req.param('t');
+
+		var conf = req.param('conf');
+		var confirmedVal = false;
+		if(conf == 'true'){
+			confirmedVal = true;
+		}
 		console.log('******************************************************');
 		console.log("doctor id for shopping list" + req.session.doctor_id);
 		console.log('patient id = ' + req.session.pid);
@@ -27,7 +33,8 @@ shopping_list.prototype.shopping_list_page =  function(req, res) {
         tomodel.user_id = data.treatment_center;
         user_model.async_select_treatment_center_by_id(tomodel, function(treatment_center) {
             if(treatment_center.length > 0) {
-                res.render('doctor/medicines_shopping_list', {treatmentCenter: treatment_center, shoppinglist: req.session.shoppinglist, patientId: req.param('pid')});
+							req.session.treatmentCenter = treatment_center;
+                res.render('doctor/medicines_shopping_list', {treatmentCenter: treatment_center, shoppinglist: req.session.shoppinglist, patientId: req.param('pid'), confirmed: confirmedVal});
             }
             else {
                 res.send("404 Not Found");
@@ -43,7 +50,6 @@ shopping_list.prototype.confirm_shopping_list = function(req, res) {
 	console.log("patient id = " + req.session.pid);
 	console.log('shopping list first med id ' + req.session.shoppinglist[0].medicine_id);
 	console.log('shopping list first med id ' + req.session.shoppinglist[0].medicine.BRAND_NAME);
-
 
 	const uuidv4 = require('uuid/v4');
   var uuid = uuidv4(); // -> '110ec58a-a0f2-4ac4-8393-c866d813b8d1'
@@ -85,6 +91,7 @@ console.log('req.session.shoppinglist[i].pharmacies.lenght' + req.session.shoppi
 	}
 
   res.send('success');
+	//res.render('doctor/medicines_shopping_list', {treatmentCenter: req.session.treatmentCenter, shoppinglist: req.session.shoppinglist, patientId: req.param('pid'), confirmed: true});
 }
 shopping_list.prototype.send_email =  function(req, res) {
     var data = controller.xssClean(req.body);

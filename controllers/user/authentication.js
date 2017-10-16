@@ -37,6 +37,9 @@ authentication.prototype.login =  function(req, res) {
                         if(user[0].TYPE.toLowerCase() == 'doctor' || user[0].TYPE.toLowerCase() == 'navigator') {
                             req.session.doctor_id = user[0].ID;
                             req.session.doctor_first_login = user[0].FIRST_LOGIN;
+														var hour = 4 * 60 * 60 * 1000;
+														req.session.cookie.expires = new Date(Date.now() + hour);
+														req.session.cookie.maxAge = hour;
                         }
                         else if(user[0].TYPE.toLowerCase() == 'pharmacy' || user[0].TYPE.toLowerCase() == 'treatment center') {
                             req.session.pharmacy_id = user[0].ID;

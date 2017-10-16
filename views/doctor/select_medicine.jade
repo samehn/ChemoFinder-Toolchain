@@ -41,10 +41,10 @@ block content
       .col-md-4.col-xs-6
         select#medicine-select.large-form-control(onchange="selectMedicine(this)")
           option(value='') Select Medicine
-          -  if(medicines.length > 0) { 
+          -  if(medicines.length > 0) {
             -  for (var i = 0; i < medicines.length; i++) {
-                option(data-name=medicines[i].GENERIC_NAME, data-form=medicines[i].FORM) #{medicines[i].GENERIC_NAME} #{medicines[i].FORM} 
-            - } 
+                option(data-name=medicines[i].GENERIC_NAME, data-form=medicines[i].FORM, data-medicine_id=medicines[i].MEDICINE_ID) #{medicines[i].GENERIC_NAME} #{medicines[i].FORM} #{medicines[i].MEDICINE_ID}
+            - }
         - }
     h4.table-title Medicine Options
     div.div_search
@@ -63,8 +63,7 @@ block content
         tbody#medicinesDetails
           tr.tr_search
             td.empty_table.td_search(style="text-align: center;", valign="top", colspan="9") No medicines are chosen yet
-    button#next-btn.btn.btn-primary.pull-right.mg-btm-70.mg-top-20(onclick="nextStep()") Next              
+    button#next-btn.btn.btn-primary.pull-right.mg-btm-70.mg-top-20(onclick="nextStep()") Next
 
 block scripts
   script(type='text/javascript', src=base+'/scripts/doctor/select_medicine.js')
-    

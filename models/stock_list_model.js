@@ -87,6 +87,11 @@ stock_list_model.prototype.async_insert_new_record = function(data, callback) {
 	return this.dbQuery(query, callback);
 };
 
+stock_list_model.prototype.async_insert_out_of_stock_new_record = function(data, callback) {
+	var query = "INSERT INTO DASH5082.CHEMO_STOCK_LIST (MEDICINE_ID, BATCH_NUMBER, PACK_SIZE, AVAILABLE_STOCK, PHARMACY_ID) VALUES (" + this.mysql_real_escape_string(data.medicine_id) + ",'" + this.mysql_real_escape_string(data.batch_number) + "', " + this.mysql_real_escape_string(data.pack_size) + "," + this.mysql_real_escape_string(data.quantity) + ", " + this.mysql_real_escape_string(data.user_id) + ");";
+	return this.dbQuery(query, callback);
+};
+
 stock_list_model.prototype.async_select_stock_record_by_id = function(data, callback) {
 	var query = "SELECT * FROM DASH5082.CHEMO_STOCK_LIST WHERE ID = " + this.mysql_real_escape_string(data.stock_id);
 	return this.dbQuery(query, callback);
@@ -100,6 +105,11 @@ stock_list_model.prototype.async_select_stock_record_by_pharmacy = function(data
 stock_list_model.prototype.async_update_stock_record = function(data, callback) {
 	var query = "UPDATE DASH5082.CHEMO_STOCK_LIST SET BATCH_NUMBER = '" + this.mysql_real_escape_string(data.batch_number) + "', EXPIRY_DATE = '" + this.mysql_real_escape_string(data.expiry_date) + "', PACK_SIZE = " + this.mysql_real_escape_string(data.pack_size) + ", PRICE_PER_PACK = " + this.mysql_real_escape_string(data.price) + ", AVAILABLE_STOCK = " + this.mysql_real_escape_string(data.quantity) + ", AVG_MONTHLY_CONSUMPTION = '" + this.mysql_real_escape_string(data.avg_monthly_consumption) + "', UPDATED_AT = CURRENT_TIMESTAMP WHERE ID =" + this.mysql_real_escape_string(data.stock_id) + " AND PHARMACY_ID =" + this.mysql_real_escape_string(data.user_id);
 	console.log(query);
+	return this.dbQuery(query, callback);
+};
+
+stock_list_model.prototype.async_update_out_of_stock_record = function(data, callback) {
+	var query = "UPDATE DASH5082.CHEMO_STOCK_LIST SET AVAILABLE_STOCK = " + this.mysql_real_escape_string(data.quantity) + " , UPDATED_AT =  CURRENT_TIMESTAMP WHERE MEDICINE_ID =" + this.mysql_real_escape_string(data.medicine_id) + " AND PHARMACY_ID =" + this.mysql_real_escape_string(data.user_id);console.log(query);
 	return this.dbQuery(query, callback);
 };
 

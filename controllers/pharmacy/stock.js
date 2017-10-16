@@ -378,7 +378,9 @@ stock.prototype.upload_out_of_stock_list =  function(req, res) {
 							res.status(500).send(err);
 					}
 					else {
+							req.session.parseOutofStock = true;
 							var medicines = parsing_stock_list(req, res);
+							req.session.parseOutofStock = false;
 							console.log(medicines);
 							console.log('File uploaded!');
 							if(medicines.length > 0) {
@@ -647,7 +649,14 @@ function parsing_stock_list(req, res) {
             var new_data = controller.xssClean(data);
             new_data['expiry_date'] = new Date(data.expiry_date);
             console.log(new_data);
-            var validation_array = new_medicine_validations(new_data);
+						var validation_array = {};
+						if(req.session.parseOutofStock == true){
+							console.log("********************calling out of stock list validation***************************************");
+								validation_array = out_of_stock_medicine_validations(new_data);
+							}else{
+								validation_array = new_medicine_validations(new_data);
+							}
+							console.log("********************After calling out of stock list validation***************************************");
             if(Object.keys(validation_array).length > 0){
                 format_error_flag = true;
                 var result = validation_array;
@@ -877,4 +886,45 @@ function new_medicine_validations(data) {
     return validation_array;
 }
 
+
+
+function out_of_stock_medicine_validations(data) {
+    var validation_array = {};
+
+    var generic_name = controller.validate({generic_name: data.generic_name},['required','length:0-60']);
+    if(generic_name){
+        validation_array = controller.mergeArrays(validation_array, generic_name);
+    }
+
+    var brand_name = controller.validate({brand_name: data.brand_name},['required', 'length:0-60']);
+    if(brand_name){
+        validation_array = controller.mergeArrays(validation_array, brand_name);
+    }
+
+    var form = controller.validate({form: data.form},['required', 'length:0-60']);
+    if(form){
+        validation_array = controller.mergeArrays(validation_array, form);
+    }
+
+    var strength = controller.validate({strength: data.strength},['required', 'float']);
+    if(strength){
+        validation_array = controller.mergeArrays(validation_array, strength);
+    }
+
+    var strength_unit = controller.validate({strength_unit: data.strength_unit},['required', 'length:0-60']);
+    if(strength_unit){
+        validation_array = controller.mergeArrays(validation_array, strength_unit);
+    }
+
+    var manufacturer = controller.validate({manufacturer: data.manufacturer},['required', 'length:0-60']);
+    if(manufacturer){
+        validation_array = controller.mergeArrays(validation_array, manufacturer);
+    }
+
+    var pack_size = controller.validate({pack_size: data.pack_size},['required', 'integer', 'length:0-60']);
+    if(pack_size){
+        validation_array = controller.mergeArrays(validation_array, pack_size);
+    }
+    return validation_array;
+}
 module.exports = new stock();

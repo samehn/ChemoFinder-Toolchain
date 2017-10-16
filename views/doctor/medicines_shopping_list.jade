@@ -79,10 +79,10 @@ block content
                   -  }
       -  }
     -  }
-      button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20(onclick="confirm()") Confirm
-    button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20(onclick="printPage()") Print
-    button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20(data-toggle='modal', data-target='#sendEmail') Send Email
-    button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20 Send SMS
+    button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20(disabled=confirmed, onclick="confirm()") Confirm
+    button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20(disabled=!confirmed, onclick="printPage()") Print
+    button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20(disabled=!confirmed, data-toggle='modal', data-target='#sendEmail') Send Email
+    button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20(disabled=!confirmed) Send SMS
     button.btn.btn-primary.pull-right.mg-btm-70.mg-left-10.mg-top-20(onclick="window.location.href='"+base+"/doctor'") Search Again
 block modals
   #sendEmail.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
