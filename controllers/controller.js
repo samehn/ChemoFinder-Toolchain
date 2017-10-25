@@ -3,6 +3,7 @@ var controller = function() {};
 controller.prototype.validator = require('validator');
 controller.prototype.bcrypt = require('bcrypt');
 controller.prototype.dateFormat = require('dateformat');
+controller.prototype.format = require('string-format');
 controller.prototype.moment = require("moment");
 controller.prototype.XLSX = require('xlsx');
 // controller.prototype.generatePassword = require("password-generator");
