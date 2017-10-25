@@ -199,10 +199,10 @@ function save_session_validations(data) {
         validation_array = controller.mergeArrays(validation_array, quantity);
     }
 
-    var price = controller.validate({price: data.price},['required','integer']);
+    /*var price = controller.validate({price: data.price},['required','integer']);
     if(price){
         validation_array = controller.mergeArrays(validation_array, price);
-    }
+    }*/
 
     if(data.pharmacies && data.pharmacies.length > 0){
         var validPharmacies = data.pharmacies.every(function checkInteger(pharmacy) { return Number.isInteger(parseInt(pharmacy));});

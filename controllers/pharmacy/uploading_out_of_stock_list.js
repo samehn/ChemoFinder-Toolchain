@@ -7,6 +7,11 @@ tomodel = {};
 
 
 process.on('message', function(message){
+	var data = {};
+	data.pharmacy_id = message.pharmacy_id;
+	console.log('^^^^^^^ upload out of stocklist pharmacy id ' + message.pharmacy_id);
+  medicine_model.insert_rows_out_of_stock_list_transaction_history(data);
+	medicine_model.delete_rows_out_of_stock_list_by_pharmacy_id(data);
 	controller.async.eachLimit(message.medicines, 1, function(medicine, callback) {
 	    save_medicines_stock_list(medicine, message.pharmacy_id, function() {
 	        console.log("done");
@@ -81,7 +86,7 @@ var save_medicines_stock_list = function(medicine, user_id, callback) {
 						console.log("main medicine id is " + main_medicine[0].ID);
             medicine['medicine_id'] = main_medicine[0].ID;
             medicine['user_id']= user_id;
-						stock_list_model.async_update_out_of_stock_record(medicine, function(stock_list_medicine) {
+						stock_list_model.async_select_stock_list_by_medicine(medicine, function(stock_list_medicine) {
                 if(stock_list_medicine.length > 0) {
                     medicine['stock_id'] = stock_list_medicine[0].ID;
 										console.log("******* stock list medicine stock is " + medicine['quantity']);

@@ -660,12 +660,20 @@ function parsing_stock_list(req, res) {
             if(Object.keys(validation_array).length > 0){
                 format_error_flag = true;
                 var result = validation_array;
+								var errorMSG = "";
+								var append = 0;
                 for (var key in result) {
-                  if (result.hasOwnProperty(key)) {
-                    wm = wm + result[key] + ', ';
-                  }
+									if(append>0) errorMSG += ", ";
+									append++;
+									errorMSG += key + ":" + result[key];
+									console.log("####validation error key " + key);
+									console.log("####validation error value " + result[key]);
+                  //if (result.hasOwnProperty(key)) {
+                  //  wm = wm + result[key] + ', ';
+                  //}
                 }
-                wm = wm.slice(0, -2) + '</li>';
+								wm += errorMSG;
+                //wm = wm.slice(0, -2) + '</li>';
                 warning_message = warning_message + wm;
             }
             else {

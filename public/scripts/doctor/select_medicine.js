@@ -42,7 +42,7 @@ function selectMedicine(element) {
                             				'<td class="td_search">' + result.medicines[i].FORM + '</td>' +
                             				'<td class="td_search">' + result.medicines[i].STRENGTH + '</td>' +
                             				'<td class="td_search">' + result.medicines[i].STRENGTH_UNIT + '</td>' +
-                            				'<td class="td_search">' + result.medicines[i].PACK_TYPE + '</td>' +
+                            				//'<td class="td_search">' + result.medicines[i].PACK_TYPE + '</td>' +
                             				'<td class="td_search">' + result.medicines[i].MANUFACTURER + '</td>' +
                             				'<td class="td_search">' + result.medicines[i].PRICE_PER_PACK + '</td>' +
                             			'</tr>';
@@ -57,7 +57,7 @@ function selectMedicine(element) {
 		      	}
 	      	}
 	      	else {
-	      		html = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>This medicine is not available currently in any pharmacy</div>';
+	      		html = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>This medicine is not available currently in any pharmacy failed</div>';
 				$(html).insertBefore('#medicine_details_table');
 	      	}
 	      }

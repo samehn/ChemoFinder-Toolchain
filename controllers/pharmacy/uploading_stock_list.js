@@ -7,6 +7,11 @@ tomodel = {};
 
 
 process.on('message', function(message){
+	var data = {};
+	data.pharmacy_id = message.pharmacy_id;
+	console.log('^^^^^^^ upload stocklist pharmacy id ' + message.pharmacy_id);
+  medicine_model.insert_rows_stock_list_transaction_history(data);
+	medicine_model.delete_rows_stock_list_by_pharmacy_id(data);
 	controller.async.eachLimit(message.medicines, 1, function(medicine, callback) {
 	    save_medicines_stock_list(medicine, message.pharmacy_id, function() {
 	        console.log("done");
