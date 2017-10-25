@@ -14,6 +14,7 @@ var randtoken = require('rand-token');
 var nodemailer = require('nodemailer');
 var hbs = require('nodemailer-express-handlebars');
 var dateFormat = require('dateformat');
+var format = require('string-format');
 var RandExp = require('randexp');
 var fileUpload = require('express-fileupload');
 var Excel = require("exceljs");
