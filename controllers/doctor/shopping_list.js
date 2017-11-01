@@ -108,7 +108,7 @@ shopping_list.prototype.send_email =  function(req, res) {
                 var mailOptions = {
                     from: 'chemofinder@gmail.com', // sender address
                     to: data.email, // list of receivers
-                    subject: 'Chemofinder Shopping List', // Subject line
+                    subject: 'ChemoFinder Shopping List', // Subject line
                     template: 'shopping_list',
                     context: {
                         treatmentCenter: treatment_center[0].NAME, shoppinglist: req.session.shoppinglist

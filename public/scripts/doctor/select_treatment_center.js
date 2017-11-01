@@ -50,7 +50,7 @@ function nextStep() {
 		alert('No treatment center has been chosen');
 		$(html).insertBefore('#treatment-center-select');
 	}else if(valid_treatment_center == 0){
-    html = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>Selected treatment center has no out of stock medicine list</div>';
+    html = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>Selected treatment canter has all medicines in stock</div>';
 		$(html).insertBefore('#treatment-center-select');
   }
   else if (patientId == ""){
