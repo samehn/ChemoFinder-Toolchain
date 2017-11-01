@@ -15,7 +15,7 @@ var lang = {
     log_in: "Se Connecter",
     email: "E-mail",
     password: "Mot de Passe",
-    forgot_password: "mot de passe oublié",
+    forgot_password: "Mot de passe oublié",
     sign_up:"S'inscrire",
     select_type: "Sélectionnez Votre Type",
     doctor: "Médecin",
