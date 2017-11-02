@@ -119,13 +119,13 @@ controller.prototype.validate = function (field, validations) {
 		if(isEmail(field))
 		{
 			if(suffix == 'email') {
-				return isEmail(field);		
+				return isEmail(field);
 			}
 			else {
 				var message = suffix.split('||')[1];
-				return isEmailWithMessage(field, message);	
+				return isEmailWithMessage(field, message);
 			}
-			
+
 		}
 	}
 
@@ -143,7 +143,7 @@ controller.prototype.validate = function (field, validations) {
 			}
 			else {
 				var message = suffixArray[1];
-				return isLengthWithMessage(field, min, max, message);	
+				return isLengthWithMessage(field, min, max, message);
 			}
 		}
 	}
@@ -227,7 +227,7 @@ function validateWithRegex(strRegex, message, field) {
 			}
 			return false;
 	    }
-	} 
+	}
 }
 
 function checkKeyStartWith(array, prefix) {
@@ -253,7 +253,7 @@ function getKeyStartWith(array, prefix) {
 function required(field) {
 	for (var key in field){
 	    if (typeof field[key] !== 'function') {
-	    	if(controller.prototype.validator.isEmpty(field[key]))
+	    	if(field[key] == null || controller.prototype.validator.isEmpty(field[key]))
 			{
 				var value = 'This filed is required';
 				var result = {[key+'_error']: value};
@@ -350,7 +350,7 @@ function isInteger(field, options) {
 					return result;
 				}
 	    	}
-	    	
+
 			return false;
 	    }
 	}
@@ -373,7 +373,7 @@ function isIntegerWithMessage(field, options, message) {
 					return result;
 				}
 	    	}
-	    	
+
 			return false;
 	    }
 	}
@@ -398,7 +398,7 @@ function isFloat(field, options) {
 					return result;
 				}
 	    	}
-	    	
+
 			return false;
 	    }
 	}
@@ -421,7 +421,7 @@ function isFloatWithMessage(field, options, message) {
 					return result;
 				}
 	    	}
-	    	
+
 			return false;
 	    }
 	}
@@ -445,7 +445,7 @@ function isFloatWithMessage(field, options, message) {
 // 			requestedPage = page - 1;
 // 			pagination = pagination + '<li><a onclick="getPage('+ requestedPage +', \'' + source + '\')" >&laquo;</a></li>';
 // 		}
-		
+
 // 		if(page == 1)
 // 		{
 // 			pagination = pagination + '<li><a class="selected-page disable-link">1</a></li>';
@@ -490,14 +490,14 @@ function isFloatWithMessage(field, options, message) {
 // 			requestedPage = page + 1;
 // 			pagination = pagination + '<li><a onclick="getPage(' + requestedPage + ', \'' + source + '\')">&raquo;</a></li>';
 // 			pagination = pagination + '<li><a onclick="getPage(' + numOfPages + ', \'' + source + '\')">Last</a></li></ul></div>';
-// 		}	
+// 		}
 // 	}
 // 	else
 // 	{
-// 		var noItems = "<tr><td colspan = '14' style='text-align:center;color: rgba(0,0,0,0.3)'><h4><span class='glyphicon glyphicon-ban-circle'></span>&nbsp;&nbsp;There are no requests currently</h4></td></tr>"; 
+// 		var noItems = "<tr><td colspan = '14' style='text-align:center;color: rgba(0,0,0,0.3)'><h4><span class='glyphicon glyphicon-ban-circle'></span>&nbsp;&nbsp;There are no requests currently</h4></td></tr>";
 // 		var pagination = '';
 // 	}
-	
+
 // 	data  = {'pagination' : pagination, 'total' : total, 'items' : items, 'noItems': noItems, 'limit': limit, 'page': page};
 // 	return data;
 // };

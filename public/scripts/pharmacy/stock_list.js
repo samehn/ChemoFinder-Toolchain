@@ -5,6 +5,12 @@ $(document).ready(function(){
     });
 });
 
+$(document).ready(function(){
+   $('#outofstockListTable').DataTable({
+        "scrollX": true
+    });
+});
+
 $(document).click(function() {
   $('.error-form').remove();
   $('.info-form').remove();

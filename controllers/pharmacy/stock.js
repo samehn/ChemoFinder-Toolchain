@@ -12,7 +12,12 @@ stock.prototype.constructor = stock;
 stock.prototype.stock_page =  function(req, res) {
     tomodel.user_id = req.session.pharmacy_id;
     var stock_list = stock_list_model.select_stock_list_by_id(tomodel);
-    var data = {stock_list: stock_list};
+    var out_of_stock_list = stock_list_model.select_out_of_stock_list_by_id(tomodel);
+		//var data = [{stock_list: stock_list} , {out_of_stock_list: out_of_stock_list}];
+		var data = {stock_list: stock_list,  out_of_stock_list: out_of_stock_list};
+
+		console.log("^^^^^^^^^^^^^^^^^^^^^^^^^ stock length : " + stock_list.length);
+		console.log("^^^^^^^^^^^^^^^^^^^^^^^^^iout of stock length : " + out_of_stock_list.length);
     if(req.session.stock_uploading_message)
     {
         data['uploading_message'] = req.session.stock_uploading_message;
@@ -31,7 +36,8 @@ stock.prototype.stock_page =  function(req, res) {
 		console.log("**************** about to call pharmacy views ******************");
 		console.log("is treatment user: " + req.session.treatmentCenter_user);
 		data['treatmentCenter_user'] = req.session.treatmentCenter_user;
-    res.render('pharmacy/stock_list', data);
+		console.log("^^^^^^^^^^^^^^^^^^^^^^^^^is treatment user: " + req.session.treatmentCenter_user);
+		res.render('pharmacy/stock_list', data );
 }
 
 stock.prototype.get_medicines_generic_and_form =  function(req, res) {
