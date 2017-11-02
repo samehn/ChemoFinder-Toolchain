@@ -38,12 +38,12 @@ function selectMedicine(element) {
                             					'<input type="radio" name="selected_medicine" data-price=' + result.medicines[i].PRICE_PER_PACK + ' value=' + result.medicines[i].ID + ' onclick="updateSelectedMedicine(this)">' +
                             				'</td>'	+
                             				'<td class="td_search">' + result.medicines[i].GENERIC_NAME + '</td>' +
-                            				'<td class="td_search">' + result.medicines[i].BRAND_NAME + '</td>' +
+                            				//'<td class="td_search">' + result.medicines[i].BRAND_NAME + '</td>' +
                             				'<td class="td_search">' + result.medicines[i].FORM + '</td>' +
                             				'<td class="td_search">' + result.medicines[i].STRENGTH + '</td>' +
                             				'<td class="td_search">' + result.medicines[i].STRENGTH_UNIT + '</td>' +
                             				//'<td class="td_search">' + result.medicines[i].PACK_TYPE + '</td>' +
-                            				'<td class="td_search">' + result.medicines[i].MANUFACTURER + '</td>' +
+                            				//'<td class="td_search">' + result.medicines[i].MANUFACTURER + '</td>' +
                             				'<td class="td_search">' + result.medicines[i].PRICE_PER_PACK + '</td>' +
                             			'</tr>';
 	      			}
