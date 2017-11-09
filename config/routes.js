@@ -101,6 +101,10 @@ module.exports = function(app){
 
 	app.get('/pharmacy/getmedicinesgenericandform', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_stock_controller.get_medicines_generic_and_form);
 	app.post('/pharmacy/getmedicinebygenericandform', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_stock_controller.get_medicine_by_generic_and_form);
+	app.post('/pharmacy/getmanufacturerbygenericandform', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_stock_controller.get_manufacturer_by_generic_and_form);
+	app.post('/pharmacy/getmedicinebygenericandformandmanufacturer', pharmacy_middleware.pharmacy_check_sign_in, pharmacy_stock_controller.get_medicine_by_generic_and_form_and_manufacturer);	
+
+
 	app.get('/pharmacy/first_changepassword', pharmacy_middleware.pharmacy_check_first_login, pharmacy_first_login_controller.first_login_page);
 	app.post('/pharmacy/first_changepassword', pharmacy_middleware.pharmacy_check_first_login, pharmacy_first_login_controller.change_password);
 

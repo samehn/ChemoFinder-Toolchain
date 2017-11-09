@@ -65,6 +65,37 @@ stock.prototype.get_medicine_by_generic_and_form =  function(req, res) {
     });
 }
 
+stock.prototype.get_manufacturer_by_generic_and_form =  function(req, res) {
+    var data = controller.xssClean(req.body);
+    tomodel.generic_name = data.generic_name;
+    tomodel.form = data.form;
+    medicine_model.async_select_manufacturer_by_generic_and_form(tomodel, function(medicines) {
+        if(medicines.length > 0) {
+            res.send({message: "success", medicines: medicines});
+        }
+        else {
+            res.send({message: "failed"});
+        }
+    });
+}
+
+stock.prototype.get_medicine_by_generic_and_form_and_manufacturer =  function(req, res) {
+    var data = controller.xssClean(req.body);
+    tomodel.generic_name = data.generic_name;
+    tomodel.form = data.form;
+		tomodel.manufacturer = data.manufacturer;
+    medicine_model.async_select_medicine_by_manufacturer_and_generic_and_form(tomodel, function(medicines) {
+        if(medicines.length > 0) {
+            res.send({message: "success", medicines: medicines});
+        }
+        else {
+            res.send({message: "failed"});
+        }
+    });
+}
+
+
+
 stock.prototype.get_stock_record =  function(req, res) {
     if(Number.isInteger(parseInt(req.body.stock_id))) {
         tomodel.stock_id = req.body.stock_id;

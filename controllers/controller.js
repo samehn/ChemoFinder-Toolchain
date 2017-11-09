@@ -1,7 +1,7 @@
 var controller = function() {};
 // controller.prototype.request = require('request');
 controller.prototype.validator = require('validator');
-controller.prototype.bcrypt = require('bcrypt');
+controller.prototype.bcrypt = require('bcrypt-nodejs');
 controller.prototype.dateFormat = require('dateformat');
 controller.prototype.format = require('string-format');
 controller.prototype.moment = require("moment");

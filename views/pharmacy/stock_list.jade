@@ -338,8 +338,13 @@ block modals
         .modal-body
           form#add-new-approved-medicine-form(role='form')
             #medicineFormApproved.form-group
-              select#medicineApproved.form-control(name='medicine', onchange="get_approved_medicine_details(this)")
+              select#medicineApproved.form-control(name='medicine', onchange="get_manufacturer(this)")
                 option.form-control(value='') Select Medicine
+              // /.input-group
+            // /.form-group
+            #medicineFORMManufacturer.form-group
+              select#medicineManufacturer.form-control(name='medicine' , onchange="get_approved_medicine_details(this)")
+                option.form-control(value='') Select Medicine Manufacturer
               // /.input-group
             // /.form-group
             #medicineDetailsFormApproved.form-group

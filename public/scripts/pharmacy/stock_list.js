@@ -329,8 +329,8 @@ function add_new_approved_medicine_modal() {
   });
 }
 
-function get_approved_medicine_details(element) {
-  $('#medicineDetailsApproved').html("<option class='form-control' value=''>Select Medicine Details</option>");
+function get_manufacturer(element) {
+  $('#medicineManufacturer').html("<option class='form-control' value=''>Select Medicine Manufacturer</option>");
   if($(element).val().length > 0) {
     var item_array={};
     item_array['generic_name'] = $(element).find(':selected').attr('data-name');
@@ -338,7 +338,36 @@ function get_approved_medicine_details(element) {
     console.log(item_array);
     $.ajax({
       type: "post",
-      url: url + '/pharmacy/getmedicinebygenericandform',
+      url: url + '/pharmacy/getmanufacturerbygenericandform',
+      data : item_array,
+      success:  function(data){
+        console.log(data);
+        if(data.message == "success") {
+          var html = "";
+          for (var i = 0; i < data.medicines.length; i++) {
+            var html = html + "<option class='form-control' data-name='" + item_array['generic_name'] + "' data-form='" + item_array['form'] +"' data-manufacturer='" + data.medicines[i].MANUFACTURER + "' >"  + data.medicines[i].MANUFACTURER + "</option>"
+          }
+          $('#medicineManufacturer').append(html);
+        }
+      }
+    });
+  }
+  else {
+    $('#medicineApproved').val('');
+  }
+}
+
+function get_approved_medicine_details(element) {
+  $('#medicineDetailsApproved').html("<option class='form-control' value=''>Select Medicine Details</option>");
+  if($(element).val().length > 0) {
+    var item_array={};
+    item_array['generic_name'] = $(element).find(':selected').attr('data-name');
+    item_array['form'] = $(element).find(':selected').attr('data-form');
+    item_array['manufacturer'] = $(element).find(':selected').attr('data-manufacturer');
+    console.log(item_array);
+    $.ajax({
+      type: "post",
+      url: url + '/pharmacy/getmedicinebygenericandformandmanufacturer',
       data : item_array,
       success:  function(data){
         console.log(data);
