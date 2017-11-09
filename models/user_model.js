@@ -178,7 +178,8 @@ user_model.prototype.async_select_treatment_centers = function(callback) {
 };
 
 user_model.prototype.async_select_treatment_center_by_id = function(data, callback) {
-	var query = "SELECT * FROM DASH5082.CHEMO_USER U JOIN DASH5082.CHEMO_USER_PHARMACY UP ON U.ID = UP.PHARMACY_ID WHERE U.TYPE = 'treatment center' AND U.ID=" + this.mysql_real_escape_string(data.user_id);
+	//var query = "SELECT * FROM DASH5082.CHEMO_USER U JOIN DASH5082.CHEMO_USER_PHARMACY UP ON U.ID = UP.PHARMACY_ID WHERE U.TYPE = 'treatment center' AND U.ID=" + this.mysql_real_escape_string(data.user_id);
+	var query = "SELECT U.ID, U.ENTITY_NAME, U.PERSON_NAME, U.PERSON_POSITION, U.EMAIL, U.PHONE_NUMBER, U.ADDRESS, U.CITY, U.COUNTRY, U.PASSWORD, U.TYPE, U.APPROVE, U.ACTIVE, U.FIRST_LOGIN, U.CREATED_AT, VARCHAR_FORMAT(U.UPDATED_AT, 'DD/MM/YYYY') AS UPDATED_AT, UP.PHARMACY_ID, CHAR(UP.OPEN_FROM, USA) as OPEN_FROM, CHAR(UP.OPEN_TO,USA) as OPEN_TO , VARCHAR_FORMAT(UP.STOCK_UPDATE, 'DD/MM/YYYY') AS STOCK_UPDATE FROM DASH5082.CHEMO_USER U JOIN DASH5082.CHEMO_USER_PHARMACY UP ON U.ID = UP.PHARMACY_ID WHERE U.TYPE = 'treatment center' AND U.ID=" + this.mysql_real_escape_string(data.user_id);
 	return this.dbQuery(query, callback);
 };
 
@@ -188,7 +189,7 @@ user_model.prototype.async_select_pharmacies_by_medicine_and_quantity = function
 };
 
 user_model.prototype.async_select_pharmacies_by_medicine_and_quantity_and_price = function(data, callback) {
-	var query = "SELECT U.ID AS ID, U.EMAIL, U.ENTITY_NAME, U.PHONE_NUMBER, U.ADDRESS, U.CITY, U.COUNTRY, UP.OPEN_FROM, UP.OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, UP.STOCK_UPDATE AS LAST_UPDATE FROM DASH5082.CHEMO_MEDICINE M JOIN DASH5082.CHEMO_STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN DASH5082.CHEMO_USER U ON U.ID = S.PHARMACY_ID JOIN DASH5082.CHEMO_USER_PHARMACY UP ON U.ID = UP.PHARMACY_ID WHERE M.APPROVED = TRUE AND U.TYPE='pharmacy' AND M.ID =" + this.mysql_real_escape_string(data.medicine_id) + " AND S.PRICE_PER_PACK =" + this.mysql_real_escape_string(data.price) + " AND S.AVAILABLE_STOCK >=" + this.mysql_real_escape_string(data.quantity) + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)";
+	var query = "SELECT U.ID AS ID, U.EMAIL, U.ENTITY_NAME, U.PHONE_NUMBER, U.ADDRESS, U.CITY, U.COUNTRY, CHAR(UP.OPEN_FROM, USA) as OPEN_FROM, CHAR(UP.OPEN_TO, USA) as OPEN_TO, S.PRICE_PER_PACK, S.EXPIRY_DATE, S.PACK_SIZE, VARCHAR_FORMAT(UP.STOCK_UPDATE, 'DD/MM/YYYY') AS LAST_UPDATE FROM DASH5082.CHEMO_MEDICINE M JOIN DASH5082.CHEMO_STOCK_LIST S ON M.ID = S.MEDICINE_ID JOIN DASH5082.CHEMO_USER U ON U.ID = S.PHARMACY_ID JOIN DASH5082.CHEMO_USER_PHARMACY UP ON U.ID = UP.PHARMACY_ID WHERE M.APPROVED = TRUE AND U.TYPE='pharmacy' AND M.ID =" + this.mysql_real_escape_string(data.medicine_id) + " AND S.PRICE_PER_PACK =" + this.mysql_real_escape_string(data.price) + " AND S.AVAILABLE_STOCK >=" + this.mysql_real_escape_string(data.quantity) + " ORDER BY CAST(S.PRICE_PER_PACK AS DECIMAL)";
 	return this.dbQuery(query, callback);
 };
 

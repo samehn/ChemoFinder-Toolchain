@@ -57,7 +57,7 @@ function selectMedicine(element) {
 		      	}
 	      	}
 	      	else {
-	      		html = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>This medicine is not available currently in any pharmacy failed</div>';
+	      		html = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>This medicine is not available currently in any pharmacy.</div>';
 				$(html).insertBefore('#medicine_details_table');
 	      	}
 	      }

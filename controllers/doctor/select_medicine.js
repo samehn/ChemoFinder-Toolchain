@@ -43,16 +43,16 @@ select_medicine.prototype.select_medicine_details =  function(req, res) {
         tomodel.generic_name = data.generic_name;
         tomodel.form = data.form;
 				tomodel.medicine_id = data.medicine_id;
-        medicine_model.async_select_medicine_by_generic_and_form_and_id_grouped_by_price(tomodel, function(medicines) {
-						if(medicines.length > 0) {
+       medicine_model.async_select_medicine_by_generic_and_form_and_id_grouped_by_price(tomodel, function(medicines) {
+					if(medicines.length > 0) {
 							for(var i=0; i<medicines.length; i++){
 								console.log("********** SELECT MEDICINES medicine_id " + medicines[i].MEDICINE_ID + " PHARMACY_ID : " + medicines[i].PHARMACY_ID);
 							}
                 res.send({message: "success", medicines: medicines})
             }
             else {
-                res.send({message: 'failed'});
-            }
+							    res.send({message: 'failed'});
+							 }
         });
     }
 }
