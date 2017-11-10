@@ -53,12 +53,15 @@ function nextStep() {
     html = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>Selected treatment canter has all medicines in stock</div>';
 		$(html).insertBefore('#treatment-center-select');
   }
-  else if (patientId == ""){
-    html = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>Patient ID could not be empty</div>';
-		alert('Please provide patient ID');
-		$(html).insertBefore('#patient-id');
-  }
+//  else if (patientId == ""){
+    //html = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>Patient ID could not be empty</div>';
+		//alert('Please provide patient ID');
+		//$(html).insertBefore('#patient-id');
+//  }
 	else {
+
+    if (patientId == "")
+          patientId = ' ';
 		window.location.href = url + '/doctor/selectmedicine?t='+ treatmentCenter + '&pid=' + patientId;
 	}
 }
