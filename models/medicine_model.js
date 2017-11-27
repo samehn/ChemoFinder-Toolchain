@@ -60,6 +60,12 @@ medicine_model.prototype.select_medicine_by_generic_and_form = function(data) {
 	return this.dbQuerySync(query);
 };
 
+medicine_model.prototype.select_all_medicine_by_generic_and_form = function(data) {
+	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE GENERIC_NAME ='" + this.mysql_real_escape_string(data.generic_name) + "' AND FORM = '" + this.mysql_real_escape_string(data.form) + "';";
+	console.log(query);
+	return this.dbQuerySync(query);
+};
+
 medicine_model.prototype.select_medicine_by_generic_and_form_grouped_by_price = function(data) {
 	var query = "SELECT * FROM DASH5082.CHEMO_MEDICINE AS G1 JOIN (SELECT SL.MEDICINE_ID, SL.PRICE_PER_PACK from DASH5082.CHEMO_MEDICINE M JOIN DASH5082.CHEMO_STOCK_LIST SL ON M.ID = SL.MEDICINE_ID WHERE M.GENERIC_NAME ='" + this.mysql_real_escape_string(data.generic_name) + "' AND M.FORM = '" + this.mysql_real_escape_string(data.form) + "' AND APPROVED = TRUE AND SL.AVAILABLE_STOCK > 0 GROUP BY SL.MEDICINE_ID, SL.PRICE_PER_PACK ORDER BY SL.PRICE_PER_PACK) AS G2 ON G2.MEDICINE_ID = G1.ID";
 	console.log(query);
@@ -168,6 +174,12 @@ medicine_model.prototype.async_insert_new_medicine_by_main_keys = function(data,
 
 medicine_model.prototype.async_select_medicine_by_generic_and_form = function(data, callback) {
 	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE GENERIC_NAME ='" + this.mysql_real_escape_string(data.generic_name) + "' AND FORM = '" + this.mysql_real_escape_string(data.form) + "' AND APPROVED = TRUE;";
+	console.log(query);
+	return this.dbQuery(query, callback);
+};
+
+medicine_model.prototype.async_select_all_medicine_by_generic_and_form = function(data, callback) {
+	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE GENERIC_NAME ='" + this.mysql_real_escape_string(data.generic_name) + "' AND FORM = '" + this.mysql_real_escape_string(data.form) + "'";
 	console.log(query);
 	return this.dbQuery(query, callback);
 };

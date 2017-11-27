@@ -47,14 +47,17 @@ block content
         button.form-control.btn.btn-primary.mg-btm-10(type="submit") Download My Last Stock
     - if(treatmentCenter_user) {
                 .row
-                .col-xs-6.col-md-6
+                .col-xs-6.col-md-4
                   form#uploadOutOfStockForm(ref='uploadOutOfStockForm', action= base + '/pharmacy/uploadoutofstocklist', method='post', enctype='multipart/form-data')
                     .fileUpload.btn.btn-primary.mg-btm-10
                       span Upload out of Stock List
                       input.upload(type='file', name="sampleFile", onchange='$("#loadingModal").modal("show");this.form.submit()')
-                .col-xs-6.col-md-6
+                .col-xs-6.col-md-4
                   form#downloadOutOfStockForm(ref='downloadOutOfStockForm', action= base + '/pharmacy/downloadoutofstocklist', method='get', enctype='multipart/form-data')
                       button.form-control.btn.btn-primary.mg-btm-10(type="submit") Download out of Stock List
+                .col-xs-6.col-md-4
+                  form#downloadForm(ref='downloadForm', action= base + '/pharmacy/downloadoutofstocklistemplate', method='get', enctype='multipart/form-data')
+                      button.form-control.btn.btn-primary.mg-btm-10(type="submit") Download out of Stock Template
     - }
   hr
   .welcome__home-buttons

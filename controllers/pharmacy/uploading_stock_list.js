@@ -23,14 +23,24 @@ process.on('message', function(message){
 	    }
 	    else {
 	        console.log('All files have been processed successfully');
+					var allAdminEmailsAddresses = "";
+					user_model.async_select_all_admin(function(user) {
+						if(user.length > 0){
+							for (var i = 0; i < user.length; i++) {
+								console.log("**** admin email"+user[i].EMAIL);
+								allAdminEmailsAddresses += user[i].EMAIL + ", "; //there will be extra comma will leave it for the user
+								console.log("all email addresses = " + allAdminEmailsAddresses);
+							}
+						}
+					});
 	        tomodel.user_id = message.pharmacy_id;
 	        user_model.async_select_user_by_id(tomodel, function(user) {
 	            //Send Confirmation Email
-
 	            var mailOptions = {
 	                from: 'chemofinder@gmail.com', // sender address
 	                to: user[0].EMAIL, // list of receivers
-	                subject: 'Uploading Stock List is Completed Successfully', // Subject line
+									cc: allAdminEmailsAddresses,
+	                subject: 'Uploading Stock List is Completed Successfully for ' + user[0].ENTITY_NAME, // Subject line
 	                template: 'upload_stock_list_mail',
 	                context: {
 	                    link: message.link

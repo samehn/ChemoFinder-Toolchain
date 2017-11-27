@@ -256,6 +256,11 @@ stock.prototype.download_stock_list_template =  function(req, res) {
     res.download(file); // Set disposition and send it.
 }
 
+stock.prototype.download_out_of_stock_list_template =  function(req, res) {
+    var file = './public/downloads/out_of_stocklist_example_data.xlsx';
+    res.download(file); // Set disposition and send it.
+}
+
 stock.prototype.download_last_stock =  function(req, res) {
     // create workbook by api.
     var workbook = new controller.Excel.Workbook();
@@ -416,10 +421,11 @@ stock.prototype.upload_out_of_stock_list =  function(req, res) {
 					}
 					else {
 							req.session.parseOutofStock = true;
-							var medicines = parsing_stock_list(req, res);
+							var medicines = parsing_out_of_stock_list(req, res);
 							req.session.parseOutofStock = false;
 							console.log(medicines);
 							console.log('File uploaded!');
+							console.log("**&&** upload out of stock medicines length is " + medicines.length);
 							if(medicines.length > 0) {
 									req.session.stock_uploading_message = "<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + medicines.length + " medicines will be updated in the background you will be notify by an email once this operation is done</div>";
 									res.redirect('/pharmacy');
@@ -485,6 +491,27 @@ stock.prototype.upload_stock_list =  function(req, res) {
     }
 }
 
+function validate_out_of_stock_list_sheet(worksheet) {
+    var str = "AB";
+    var titles = ["generic name", "form"];
+    for(var i=0; i<str.length; i++)
+    {
+        var char = str.charAt(i);
+        var address = char + '1';
+        var cell = worksheet[address];
+        if(cell == undefined)
+        {
+            return false;
+        }
+        else
+        {
+            if(!(cell.v && cell.v.toLowerCase().startsWith(titles[i]))) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
 function validate_stock_list_sheet(worksheet) {
     var str = "ABCDEFGHIJKLMN";
     var titles = ["id", "generic name", "form", "strength", "strength unit", "brand name", "manufacturer", "batch number", "expiry date", "current stringent regulatory authority", "pack size", "price per pack", "available stock", "average monthly consumption"];
@@ -506,7 +533,107 @@ function validate_stock_list_sheet(worksheet) {
     }
     return true;
 }
+function parsing_out_of_stock_list(req, res) {
+	var medicines = [];
+	var workbook = controller.XLSX.readFile(req.stockFilePath);
+	var first_sheet_name = workbook.SheetNames[0];
+	var worksheet = workbook.Sheets[first_sheet_name];
+	if(validate_out_of_stock_list_sheet(worksheet)) {
+			var warning_message = "<div class='alert alert-danger'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a> Some medicines cannot be added due to the following: <ul>";
+			var flag = true;
+			var format_error_flag = false;
+			var i = 2;
+			while(flag)
+			{
+					var wm = "<li> On line " + i + ":";
+					var data = {};
 
+					var generic_name_address = 'A'+i;
+					var generic_name_cell = worksheet[generic_name_address];
+
+					if(generic_name_cell == undefined)
+					{
+							flag = false;
+							warning_message = warning_message + '</ul></div>';
+							if(format_error_flag)
+							{
+									req.session.stock_format_error = warning_message;
+							}
+							break;
+					}
+					else
+					{
+							data['generic_name'] = generic_name_cell.v;
+					}
+
+					var form_address = 'B'+i;
+					var form_cell = worksheet[form_address];
+					if(form_cell != undefined)
+					{
+							data['form']= form_cell.v;
+					}
+					else
+					{
+							data['form'] = '';
+					}
+
+					var new_data = controller.xssClean(data);
+					console.log(new_data);
+					new_data.user_id = req.session.pharmacy_id;
+					var validation_array = {};
+					console.log("******************** calling new out of stock list validation");
+					validation_array = out_of_stock_medicine_validations(new_data);
+					console.log("******************** After calling out of stock list validation with length " + Object.keys(validation_array).length);
+					if(Object.keys(validation_array).length > 0){
+							console.log("out of stock validation array length is " + Object.keys(validation_array).length);
+							format_error_flag = true;
+							var result = validation_array;
+							var errorMSG = "";
+							var append = 0;
+							for (var key in result) {
+								if(append>0) errorMSG += ", ";
+								append++;
+								errorMSG += key + ":" + result[key];
+								console.log("####validation error key " + key);
+								console.log("####validation error value " + result[key]);
+								//if (result.hasOwnProperty(key)) {
+								//  wm = wm + result[key] + ', ';
+								//}
+							}
+							wm += errorMSG;
+							//wm = wm.slice(0, -2) + '</li>';
+							warning_message = warning_message + wm;
+					}
+					else {
+							var medicine = {};
+							medicine['generic_name'] = new_data.generic_name;
+							medicine['form'] = new_data.form;
+							if(new_data.c_medicines.length > 0){
+									for(var m=0; m<new_data.c_medicines.length; m++){
+										console.log("found completed medicines with id = " + new_data.c_medicines[m].ID);
+										new_data.c_medicines[m].id = new_data.c_medicines[m].ID;
+										new_data.c_medicines[m].medicine_id = new_data.c_medicines[m].MEDICINE_ID;
+										new_data.c_medicines[m].batch_number = new_data.c_medicines[m].BATCH_NUMBER;
+										new_data.c_medicines[m].expiry_date = new_data.c_medicines[m]. EXPIRY_DATE ;
+										new_data.c_medicines[m].pack_size = new_data.c_medicines[m].PACK_SIZE;
+										new_data.c_medicines[m].price_per_pack = new_data.c_medicines[m]. PRICE_PER_PACK ;
+										new_data.c_medicines[m].available_stock = new_data.c_medicines[m]. AVAILABLE_STOCK ;
+										new_data.c_medicines[m].avg_monthly_consumption = new_data.c_medicines[m]. AVG_MONTHLY_CONSUMPTION ;
+										new_data.c_medicines[m].user_id = new_data.c_medicines[m]. PHARMACY_ID ;
+										new_data.c_medicines[m].created_at = new_data.c_medicines[m]. CREATED_AT ;
+										new_data.c_medicines[m].updated_at = new_data.c_medicines[m].UPDATED_AT;
+										medicines.push(new_data.c_medicines[m]);
+									}
+							}
+					}
+					i++;
+			}
+	}
+	else {
+			req.session.stock_format_error = "<div class='alert alert-danger'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a> Wrong format please download the template and follow the convention </div>";
+	}
+	return medicines;
+}
 function parsing_stock_list(req, res) {
     var medicines = [];
     var workbook = controller.XLSX.readFile(req.stockFilePath);
@@ -935,41 +1062,54 @@ function new_medicine_validations(data) {
 
 function out_of_stock_medicine_validations(data) {
     var validation_array = {};
-
+		var flag = false;
+		var c_medicines = [];
+		data.c_medicines = c_medicines;
     var generic_name = controller.validate({generic_name: data.generic_name},['required','length:0-60']);
     if(generic_name){
+				flag = true;
         validation_array = controller.mergeArrays(validation_array, generic_name);
-    }
-
-    var brand_name = controller.validate({brand_name: data.brand_name},['required', 'length:0-60']);
-    if(brand_name){
-        validation_array = controller.mergeArrays(validation_array, brand_name);
     }
 
     var form = controller.validate({form: data.form},['required', 'length:0-60']);
     if(form){
+			flag = true;
         validation_array = controller.mergeArrays(validation_array, form);
     }
-
-    var strength = controller.validate({strength: data.strength},['required', 'float']);
-    if(strength){
-        validation_array = controller.mergeArrays(validation_array, strength);
-    }
-
-    var strength_unit = controller.validate({strength_unit: data.strength_unit},['required', 'length:0-60']);
-    if(strength_unit){
-        validation_array = controller.mergeArrays(validation_array, strength_unit);
-    }
-
-    var manufacturer = controller.validate({manufacturer: data.manufacturer},['required', 'length:0-60']);
-    if(manufacturer){
-        validation_array = controller.mergeArrays(validation_array, manufacturer);
-    }
-
-    var pack_size = controller.validate({pack_size: data.pack_size},['required', 'integer', 'length:0-60']);
-    if(pack_size){
-        validation_array = controller.mergeArrays(validation_array, pack_size);
-    }
+		if(flag == false){
+		tomodel.generic_name = data.generic_name;
+    tomodel.form = data.form;
+		var all_medicines = medicine_model.select_all_medicine_by_generic_and_form(tomodel);
+		console.log("medicines length = " + all_medicines.length);
+		if(all_medicines.length == 0){
+			console.log("uploading out of stock list medicine is not exists");
+				var error_message = {['medicine_not_found_error']: 'unable to find medicine with generic name ' + data.generic_name + ' and form ' + data.form};
+				validation_array = controller.mergeArrays(validation_array, error_message);
+				console.log("error validation length is " + validation_array.length );
+		}else{
+			for(var i=0; i<all_medicines.length; i++){
+					tomodel.medicine_id = all_medicines[i].ID;
+					tomodel.user_id = data.user_id;
+					var completed_medicine = stock_list_model.select_stock_list_by_medicine(tomodel);
+						console.log("test get attributes from stock list table");
+						if(completed_medicine.length > 0 ){
+								console.log("found medicine in stock list with size = " + completed_medicine.length);
+								for(var j=0; j<completed_medicine.length; j++){
+									c_medicines.push(completed_medicine[j]);
+								}
+						}else{
+							console.log("uploading out of stock list medicine is not exists in stock list medicine");
+								var error_message = {['medicine_not_found_error']: 'unable to find medicine with generic name ' + data.generic_name + ' and form ' + data.form};
+								validation_array = controller.mergeArrays(validation_array, error_message);
+								console.log("error validation length is " + validation_array.length );
+						}
+		}
+	}
+	console.log("testing complete medicines, length = " + c_medicines.length);
+	for(var i=0; i<data.c_medicines.length; i++){
+		console.log("med id = " + data.c_medicines[i].ID);
+	}
+}
     return validation_array;
 }
 module.exports = new stock();

@@ -113,6 +113,12 @@ stock_list_model.prototype.async_update_stock_record = function(data, callback) 
 	return this.dbQuery(query, callback);
 };
 
+stock_list_model.prototype.async_update_stock_availability_record = function(data, callback) {
+	var query = "UPDATE DASH5082.CHEMO_STOCK_LIST SET AVAILABLE_STOCK = " + this.mysql_real_escape_string(data.quantity) + ", UPDATED_AT = CURRENT_TIMESTAMP WHERE ID =" + this.mysql_real_escape_string(data.stock_id) + " AND PHARMACY_ID =" + this.mysql_real_escape_string(data.user_id);
+	console.log(query);
+	return this.dbQuery(query, callback);
+};
+
 stock_list_model.prototype.async_update_out_of_stock_record = function(data, callback) {
 	var query = "UPDATE DASH5082.CHEMO_STOCK_LIST SET AVAILABLE_STOCK = " + this.mysql_real_escape_string(data.quantity) + " , UPDATED_AT =  CURRENT_TIMESTAMP WHERE MEDICINE_ID =" + this.mysql_real_escape_string(data.medicine_id) + " AND PHARMACY_ID =" + this.mysql_real_escape_string(data.user_id);console.log(query);
 	return this.dbQuery(query, callback);

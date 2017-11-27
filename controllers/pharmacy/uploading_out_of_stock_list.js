@@ -30,8 +30,8 @@ process.on('message', function(message){
 	            var mailOptions = {
 	                from: 'chemofinder@gmail.com', // sender address
 	                to: user[0].EMAIL, // list of receivers
-	                subject: 'Uploading Stock List is Completed Successfully', // Subject line
-	                template: 'upload_stock_list_mail',
+	                subject: 'Uploading out of Stock List is Completed Successfully', // Subject line
+	                template: 'upload_out_of_stock_list_mail',
 	                context: {
 	                    link: message.link
 	                }
@@ -76,15 +76,32 @@ process.on('message', function(message){
 var save_medicines_stock_list = function(medicine, user_id, callback) {
 	console.log("********** about to update out of stock list ***************");
 	medicine['quantity'] = 0;
+	medicine['stock_id'] = medicine.ID;
+	stock_list_model.async_select_stock_record_by_id(medicine, function(sm){
+		if(sm.length > 0){
+			sm['quantity'] = 0;
+			stock_list_model.async_update_stock_availability_record(medicine, function(rows) {
+					user_pharmacy_model.async_update_stock_time(medicine, function(rows) {
+							callback();
+					});
+			});
+		}else{
+			stock_list_model.async_insert_out_of_stock_new_record(medicine, function(rows) {
+						callback();
+				});
+		}
+	});
+
 	//medicine['expiry_date'] = '01-01-2000';
 	//medicine['pack_size'] = 0.0;
 	//medicine['price'] = 0.0;
 	//medicine['avg_monthly_consumption'] = '';
-    medicine_model.async_select_medicine_by_main_keys(medicine, function(main_medicine) {
+  /*  medicine_model.async_select_all_medicine_by_generic_and_form(medicine, function(main_medicine) {
 			console.log("medicine to update =>\n" + main_medicine );
         if(main_medicine.length > 0) {
-						console.log("main medicine id is " + main_medicine[0].ID);
-            medicine['medicine_id'] = main_medicine[0].ID;
+					for(var i=0; i<main_medicine.length; i++){
+						console.log("main medicine id is " + main_medicine[i].ID);
+            medicine['medicine_id'] = main_medicine[i].ID;
             medicine['user_id']= user_id;
 						stock_list_model.async_select_stock_list_by_medicine(medicine, function(stock_list_medicine) {
                 if(stock_list_medicine.length > 0) {
@@ -93,7 +110,7 @@ var save_medicines_stock_list = function(medicine, user_id, callback) {
 										medicine['quantity'] = 0;
 										//medicine['expiry_date'] = '01-01-2000';
 										console.log("******* stock list medicine after update is " + medicine['quantity'] + " EXPIRY_DATE " + medicine['expiry_date']);
-                    stock_list_model.async_update_stock_record(medicine, function(rows) {
+                    stock_list_model.async_update_stock_availability_record(medicine, function(rows) {
 
                         user_pharmacy_model.async_update_stock_time(medicine, function(rows) {
                             callback();
@@ -107,6 +124,7 @@ var save_medicines_stock_list = function(medicine, user_id, callback) {
                     });
                 }
             });
+					}
         }
         else {
             medicine_model.async_insert_new_medicine_by_main_keys(medicine, function(rows) {
@@ -119,5 +137,5 @@ var save_medicines_stock_list = function(medicine, user_id, callback) {
                 });
             });
         }
-    });
+    });*/
 }
