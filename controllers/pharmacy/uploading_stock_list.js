@@ -93,16 +93,15 @@ var save_medicines_stock_list = function(medicine, user_id, callback) {
             stock_list_model.async_select_stock_list_by_medicine(medicine, function(stock_list_medicine) {
                 if(stock_list_medicine.length > 0) {
                     medicine['stock_id'] = stock_list_medicine[0].ID;
-                    stock_list_model.async_update_stock_record(medicine, function(rows) {
-                        user_pharmacy_model.async_update_stock_time(medicine, function(rows) {
+										console.log("found medicine stock id " + medicine['stock_id']);
+                    stock_list_model.update_stock_record(medicine);
+                    user_pharmacy_model.async_update_stock_time(medicine, function(rows) {
                             callback();
                         });
-                    });
                 }
                 else {
-                    stock_list_model.async_insert_new_record(medicine, function(rows) {
-                        callback();
-                    });
+                    stock_list_model.insert_new_record(medicine);
+										callback();
                 }
             });
         }

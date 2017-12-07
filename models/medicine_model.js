@@ -21,6 +21,12 @@ medicine_model.prototype.select_non_approved_medicines = function() {
 	return this.dbQuerySync(query);
 };
 
+
+medicine_model.prototype.select_non_approved_medicines_DESC = function() {
+	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE APPROVED = FALSE order by UPDATED_AT DESC";
+	return this.dbQuerySync(query);
+};
+
 medicine_model.prototype.select_medicine_by_main_keys = function(data) {
 	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE GENERIC_NAME ='" + this.mysql_real_escape_string(data.generic_name) + "' AND BRAND_NAME = '" + this.mysql_real_escape_string(data.brand_name) + "' AND FORM = '" + this.mysql_real_escape_string(data.form) + "' AND STRENGTH = '" + this.mysql_real_escape_string(data.strength) + "' AND STRENGTH_UNIT = '" + this.mysql_real_escape_string(data.strength_unit) + "' AND MANUFACTURER = '" + this.mysql_real_escape_string(data.manufacturer) + "';";
 	return this.dbQuerySync(query);
@@ -61,7 +67,7 @@ medicine_model.prototype.select_medicine_by_generic_and_form = function(data) {
 };
 
 medicine_model.prototype.select_all_medicine_by_generic_and_form = function(data) {
-	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE GENERIC_NAME ='" + this.mysql_real_escape_string(data.generic_name) + "' AND FORM = '" + this.mysql_real_escape_string(data.form) + "';";
+	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE upper(GENERIC_NAME) ='" + this.mysql_upper_case_real_escape_string(data.generic_name) + "' AND upper(FORM) = '" + this.mysql_upper_case_real_escape_string(data.form) + "';";
 	console.log(query);
 	return this.dbQuerySync(query);
 };
@@ -140,7 +146,7 @@ medicine_model.prototype.async_select_non_approved_medicines = function(callback
 };
 
 medicine_model.prototype.async_select_medicine_by_main_keys = function(data, callback) {
-	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE GENERIC_NAME ='" + this.mysql_real_escape_string(data.generic_name) + "' AND BRAND_NAME = '" + this.mysql_real_escape_string(data.brand_name) + "' AND FORM = '" + this.mysql_real_escape_string(data.form) + "' AND STRENGTH = '" + this.mysql_real_escape_string(data.strength) + "' AND STRENGTH_UNIT = '" + this.mysql_real_escape_string(data.strength_unit) + "' AND MANUFACTURER = '" + this.mysql_real_escape_string(data.manufacturer) + "';";
+	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE upper(GENERIC_NAME) ='" + this.mysql_upper_case_real_escape_string(data.generic_name) + "' AND upper(BRAND_NAME) = '" + this.mysql_upper_case_real_escape_string(data.brand_name) + "' AND upper(FORM) = '" + this.mysql_upper_case_real_escape_string(data.form) + "' AND STRENGTH = '" + this.mysql_real_escape_string(data.strength) + "' AND upper(STRENGTH_UNIT) = '" + this.mysql_upper_case_real_escape_string(data.strength_unit) + "' AND upper(MANUFACTURER) = '" + this.mysql_upper_case_real_escape_string(data.manufacturer) + "';";
 	return this.dbQuery(query, callback);
 };
 

@@ -1087,29 +1087,35 @@ function out_of_stock_medicine_validations(data) {
 				validation_array = controller.mergeArrays(validation_array, error_message);
 				console.log("error validation length is " + validation_array.length );
 		}else{
+			var foundMed = false;
 			for(var i=0; i<all_medicines.length; i++){
 					tomodel.medicine_id = all_medicines[i].ID;
+					console.log("looking for medicine id = " +all_medicines[i].ID);
 					tomodel.user_id = data.user_id;
 					var completed_medicine = stock_list_model.select_stock_list_by_medicine(tomodel);
-						console.log("test get attributes from stock list table");
-						if(completed_medicine.length > 0 ){
-								console.log("found medicine in stock list with size = " + completed_medicine.length);
-								for(var j=0; j<completed_medicine.length; j++){
-									c_medicines.push(completed_medicine[j]);
-								}
-						}else{
-							console.log("uploading out of stock list medicine is not exists in stock list medicine");
-								var error_message = {['medicine_not_found_error']: 'unable to find medicine with generic name ' + data.generic_name + ' and form ' + data.form};
-								validation_array = controller.mergeArrays(validation_array, error_message);
-								console.log("error validation length is " + validation_array.length );
+					console.log("test get attributes from stock list table");
+					if(completed_medicine.length > 0 ){
+						foundMed = true;
+						console.log("found medicine in stock list with size = " + completed_medicine.length);
+						console.log("completed_medicine id = " +completed_medicine[0].MEDICINE_ID);
+						for(var j=0; j<completed_medicine.length; j++){
+							c_medicines.push(completed_medicine[j]);
+							console.log("c_medicine id = " +c_medicines[j].MEDICINE_ID);
 						}
+					}
+				}
+				if(foundMed == false){
+					console.log("uploading out of stock list medicine is not exists in stock list medicine");
+					var error_message = {['medicine_not_found_error']: 'unable to find medicine with generic name ' + data.generic_name + ' and form ' + data.form};
+					validation_array = controller.mergeArrays(validation_array, error_message);
+					console.log("error validation length is " + validation_array.length );
+				}
+			}
+			console.log("testing complete medicines, length = " + c_medicines.length);
+			for(var i=0; i<data.c_medicines.length; i++){
+				console.log("med id = " + data.c_medicines[i].MEDICINE_ID);
+			}
 		}
-	}
-	console.log("testing complete medicines, length = " + c_medicines.length);
-	for(var i=0; i<data.c_medicines.length; i++){
-		console.log("med id = " + data.c_medicines[i].ID);
-	}
-}
     return validation_array;
 }
 module.exports = new stock();
