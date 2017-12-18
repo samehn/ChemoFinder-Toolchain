@@ -5,7 +5,8 @@ stock_list_model  = require('../../models/stock_list_model');
 tomodel = {};
 //var dependency = JSON.parse(process.argv[2]);
 process.on('message', function(message){
-    controller.async.eachLimit(message.medicines, 5, function(medicine, callback){                      
+    medicine_model.disapprove_rsa();
+    controller.async.eachLimit(message.medicines, 5, function(medicine, callback){
         save_medicines_list(medicine, function() {
             console.log("done");
          callback();
@@ -20,7 +21,7 @@ process.on('message', function(message){
          tomodel.admin_id = message.admin_id;
          admin_model.async_select_admin_by_id(tomodel, function(admin) {
             //Send Confirmation Email
-            
+
             var mailOptions = {
                 from: 'chemofinder@gmail.com', // sender address
                 to: admin[0].EMAIL, // list of receivers
@@ -62,7 +63,7 @@ process.on('message', function(message){
                 };
                 process.exit();
             });
-            
+
         });
      }
     });
@@ -70,17 +71,15 @@ process.on('message', function(message){
 });
 
 var save_medicines_list = function(medicine, callback) {
-    medicine_model.async_select_medicine_by_main_keys(medicine, function(rows) {
+    rows = medicine_model.select_medicine_by_main_keys(medicine);
+    medicine.b_rsa_approve = true;
         if(rows.length > 0) {
             medicine['medicine_id'] = rows[0].ID;
-            medicine_model.async_update_medicine(medicine, function(rows) {
-                callback();
-            });
+            rows = medicine_model.update_medicine(medicine);
+            callback();
         }
         else {
-            medicine_model.async_insert_new_medicine(medicine, function(rows) {
-                callback();
-            });
+            medicine_model.insert_new_medicine(medicine);
+            callback();
         }
-    });
 }

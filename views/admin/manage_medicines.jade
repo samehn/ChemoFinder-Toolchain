@@ -298,12 +298,13 @@ block modals
             #unitsPerPackForm.form-group
               input#unitsPerPack.form-control(name='units_per_pack', type='text', placeholder='Units Per Pack')
             // /.form-group
-
+            p
+              strong Approve
             #sraForm.form-group.row
               .col-xs-1
                 input#approve.checkbox-form-control(name='approve', type="checkbox")
-              .col-xs-10
-                input#sra.form-control(name='sra', type='text', placeholder='SRA Approval' disabled="disabled")
+              //.col-xs-10
+                //input#sra.form-control(name='sra', type='text', placeholder='SRA Approval' disabled="disabled")
             // /.form-group
 
             p
@@ -418,12 +419,12 @@ block modals
             // /.form-group
 
 
-            label SRA Approval
+            label approve
             #sraFormUpdate.form-group.row
               .col-xs-1
                 input#approveUpdate.checkbox-form-control(name='approve', type="checkbox")
-              .col-xs-10
-                input#sraUpdate.form-control(name='sra', type='text', placeholder='SRA Approval' disabled="disabled")
+              //.col-xs-10
+                //input#sraUpdate.form-control(name='sra', type='text', placeholder='SRA Approval' disabled="disabled")
             // /.form-group
             label Approval Date
             #approvalDateFormUpdate.form-group

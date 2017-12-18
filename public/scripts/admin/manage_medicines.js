@@ -96,7 +96,7 @@ function getMedicine(medicine_id) {
         }
         else {
           $("#approveUpdate").attr("checked", false);
-          $('#sraUpdate').attr('disabled', 'disabled'); 
+          $('#sraUpdate').attr('disabled', 'disabled');
         }
         $('#update-medicine-btn').attr('onclick','updateMedicine(' + medicine_id + ')');
         $('#updateMedicine').modal('show');
@@ -153,11 +153,11 @@ function deleteApprovedStockRecord(medicine_id, element) {
             if(data.message == "success")
             {
               if(data.action == "delete") {
-                
-                $('#confimDeleteMedicine').modal('show');  
+
+                $('#confimDeleteMedicine').modal('show');
               }
               else if(data.action == "non_approved") {
-                
+
                 $('#confimDeleteNonApprovedMedicine').modal('show');
               }
               else if(data.action == "no_delete") {
@@ -173,7 +173,7 @@ function deleteApprovedStockRecord(medicine_id, element) {
               $(message).insertAfter($('.page__subtitle'));
             }
           }
-    }); 
+    });
   }
 }
 
@@ -192,15 +192,15 @@ function deleteNonApprovedStockRecord(medicine_id, element) {
             if(data.message == "success")
             {
               if(data.action == "delete") {
-                
-                $('#confimDeleteMedicine').modal('show');  
-              } 
+
+                $('#confimDeleteMedicine').modal('show');
+              }
               else if(data.action == "non_approved") {
-                
+
                 $('#confimDeleteNonApprovedMedicine').modal('show');
               }
               else if(data.action == "no_delete") {
-                
+
                 $('#confimNoDeleteMedicine').modal('show');
               }
               // $(element).parent().parent().remove();
@@ -212,7 +212,7 @@ function deleteNonApprovedStockRecord(medicine_id, element) {
               $(message).insertAfter($('.page__subtitle'));
             }
           }
-    }); 
+    });
   }
 }
 
@@ -260,7 +260,7 @@ function updateMedicine(medicine_id) {
     item_array[approve.attr('name')] = true;
   }
   else {
-    item_array[approve.attr('name')] = false; 
+    item_array[approve.attr('name')] = false;
   }
 
   $('#loadingModal').modal('show');
@@ -373,7 +373,7 @@ function updateMedicine(medicine_id) {
 
 function add_new_medicine() {
 	var item_array={};
-    
+
   var genericName = $('#genericName');
   var brandName = $('#brandName');
   var form = $('#form');
@@ -416,9 +416,9 @@ function add_new_medicine() {
     item_array[approve.attr('name')] = true;
   }
   else {
-    item_array[approve.attr('name')] = false; 
+    item_array[approve.attr('name')] = false;
   }
-  
+
   $('#loadingModal').modal('show');
   console.log(item_array);
    $.ajax({
@@ -472,11 +472,11 @@ function add_new_medicine() {
                 var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.manufacturer_error + '</div>';
                 $(error_message).insertBefore($('#manufacturerForm'));
              }
-             if(data.sra_error)
+             /*if(data.sra_error)
              {
                 var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.sra_error + '</div>';
                 $(error_message).insertBefore($('#sraForm'));
-             }
+             }*/
              if(data.approval_date_error)
              {
                 var error_message = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>' + data.approval_date_error + '</div>';

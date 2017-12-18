@@ -651,12 +651,12 @@ function medicine_validations(data) {
         validation_array = controller.mergeArrays(validation_array, manufacturer);
     }
 
-    if(data.approve == 'true') {
+    /*if(data.approve == 'true') {
     	var sra = controller.validate({sra: data.sra},['required', 'length:0-100']);
 	    if(sra){
 	        validation_array = controller.mergeArrays(validation_array, sra);
 	    }
-    }
+    }*/
 
     var source = controller.validate({source: data.source},['length:0-2000']);
     if(source){
