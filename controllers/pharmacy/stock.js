@@ -471,7 +471,7 @@ stock.prototype.upload_stock_list =  function(req, res) {
                 console.log(medicines);
                 console.log('File uploaded!');
                 if(medicines.length > 0) {
-                    req.session.stock_uploading_message = "<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + medicines.length + " medicines will be added/updated in the background you will be notify by an email once this operation is done</div>";
+                    req.session.stock_uploading_message = "<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + medicines.length + " medicines will be added/updated on your stock. You will be notified by email once this operation is done.</div>";
                     res.redirect('/pharmacy');
                     var link = req.protocol + '://' + req.get('host') + '/pharmacy';
 
