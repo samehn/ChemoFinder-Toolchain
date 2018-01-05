@@ -23,14 +23,24 @@ process.on('message', function(message){
 	    }
 	    else {
 	        console.log('All files have been processed successfully');
+					var allAdminEmailsAddresses = "";
+					user_model.async_select_all_admin(function(user) {
+						if(user.length > 0){
+							for (var i = 0; i < user.length; i++) {
+								console.log("**** admin email"+user[i].EMAIL);
+								allAdminEmailsAddresses += user[i].EMAIL + ", "; //there will be extra comma will leave it for the user
+								console.log("all email addresses = " + allAdminEmailsAddresses);
+							}
+						}
+					});
 	        tomodel.user_id = message.pharmacy_id;
 	        user_model.async_select_user_by_id(tomodel, function(user) {
 	            //Send Confirmation Email
-
 	            var mailOptions = {
 	                from: 'chemofinder@gmail.com', // sender address
 	                to: user[0].EMAIL, // list of receivers
-	                subject: 'Uploading Stock List is Completed Successfully', // Subject line
+									cc: allAdminEmailsAddresses,
+	                subject: 'Uploading Stock List is Completed Successfully for ' + user[0].ENTITY_NAME, // Subject line
 	                template: 'upload_stock_list_mail',
 	                context: {
 	                    link: message.link
@@ -83,16 +93,15 @@ var save_medicines_stock_list = function(medicine, user_id, callback) {
             stock_list_model.async_select_stock_list_by_medicine(medicine, function(stock_list_medicine) {
                 if(stock_list_medicine.length > 0) {
                     medicine['stock_id'] = stock_list_medicine[0].ID;
-                    stock_list_model.async_update_stock_record(medicine, function(rows) {
-                        user_pharmacy_model.async_update_stock_time(medicine, function(rows) {
+										console.log("found medicine stock id " + medicine['stock_id']);
+                    stock_list_model.update_stock_record(medicine);
+                    user_pharmacy_model.async_update_stock_time(medicine, function(rows) {
                             callback();
                         });
-                    });
                 }
                 else {
-                    stock_list_model.async_insert_new_record(medicine, function(rows) {
-                        callback();
-                    });
+                    stock_list_model.insert_new_record(medicine);
+										callback();
                 }
             });
         }

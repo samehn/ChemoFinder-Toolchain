@@ -1,7 +1,7 @@
 var model = function() {
-    db = require('../config/db'); 
+    db = require('../config/db');
 };
- 
+
 model.prototype.dbQuery = function(query, callback) {
     var result;
     db.ibmdb.open(db.connString, function(err, conn) {
@@ -11,7 +11,7 @@ model.prototype.dbQuery = function(query, callback) {
             }
             else {
                 conn.query(query, function(err, tables, moreResultSets) {
-                    result = tables;        
+                    result = tables;
                     /*
                         Close the connection to the database
                         param 1: The callback function to execute on completion of close function.
@@ -22,7 +22,7 @@ model.prototype.dbQuery = function(query, callback) {
                         console.log("Connection Closed");
                         });
                     // console.log(result);
-                    return callback(result);     
+                    return callback(result);
                 });
 
             }
@@ -30,7 +30,7 @@ model.prototype.dbQuery = function(query, callback) {
 }
 
 model.prototype.dbQuerySync = function(query) {
-    var option = { connectTimeout : 3000000 };// Connection Timeout after 40 seconds. 
+    var option = { connectTimeout : 3000000 };// Connection Timeout after 40 seconds.
     var conn = db.ibmdb.openSync(db.connString, option);
     var rows = conn.querySync(query);
     // console.log(query);
@@ -45,6 +45,11 @@ model.prototype.mysql_real_escape_string = function(str) {
         var r = ['\\\\0', '\\\\b', '\\\\t', '\\\\z', '\\\\n', '\\\\r', "''", '""', '\\\\', '\\\\\\\\', '\\%'];
         return r[m.indexOf(char)];
     });
+}
+
+model.prototype.mysql_upper_case_real_escape_string = function(str) {
+    str = this.mysql_real_escape_string(str);
+    return str.toUpperCase();
 }
 
 module.exports = new model();

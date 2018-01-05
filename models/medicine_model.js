@@ -21,13 +21,19 @@ medicine_model.prototype.select_non_approved_medicines = function() {
 	return this.dbQuerySync(query);
 };
 
+
+medicine_model.prototype.select_non_approved_medicines_DESC = function() {
+	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE APPROVED = FALSE order by UPDATED_AT DESC";
+	return this.dbQuerySync(query);
+};
+
 medicine_model.prototype.select_medicine_by_main_keys = function(data) {
 	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE GENERIC_NAME ='" + this.mysql_real_escape_string(data.generic_name) + "' AND BRAND_NAME = '" + this.mysql_real_escape_string(data.brand_name) + "' AND FORM = '" + this.mysql_real_escape_string(data.form) + "' AND STRENGTH = '" + this.mysql_real_escape_string(data.strength) + "' AND STRENGTH_UNIT = '" + this.mysql_real_escape_string(data.strength_unit) + "' AND MANUFACTURER = '" + this.mysql_real_escape_string(data.manufacturer) + "';";
 	return this.dbQuerySync(query);
 };
 
 medicine_model.prototype.insert_new_medicine = function(data) {
-	var query = "INSERT INTO DASH5082.CHEMO_MEDICINE (GENERIC_NAME, BRAND_NAME, FORM, STRENGTH, STRENGTH_UNIT, ROUTE, MANUFACTURER, SRA, APPROVAL_DATE, SOURCE, EXTRACT_DATE, SPECIFICATION_FORM, PACK_TYPE, UNITS_PER_PACK, APPROVED, STATUS, COMMENTS) VALUES ('" + this.mysql_real_escape_string(data.generic_name) + "','" + this.mysql_real_escape_string(data.brand_name) + "','" + this.mysql_real_escape_string(data.form) + "','" + this.mysql_real_escape_string(data.strength) + "','" + this.mysql_real_escape_string(data.strength_unit) + "','" + this.mysql_real_escape_string(data.route) + "','" + this.mysql_real_escape_string(data.manufacturer) + "','" + this.mysql_real_escape_string(data.sra) + "','" + this.mysql_real_escape_string(data.approval_date) + "','" + this.mysql_real_escape_string(data.source) + "','" + this.mysql_real_escape_string(data.extract_date) + "', '" + this.mysql_real_escape_string(data.specification_form) + "', '" + this.mysql_real_escape_string(data.pack_type) + "', " + this.mysql_real_escape_string(data.units_per_pack) + ", " + this.mysql_real_escape_string(data.approve) + ", '" + this.mysql_real_escape_string(data.status) + "', '" + this.mysql_real_escape_string(data.comments) + "');";
+	var query = "INSERT INTO DASH5082.CHEMO_MEDICINE (GENERIC_NAME, BRAND_NAME, FORM, STRENGTH, STRENGTH_UNIT, ROUTE, MANUFACTURER, SRA, APPROVAL_DATE, SOURCE, EXTRACT_DATE, SPECIFICATION_FORM, PACK_TYPE, UNITS_PER_PACK, APPROVED, STATUS, COMMENTS, SRA_APPROVED) VALUES ('" + this.mysql_real_escape_string(data.generic_name) + "','" + this.mysql_real_escape_string(data.brand_name) + "','" + this.mysql_real_escape_string(data.form) + "','" + this.mysql_real_escape_string(data.strength) + "','" + this.mysql_real_escape_string(data.strength_unit) + "','" + this.mysql_real_escape_string(data.route) + "','" + this.mysql_real_escape_string(data.manufacturer) + "','" + this.mysql_real_escape_string(data.sra) + "','" + this.mysql_real_escape_string(data.approval_date) + "','" + this.mysql_real_escape_string(data.source) + "','" + this.mysql_real_escape_string(data.extract_date) + "', '" + this.mysql_real_escape_string(data.specification_form) + "', '" + this.mysql_real_escape_string(data.pack_type) + "', " + this.mysql_real_escape_string(data.units_per_pack) + ", " + this.mysql_real_escape_string(data.approve) + ", '" + this.mysql_real_escape_string(data.status) + "', '" + this.mysql_real_escape_string(data.comments) + "'," + this.mysql_real_escape_string(data.b_rsa_approve) + ");";
 	console.log(query);
 	return this.dbQuerySync(query);
 };
@@ -37,8 +43,13 @@ medicine_model.prototype.select_medicine_by_id = function(data) {
 	return this.dbQuerySync(query);
 };
 
+medicine_model.prototype.disapprove_rsa = function() {
+	var query = "UPDATE DASH5082.CHEMO_MEDICINE SET SRA_APPROVED = FALSE, APPROVED = FALSE where SRA_APPROVED = TRUE;";
+	return this.dbQuerySync(query);
+};
+
 medicine_model.prototype.update_medicine = function(data) {
-	var query = "UPDATE DASH5082.CHEMO_MEDICINE SET GENERIC_NAME = '" + this.mysql_real_escape_string(data.generic_name) + "', BRAND_NAME = '" + this.mysql_real_escape_string(data.brand_name) + "', FORM = '" + this.mysql_real_escape_string(data.form) + "', STRENGTH = '" + this.mysql_real_escape_string(data.strength) + "', STRENGTH_UNIT = '" + this.mysql_real_escape_string(data.strength_unit) + "', ROUTE = '" + this.mysql_real_escape_string(data.route) + "', MANUFACTURER = '" + this.mysql_real_escape_string(data.manufacturer) + "', SRA = '" + this.mysql_real_escape_string(data.sra) + "', APPROVAL_DATE = '" + this.mysql_real_escape_string(data.approval_date) + "', SOURCE = '" + this.mysql_real_escape_string(data.source) + "', EXTRACT_DATE = '" + this.mysql_real_escape_string(data.extract_date) + "', SPECIFICATION_FORM = '" + this.mysql_real_escape_string(data.specification_form) + "', PACK_TYPE = '" + this.mysql_real_escape_string(data.pack_type) + "', UNITS_PER_PACK = " + this.mysql_real_escape_string(data.units_per_pack) + ", APPROVED = " + this.mysql_real_escape_string(data.approve) + ", STATUS = '" + this.mysql_real_escape_string(data.status) + "', COMMENTS = '" + this.mysql_real_escape_string(data.comments) + "', UPDATED_AT = CURRENT_TIMESTAMP WHERE ID = " + this.mysql_real_escape_string(data.medicine_id) + ";";
+	var query = "UPDATE DASH5082.CHEMO_MEDICINE SET GENERIC_NAME = '" + this.mysql_real_escape_string(data.generic_name) + "', BRAND_NAME = '" + this.mysql_real_escape_string(data.brand_name) + "', FORM = '" + this.mysql_real_escape_string(data.form) + "', STRENGTH = '" + this.mysql_real_escape_string(data.strength) + "', STRENGTH_UNIT = '" + this.mysql_real_escape_string(data.strength_unit) + "', ROUTE = '" + this.mysql_real_escape_string(data.route) + "', MANUFACTURER = '" + this.mysql_real_escape_string(data.manufacturer) + "', SRA = '" + this.mysql_real_escape_string(data.sra) + "', APPROVAL_DATE = '" + this.mysql_real_escape_string(data.approval_date) + "', SOURCE = '" + this.mysql_real_escape_string(data.source) + "', EXTRACT_DATE = '" + this.mysql_real_escape_string(data.extract_date) + "', SPECIFICATION_FORM = '" + this.mysql_real_escape_string(data.specification_form) + "', PACK_TYPE = '" + this.mysql_real_escape_string(data.pack_type) + "', UNITS_PER_PACK = " + this.mysql_real_escape_string(data.units_per_pack) + ", APPROVED = " + this.mysql_real_escape_string(data.approve) + ", STATUS = '" + this.mysql_real_escape_string(data.status) + "', COMMENTS = '" + this.mysql_real_escape_string(data.comments) + "', UPDATED_AT = CURRENT_TIMESTAMP, SRA_APPROVED = " + this.mysql_real_escape_string(data.b_rsa_approve) + " WHERE ID = " + this.mysql_real_escape_string(data.medicine_id) + ";";
 	console.log(query);
 	return this.dbQuerySync(query);
 };
@@ -56,6 +67,12 @@ medicine_model.prototype.insert_new_medicine_by_main_keys = function(data) {
 
 medicine_model.prototype.select_medicine_by_generic_and_form = function(data) {
 	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE GENERIC_NAME ='" + this.mysql_real_escape_string(data.generic_name) + "' AND FORM = '" + this.mysql_real_escape_string(data.form) + "' AND APPROVED = TRUE;";
+	console.log(query);
+	return this.dbQuerySync(query);
+};
+
+medicine_model.prototype.select_all_medicine_by_generic_and_form = function(data) {
+	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE upper(GENERIC_NAME) ='" + this.mysql_upper_case_real_escape_string(data.generic_name) + "' AND upper(FORM) = '" + this.mysql_upper_case_real_escape_string(data.form) + "';";
 	console.log(query);
 	return this.dbQuerySync(query);
 };
@@ -134,7 +151,7 @@ medicine_model.prototype.async_select_non_approved_medicines = function(callback
 };
 
 medicine_model.prototype.async_select_medicine_by_main_keys = function(data, callback) {
-	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE GENERIC_NAME ='" + this.mysql_real_escape_string(data.generic_name) + "' AND BRAND_NAME = '" + this.mysql_real_escape_string(data.brand_name) + "' AND FORM = '" + this.mysql_real_escape_string(data.form) + "' AND STRENGTH = '" + this.mysql_real_escape_string(data.strength) + "' AND STRENGTH_UNIT = '" + this.mysql_real_escape_string(data.strength_unit) + "' AND MANUFACTURER = '" + this.mysql_real_escape_string(data.manufacturer) + "';";
+	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE upper(GENERIC_NAME) ='" + this.mysql_upper_case_real_escape_string(data.generic_name) + "' AND upper(BRAND_NAME) = '" + this.mysql_upper_case_real_escape_string(data.brand_name) + "' AND upper(FORM) = '" + this.mysql_upper_case_real_escape_string(data.form) + "' AND STRENGTH = '" + this.mysql_real_escape_string(data.strength) + "' AND upper(STRENGTH_UNIT) = '" + this.mysql_upper_case_real_escape_string(data.strength_unit) + "' AND upper(MANUFACTURER) = '" + this.mysql_upper_case_real_escape_string(data.manufacturer) + "';";
 	return this.dbQuery(query, callback);
 };
 
@@ -168,6 +185,12 @@ medicine_model.prototype.async_insert_new_medicine_by_main_keys = function(data,
 
 medicine_model.prototype.async_select_medicine_by_generic_and_form = function(data, callback) {
 	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE GENERIC_NAME ='" + this.mysql_real_escape_string(data.generic_name) + "' AND FORM = '" + this.mysql_real_escape_string(data.form) + "' AND APPROVED = TRUE;";
+	console.log(query);
+	return this.dbQuery(query, callback);
+};
+
+medicine_model.prototype.async_select_all_medicine_by_generic_and_form = function(data, callback) {
+	var query = "SELECT * from DASH5082.CHEMO_MEDICINE WHERE GENERIC_NAME ='" + this.mysql_real_escape_string(data.generic_name) + "' AND FORM = '" + this.mysql_real_escape_string(data.form) + "'";
 	console.log(query);
 	return this.dbQuery(query, callback);
 };

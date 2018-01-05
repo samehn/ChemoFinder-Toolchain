@@ -47,14 +47,17 @@ block content
         button.form-control.btn.btn-primary.mg-btm-10(type="submit") Download My Last Stock
     - if(treatmentCenter_user) {
                 .row
-                .col-xs-6.col-md-6
+                .col-xs-6.col-md-4
                   form#uploadOutOfStockForm(ref='uploadOutOfStockForm', action= base + '/pharmacy/uploadoutofstocklist', method='post', enctype='multipart/form-data')
                     .fileUpload.btn.btn-primary.mg-btm-10
                       span Upload out of Stock List
                       input.upload(type='file', name="sampleFile", onchange='$("#loadingModal").modal("show");this.form.submit()')
-                .col-xs-6.col-md-6
+                .col-xs-6.col-md-4
                   form#downloadOutOfStockForm(ref='downloadOutOfStockForm', action= base + '/pharmacy/downloadoutofstocklist', method='get', enctype='multipart/form-data')
                       button.form-control.btn.btn-primary.mg-btm-10(type="submit") Download out of Stock List
+                .col-xs-6.col-md-4
+                  form#downloadForm(ref='downloadForm', action= base + '/pharmacy/downloadoutofstocklistemplate', method='get', enctype='multipart/form-data')
+                      button.form-control.btn.btn-primary.mg-btm-10(type="submit") Download out of Stock Template
     - }
   hr
   .welcome__home-buttons
@@ -93,6 +96,8 @@ block content
             else
               | Not Approved
         - }
+
+        - if(treatmentCenter_user) {
   hr
   .welcome__home-buttons
     h4.table-title Medicines Out Of Stock
@@ -111,24 +116,24 @@ block content
           th SRA Approving Body
         tbody
           - for( var i = 0, len = out_of_stock_list.length; i < len; i++ ) {
-            tr
-              td
-                  button.form-control.btn.btn-primary(onclick='getStockRecord(' + out_of_stock_list[i].STOCK_LIST_ID + ')') Update
-              td
-                  button.form-control.btn.btn-gray(onclick='deleteStockRecord(' + out_of_stock_list[i].STOCK_LIST_ID + ', this)') Delete
-              td
-                  button.form-control.btn.btn-gray(onclick='showStockRecord(' + out_of_stock_list[i].STOCK_LIST_ID + ')') Show Details
+          tr
+            td
+              button.form-control.btn.btn-primary(onclick='getStockRecord(' + out_of_stock_list[i].STOCK_LIST_ID + ')') Update
+            td
+              button.form-control.btn.btn-gray(onclick='deleteStockRecord(' + out_of_stock_list[i].STOCK_LIST_ID + ', this)') Delete
+            td
+              button.form-control.btn.btn-gray(onclick='showStockRecord(' + out_of_stock_list[i].STOCK_LIST_ID + ')') Show Details
               td #{out_of_stock_list[i].GENERIC_NAME}
               td #{out_of_stock_list[i].FORM}
               td #{out_of_stock_list[i].STRENGTH}
               td #{out_of_stock_list[i].STRENGTH_UNIT}
               td #{out_of_stock_list[i].BRAND_NAME}
               td #{out_of_stock_list[i].MANUFACTURER}
-              td
-                if(out_of_stock_list[i].APPROVED)
-                  | Approved
-                else
-                  | Not Approved
+              if(out_of_stock_list[i].APPROVED)
+                td Approved
+              else
+                td Not Approved
+                - }
               - }
 
 block modals

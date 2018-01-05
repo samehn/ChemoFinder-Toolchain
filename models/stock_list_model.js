@@ -6,11 +6,13 @@ stock_list_model.prototype     		= model;
 
 stock_list_model.prototype.select_stock_list_by_id = function(data) {
 	var query = "SELECT *, SL.ID AS STOCK_LIST_ID FROM DASH5082.CHEMO_STOCK_LIST SL JOIN DASH5082.CHEMO_MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE SL.PHARMACY_ID = " + this.mysql_real_escape_string(data.user_id) + " AND SL.AVAILABLE_STOCK >  0";
+	console.log(query);
 	return this.dbQuerySync(query);
 };
 
 stock_list_model.prototype.select_out_of_stock_list_by_id = function(data) {
 	var query = "SELECT *, SL.ID AS STOCK_LIST_ID FROM DASH5082.CHEMO_STOCK_LIST SL JOIN DASH5082.CHEMO_MEDICINE M ON SL.MEDICINE_ID = M.ID WHERE SL.PHARMACY_ID = " + this.mysql_real_escape_string(data.user_id) + " AND SL.AVAILABLE_STOCK =  0";
+	console.log(query);
 	return this.dbQuerySync(query);
 };
 
@@ -21,6 +23,7 @@ stock_list_model.prototype.select_stock_list_record_by_id = function(data) {
 
 stock_list_model.prototype.select_stock_list_by_medicine = function(data) {
 	var query = "SELECT * FROM DASH5082.CHEMO_STOCK_LIST WHERE MEDICINE_ID = " + this.mysql_real_escape_string(data.medicine_id) + " AND PHARMACY_ID = " + this.mysql_real_escape_string(data.user_id);
+	console.log(query);
 	return this.dbQuerySync(query);
 };
 
@@ -109,6 +112,12 @@ stock_list_model.prototype.async_select_stock_record_by_pharmacy = function(data
 
 stock_list_model.prototype.async_update_stock_record = function(data, callback) {
 	var query = "UPDATE DASH5082.CHEMO_STOCK_LIST SET BATCH_NUMBER = '" + this.mysql_real_escape_string(data.batch_number) + "', EXPIRY_DATE = '" + this.mysql_real_escape_string(data.expiry_date) + "', PACK_SIZE = " + this.mysql_real_escape_string(data.pack_size) + ", PRICE_PER_PACK = " + this.mysql_real_escape_string(data.price) + ", AVAILABLE_STOCK = " + this.mysql_real_escape_string(data.quantity) + ", AVG_MONTHLY_CONSUMPTION = '" + this.mysql_real_escape_string(data.avg_monthly_consumption) + "', UPDATED_AT = CURRENT_TIMESTAMP WHERE ID =" + this.mysql_real_escape_string(data.stock_id) + " AND PHARMACY_ID =" + this.mysql_real_escape_string(data.user_id);
+	console.log(query);
+	return this.dbQuery(query, callback);
+};
+
+stock_list_model.prototype.async_update_stock_availability_record = function(data, callback) {
+	var query = "UPDATE DASH5082.CHEMO_STOCK_LIST SET AVAILABLE_STOCK = " + this.mysql_real_escape_string(data.quantity) + ", UPDATED_AT = CURRENT_TIMESTAMP WHERE ID =" + this.mysql_real_escape_string(data.stock_id) + " AND PHARMACY_ID =" + this.mysql_real_escape_string(data.user_id);
 	console.log(query);
 	return this.dbQuery(query, callback);
 };

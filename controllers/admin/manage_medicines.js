@@ -11,8 +11,8 @@ manage_medicines.prototype.constructor = manage_medicines;
 
 manage_medicines.prototype.manage_medicines_page =  function(req, res) {
 	var approved_medicines = medicine_model.select_approved_medicines();
-	var non_approved_medicines = medicine_model.select_non_approved_medicines();
-	
+	var non_approved_medicines = medicine_model.select_non_approved_medicines_DESC();
+
 	var data = {approved_medicines: approved_medicines,  non_approved_medicines: non_approved_medicines};
     if(req.session.uploading_message)
     {
@@ -28,14 +28,14 @@ manage_medicines.prototype.manage_medicines_page =  function(req, res) {
     {
         data['format_error'] = req.session.format_error;
         req.session.format_error = null;
-    }  
+    }
     if(req.session.success_message)
     {
         data['success_message'] = req.session.success_message;
         req.session.success_message = null;
-    } 
+    }
     res.render('admin/manage_medicines', data);
-		
+
 }
 
 manage_medicines.prototype.add_new_medicine =  function(req, res) {
@@ -69,7 +69,7 @@ manage_medicines.prototype.add_new_medicine =  function(req, res) {
 					tomodel.approval_date = data.approval_date;
 				}
 				else {
-					tomodel.approval_date = controller.moment(new Date()).format('DD/MM/YYYY');		
+					tomodel.approval_date = controller.moment(new Date()).format('DD/MM/YYYY');
 				}
 	    		tomodel.source = data.source;
 	    		tomodel.extract_date = data.extract_date;
@@ -96,7 +96,7 @@ manage_medicines.prototype.add_new_medicine =  function(req, res) {
 	    		res.send(result);
 	    	}
     	});
-    }                  
+    }
 }
 
 manage_medicines.prototype.update_medicine =  function(req, res) {
@@ -131,7 +131,7 @@ manage_medicines.prototype.update_medicine =  function(req, res) {
 						tomodel.approval_date = data.approval_date;
 					}
 					else {
-						tomodel.approval_date = controller.moment(new Date()).format('DD/MM/YYYY');		
+						tomodel.approval_date = controller.moment(new Date()).format('DD/MM/YYYY');
 					}
 		    		tomodel.source = data.source;
 		    		tomodel.extract_date = data.extract_date;
@@ -251,7 +251,7 @@ manage_medicines.prototype.download_medicines_template =  function(req, res) {
 
 manage_medicines.prototype.upload_stock_list =  function(req, res) {
 	var sampleFile;
- 
+
     if (!req.files) {
         res.send('No files were uploaded.');
         console.log('No files were uploaded.');
@@ -339,7 +339,7 @@ function parsing_approved_medicines(req, res) {
 
 	        var id_address = 'A'+i;
 	        var id_cell = worksheet[id_address];
-	        
+
 	        if(id_cell == undefined)
 	        {
 	            flag = false;
@@ -376,7 +376,7 @@ function parsing_approved_medicines(req, res) {
 	        {
 	            data['brand_name'] = '';
 	        }
-	        
+
 	        var form_address = 'D'+i;
 	        var form_cell = worksheet[form_address];
 	        if(form_cell != undefined)
@@ -398,7 +398,7 @@ function parsing_approved_medicines(req, res) {
 	        {
 	            data['strength'] = '';
 	        }
-	        
+
 	        var strength_unit_address = 'F'+i;
 	        var strength_unit_cell = worksheet[strength_unit_address];
 	        if(strength_unit_cell != undefined)
@@ -556,7 +556,7 @@ function parsing_approved_medicines(req, res) {
 		    	medicine['brand_name'] = new_data.brand_name;
 		    	medicine['form'] = new_data.form;
 		    	medicine['strength'] = new_data.strength;
-		    	medicine['strength_unit'] = new_data.strength_unit; 
+		    	medicine['strength_unit'] = new_data.strength_unit;
 		    	medicine['manufacturer'] = new_data.manufacturer;
 		    	medicine['route'] = new_data.route;
 		    	medicine['sra'] = new_data.sra;
@@ -564,7 +564,7 @@ function parsing_approved_medicines(req, res) {
     				medicine['approval_date'] = controller.moment(new_data.approval_date).format('DD/MM/YYYY');
     			}
     			else {
-    				medicine['approval_date'] = controller.moment(new Date()).format('DD/MM/YYYY');		
+    				medicine['approval_date'] = controller.moment(new Date()).format('DD/MM/YYYY');
     			}
     			medicine['source'] = new_data.source;
     			medicine['extract_date'] = controller.moment(new_data.extract_date).format('DD/MM/YYYY');
@@ -585,7 +585,7 @@ function parsing_approved_medicines(req, res) {
 	    		medicines.push(medicine);
 		    }
 	        i++;
-	    }	
+	    }
     }
     else {
     	req.session.format_error = "<div class='alert alert-danger'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a> Wrong format please download the template and follow the convention </div>";
@@ -620,7 +620,7 @@ function validate_medicine_list_sheet(worksheet) {
 function medicine_validations(data) {
 	console.log(data);
     var validation_array = {};
-    
+
     var generic_name = controller.validate({generic_name: data.generic_name},['required','length:0-60']);
     if(generic_name){
         validation_array = controller.mergeArrays(validation_array, generic_name);
@@ -651,23 +651,23 @@ function medicine_validations(data) {
         validation_array = controller.mergeArrays(validation_array, manufacturer);
     }
 
-    if(data.approve == 'true') {
+    /*if(data.approve == 'true') {
     	var sra = controller.validate({sra: data.sra},['required', 'length:0-100']);
 	    if(sra){
 	        validation_array = controller.mergeArrays(validation_array, sra);
 	    }
-    }
+    }*/
 
     var source = controller.validate({source: data.source},['length:0-2000']);
     if(source){
         validation_array = controller.mergeArrays(validation_array, source);
     }
- 	
+
  	var route = controller.validate({route: data.route},['length:0-200']);
     if(route){
         validation_array = controller.mergeArrays(validation_array, route);
     }
-    
+
     if(!controller.moment(data.extract_date, 'DD/MM/YYYY', true).isValid() && !controller.moment(data.extract_date, 'DD-MM-YYYY', true).isValid() && !controller.moment(data.extract_date, 'DD-MMM-YYYY', true).isValid()) {
     	validation_array = controller.mergeArrays(validation_array, {extract_date_error: 'This is not a valid date'});
     	// data.extract_date = controller.moment(data.extract_date).format('MM/DD/YYYY');
@@ -679,7 +679,7 @@ function medicine_validations(data) {
 	    	// data.approval_date = controller.moment(data.approval_date).format('MM/DD/YYYY');
 	    }
     }
-    
+
     var specification_form = controller.validate({specification_form: data.specification_form},['length:0-60']);
     if(specification_form){
         validation_array = controller.mergeArrays(validation_array, specification_form);
@@ -694,9 +694,9 @@ function medicine_validations(data) {
 		var units_per_pack = controller.validate({units_per_pack: data.units_per_pack},['required', 'integer']);
 	    if(units_per_pack){
 	        validation_array = controller.mergeArrays(validation_array, units_per_pack);
-	    }	
+	    }
     }
-    
+
 
     var status = controller.validate({status: data.status},['length:0-60']);
     if(status){
