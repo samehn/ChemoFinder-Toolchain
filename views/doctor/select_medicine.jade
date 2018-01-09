@@ -37,16 +37,16 @@ block content
     p.search_hint Note: the list of medicines below are the medicines that are not available in your treatment center currently
     .row
       .col-xs-4
-        select#quantity-select.qty-20.qty-box.large-form-control
+        select#quantity-select.qty-20.qty-box.form-control
       .col-md-4.col-xs-6
-        select#medicine-select.large-form-control(onchange="selectMedicine(this)")
+        select#medicine-select.form-control(onchange="selectMedicine(this)")
           option(value='') Select Medicine
           -  if(medicines.length > 0) {
             -  for (var i = 0; i < medicines.length; i++) {
                 option(data-name=medicines[i].GENERIC_NAME, data-form=medicines[i].FORM, data-medicine_id=medicines[i].MEDICINE_ID) #{medicines[i].GENERIC_NAME} #{medicines[i].FORM} #{medicines[i].STRENGTH} #{medicines[i].STRENGTH_UNIT}
             - }
         - }
-    h4.table-title Medicine Options
+    h4.table-title.h4-with-margin Medicine Options
     div.div_search
       table#medicine_details_table.table_search
         thead

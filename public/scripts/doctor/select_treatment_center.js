@@ -46,7 +46,7 @@ function nextStep() {
 	var treatmentCenter = $('#treatment-center-select').val();
   var patientId = $('#patient-id').val();
 	if(treatmentCenter == 0) {
-		html = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>No treatment center has been chosen</div>';
+//		html = '<div class="alert alert-danger error-form"><button class="close" data-close="alert"></button>No treatment center has been chosen</div>';
 		alert('No treatment center has been chosen');
 		$(html).insertBefore('#treatment-center-select');
 	}else if(valid_treatment_center == 0){
