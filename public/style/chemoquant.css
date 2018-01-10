@@ -1409,7 +1409,7 @@ td.highlight {
   body
   {
     visibility: hidden;
-    display:block;
+    display: block;
   }
   thead {display: table-header-group;}
   .dataTable, .medicine-title,.welcome__branding,.page__subtitle,.div_search,.table-title 
@@ -1418,7 +1418,7 @@ td.highlight {
   }
   main-comp {
         display: block;
-        margin-top: 60px;
+        margin-top: 0px;
         background-color: #fdfdfd;
         width: 70.5cm;
         margin-left: auto;
