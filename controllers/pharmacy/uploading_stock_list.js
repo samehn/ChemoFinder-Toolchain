@@ -106,6 +106,9 @@ var save_medicines_stock_list = function(medicine, user_id, callback) {
             });
         }
         else {
+					var user_model_info = {};
+					user_model_info.user_id = user_id;
+					var user_info = user_model.select_user_by_id(user_model_info);
 					console.log("***************** here medicine Does NOT exist in medicine table User ID =" + user_id);
             medicine_model.async_insert_new_medicine_by_main_keys(medicine, function(rows) {
                 medicine_model.async_select_medicine_by_main_keys(medicine, function(medicine1) {
@@ -124,8 +127,16 @@ var save_medicines_stock_list = function(medicine, user_id, callback) {
 																	subject: 'New Unapproved Medicine Was Loaded', // Subject line
 																	template: 'upload_unapproved_medicines_mail',
 																	context: {
-																			link: "http://chemofinder.mybluemix.net/admin/login"//message.link
+																			link: "http://chemofinder.mybluemix.net/admin/login",//message.link
+																			pharmacy_name: user_info[0].ENTITY_NAME,
+																			Generic_name: medicine1[0].GENERIC_NAME,
+																			Brand_name: medicine1[0].BRAND_NAME,
+																			Manufacturer: medicine1[0].MANUFACTURER,
+																			form: medicine1[0].FORM,
+																			Strength: medicine1[0].STRENGTH,
+																			Strength_unit: medicine1[0].STRENGTH_UNIT
 																	}
+
 																	//html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
 															};
 

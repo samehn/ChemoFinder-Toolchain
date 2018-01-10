@@ -96,9 +96,9 @@ reports.prototype.download_stock_list  =  function(req, res) {
 			{zoomScale:66}
 	];
 	// Add a row by contiguous Array (assign to columns A, B & C)
-	worksheet.addRow(['ID', 'Generic Name', 'Form', 'Strength', 'Strength unit', 'Brand name', 'Manufacturer', 'Batch Number', 'Expiry Date (dd-mm-yyyy)', 'Current Stringent Regulatory Authority (SRA) Approvals', 'Pack Size', 'Price per Pack', 'Available Stock (Packs)', 'Average Monthly Consumption (AMC) in Packs' , 'Pharmacy ID' , 'Pharmacy Name']);
+	worksheet.addRow(['ID', 'Generic Name', 'Form', 'Strength', 'Strength unit', 'Brand name', 'Manufacturer', 'Batch Number', 'Expiry Date (dd-mm-yyyy)', 'Current Stringent Regulatory Authority (SRA) Approvals', 'Pack Size', 'Price per Pack', 'Available Stock (Packs)', 'Average Monthly Consumption (AMC) in Packs' , 'Pharmacy ID' , 'Pharmacy Name' , 'UPDATED_AT' ,'CREATED_AT']);
 
-	var str = "ABCDEFGHIJKLMNOP";
+	var str = "ABCDEFGHIJKLMNOPQR";
 	for(var i=0; i<str.length; i++)
 	{
 			var char = str.charAt(i);
@@ -118,8 +118,8 @@ reports.prototype.download_stock_list  =  function(req, res) {
 			};
 			worksheet.getCell(char + '1').alignment = { wrapText: true };
 			var dobCol = worksheet.getColumn(char);
-			if(char == 'B' || char == 'E' || char == 'F'|| char == 'I'|| char == 'J'|| char == 'N' || char == 'P') {
-					dobCol.width = 30;
+			if(char == 'B' || char == 'E' || char == 'F'|| char == 'I'|| char == 'J'|| char == 'N' || char == 'P' || char == 'Q' || char == 'R') {
+					dobCol.width = 35;
 			}
 			else {
 					dobCol.width = 20;
@@ -131,7 +131,7 @@ reports.prototype.download_stock_list  =  function(req, res) {
 			if(stock_list.length > 0) {
 					for (var i = 0; i < stock_list.length; i++) {
 						console.log("*******stock_list[i].PHARMACY_ID" + stock_list[i].PHARMACY_ID + "stock_list[i].ENTITY_NAME" + stock_list[i].ENTITY_NAME);
-							worksheet.addRow([stock_list[i].ID, stock_list[i].GENERIC_NAME, stock_list[i].FORM, stock_list[i].STRENGTH, stock_list[i].STRENGTH_UNIT, stock_list[i].BRAND_NAME, stock_list[i].MANUFACTURER, stock_list[i].BATCH_NUMBER, stock_list[i].EXPIRY_DATE, stock_list[i].SRA, stock_list[i].PACK_SIZE, stock_list[i].PRICE_PER_PACK, stock_list[i].AVAILABLE_STOCK, stock_list[i].AVG_MONTHLY_CONSUMPTION, stock_list[i].PHARMACY_ID , stock_list[i].ENTITY_NAME]);
+							worksheet.addRow([stock_list[i].ID, stock_list[i].GENERIC_NAME, stock_list[i].FORM, stock_list[i].STRENGTH, stock_list[i].STRENGTH_UNIT, stock_list[i].BRAND_NAME, stock_list[i].MANUFACTURER, stock_list[i].BATCH_NUMBER, stock_list[i].EXPIRY_DATE, stock_list[i].SRA, stock_list[i].PACK_SIZE, stock_list[i].PRICE_PER_PACK, stock_list[i].AVAILABLE_STOCK, stock_list[i].AVG_MONTHLY_CONSUMPTION, stock_list[i].PHARMACY_ID , stock_list[i].ENTITY_NAME , stock_list[i].UPDATED_AT , stock_list[i].CREATED_AT] );
 					}
 					var path = './public/uploads/stocks/stock_list_' + req.session.admin_id + '_' + Date.now() + '.xlsx';
 					if(controller.fs.existsSync(path)) {

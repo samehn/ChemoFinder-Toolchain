@@ -68,7 +68,8 @@ stock_list_model.prototype.async_select_stock_list_by_id = function(data, callba
 //+++++++++++++++++++++++Download stock all list for admin+++++++++++++++++++++++++++++++++++
 
 stock_list_model.prototype.async_select_stock_list = function(callback) {
-	var query =  "SELECT *, SL.ID AS STOCK_LIST_ID FROM DASH5082.CHEMO_STOCK_LIST SL INNER JOIN DASH5082.CHEMO_MEDICINE M ON SL.MEDICINE_ID = M.ID  INNER JOIN DASH5082.CHEMO_USER CU ON SL.PHARMACY_ID = CU.ID WHERE  SL.AVAILABLE_STOCK > "+ 0  ;
+	//var query =  "SELECT *, SL.ID AS STOCK_LIST_ID FROM DASH5082.CHEMO_STOCK_LIST SL INNER JOIN DASH5082.CHEMO_MEDICINE M ON SL.MEDICINE_ID = M.ID  INNER JOIN DASH5082.CHEMO_USER CU ON SL.PHARMACY_ID = CU.ID WHERE  SL.AVAILABLE_STOCK > "+ 0  ;
+	var query =  "SELECT *, SL.ID AS STOCK_LIST_ID FROM DASH5082.CHEMO_STOCK_LIST SL INNER JOIN DASH5082.CHEMO_MEDICINE M ON SL.MEDICINE_ID = M.ID  INNER JOIN DASH5082.CHEMO_USER CU ON SL.PHARMACY_ID = CU.ID "  ;
 	return this.dbQuery(query, callback);
 };
 
