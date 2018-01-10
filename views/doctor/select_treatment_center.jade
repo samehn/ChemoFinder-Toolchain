@@ -33,23 +33,24 @@ block content
         button.tab-bar__tab.ng-binding.ng-scope
           | 4. Shopping List
         // end ngRepeat: tab in tabBarCtrl.tabs
-    h4.table-title Select Treatment Center
-      .row
-        .col-xs-4.col-xs-push-4
-          select#treatment-center-select.large-form-control(onchange="selectTreatmentCenter(this)")
+    div.form-horizontal
+      .form-group
+        label.col-xs-2.col-xs-offset-2.control-label(for="treatment-center-select") Select Treatment Center:
+        div.col-xs-4
+          select#treatment-center-select.form-control.col(onchange="selectTreatmentCenter(this)")
             option(value=0) Select Treatment Center
             -  if(treatmentCenters.length > 0) {
               -  for (var i = 0; i < treatmentCenters.length; i++) {
                   option(value=treatmentCenters[i].ID) #{treatmentCenters[i].ENTITY_NAME}
               - }
           - }
-    h4.table-title Enter Patient ID
-        .row
-          .col-xs-4.col-xs-push-4
-            input#patient-id
+      .form-group
+        label.col-xs-2.col-xs-offset-2.control-label(for="patient-id") Enter Patient ID:
+        div.col-xs-4
+          input#patient-id.form-control
 
 
-    h4.table-title Treatment Center Details
+    h4.table-title.h4-with-margin Treatment Center Details
     div.div_search
       table.table_search
         thead

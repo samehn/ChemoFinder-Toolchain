@@ -300,7 +300,7 @@ manage_medicines.prototype.upload_medicines_list =  function(req, res) {
                 var medicines = parsing_approved_medicines(req, res);
                 console.log('File uploaded!');
                 if(medicines.length > 0) {
-				    req.session.uploading_message = "<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + medicines.length + " medicines will be added/updated in the background you will be notify by an email once this operation is done</div>";
+				    req.session.uploading_message = "<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + medicines.length + " medicines will be added/updated on your stock. You will be notified by email once this operation is done.</div>";
                 	res.redirect('/admin/manage_medicines');
 				    // var args = [JSON.stringify(medicines)];
 				    var link = req.protocol + '://' + req.get('host') + '/admin/manage_medicines';
