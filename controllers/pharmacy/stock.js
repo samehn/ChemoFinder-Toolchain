@@ -427,7 +427,7 @@ stock.prototype.upload_out_of_stock_list =  function(req, res) {
 							console.log('File uploaded!');
 							console.log("**&&** upload out of stock medicines length is " + medicines.length);
 							if(medicines.length > 0) {
-									req.session.stock_uploading_message = "<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + medicines.length + " medicines will be updated in the background you will be notify by an email once this operation is done</div>";
+									req.session.stock_uploading_message = "<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + medicines.length + " medicines will be updated in your stock. You will receive an email once the operation is done.</div>";
 									res.redirect('/pharmacy');
 									var link = req.protocol + '://' + req.get('host') + '/pharmacy';
 

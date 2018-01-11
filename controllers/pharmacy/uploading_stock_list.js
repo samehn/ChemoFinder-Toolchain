@@ -40,7 +40,7 @@ process.on('message', function(message){
 	                from: 'chemofinder@gmail.com', // sender address
 	                to: user[0].EMAIL, // list of receivers
 									cc: allAdminEmailsAddresses,
-	                subject: 'Uploading Stock List is Completed Successfully for ' + user[0].ENTITY_NAME, // Subject line
+	                subject: 'Uploading Stock List Has Completed Successfully For ' + user[0].ENTITY_NAME, // Subject line
 	                template: 'upload_stock_list_mail',
 	                context: {
 	                    link: message.link
