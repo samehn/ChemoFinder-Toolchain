@@ -19,7 +19,7 @@
       <h1 style="text-align: center;">ChemoFinder Shopping List </h1>
       
       <spacer size="16"></spacer>
-      <p style="text-align: center;"> Your treatment center is <strong>{{treatmentCenter[0].ENTITY_NAME}}</strong></p>
+      <p style="text-align: center;"> Your treatment center is <strong>{{treatmentCenter}}</strong></p>
       <p style="text-align: center;"> For Patient ID: <strong>{{patientId}}</strong></p>
       {{#each shoppinglist}}
         <h5 style="text-align: center; margin: 30px; font-weight: 900; font-size: large;">x{{quantity}} {{#medicine}} {{GENERIC_NAME}} {{BRAND_NAME}} {{FORM}} {{STRENGTH}} {{STRENGTH_UNIT}} {{MANUFACTURER}}{{/medicine}}

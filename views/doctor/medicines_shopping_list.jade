@@ -33,10 +33,9 @@ block content
         button.tab-bar__tab.ng-binding.ng-scope.tab-bar__aval-tab.tab-bar__active-tab
           | 4. Shopping List
         // end ngRepeat: tab in tabBarCtrl.tabs
-    h4.table-title Shopping List
     p Your treatment center is 
       strong #{treatmentCenter[0].ENTITY_NAME}
-    h5.medicine-title For Patient ID: 
+    p For Patient ID: 
       strong #{patientId}
     -  if (shoppinglist.length > 0) {
       -  for (var i = 0; i < shoppinglist.length; i++) {

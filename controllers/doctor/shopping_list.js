@@ -111,7 +111,7 @@ shopping_list.prototype.send_email =  function(req, res) {
                     subject: 'ChemoFinder Shopping List', // Subject line
                     template: 'shopping_list',
                     context: {
-                        treatmentCenter: treatment_center[0].NAME, shoppinglist: req.session.shoppinglist
+                        treatmentCenter: treatment_center[0].ENTITY_NAME, patientId: req.session.pid, shoppinglist: req.session.shoppinglist
                     }
                     //html: {path: './views/emails/forgot_password_mail.html'} // You can choose to send an HTML body instead
                 };

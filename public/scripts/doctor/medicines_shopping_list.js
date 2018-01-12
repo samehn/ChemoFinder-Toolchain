@@ -51,7 +51,10 @@ function sendEmail() {
     	var pair = vars[i].split("=");
       	if(pair[0] == 't') {
       		data['treatment_center'] = pair[1];
-      	}
+        }
+        if(pair[0] == 'pid'){
+            data['pid'] = pair[1];
+        }
     }
     $('#sendEmail').modal('hide');
 	$('#loadingModal').modal('show');
