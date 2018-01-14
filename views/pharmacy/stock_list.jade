@@ -17,7 +17,7 @@ block account
 block content
   .page__subtitle.ng-binding My Stock
   - if(uploading_message) {
-      !{uploading_message}
+    | !{uploading_message}
   - }
   - if(extention_error) {
       .alert.alert-danger
@@ -25,7 +25,7 @@ block content
         |  This file extension is not allowed, only files with xlsx extension are allowed
   - }
   - if(format_error) {
-      !{format_error}
+    | !{format_error}
   - }
 
   .row
