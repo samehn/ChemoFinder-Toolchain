@@ -12,13 +12,15 @@ for (var i = 1; i <= 20; i++) {
 }
 
 function selectMedicine(element) {
-	var medicine = $(element).val();
+  var medicine = $(element).val();
 	var generic_name = $('option:selected', element).attr("data-name");
 	var form = $('option:selected', element).attr("data-form");
-  var medicine_id = $('option:selected', element).attr("data-medicine_id");
-
+  //var medicine_id = $('option:selected', element).attr("data-medicine_id");
+  alert("here 1 " + generic_name + " -- " + form)
 	if(generic_name && form) {
-		var data = {generic_name: generic_name, form: form, medicine_id: medicine_id};
+    alert("here 2")
+		var data = {generic_name: generic_name, form: form};
+    alert("here " + data)
 		console.log(data);
 		$.ajax({
 	      type: "post",
@@ -41,7 +43,7 @@ function selectMedicine(element) {
                             				//'<td class="td_search">' + result.medicines[i].BRAND_NAME + '</td>' +
                             				'<td class="td_search">' + result.medicines[i].FORM + '</td>' +
                             				'<td class="td_search">' + result.medicines[i].STRENGTH + '</td>' +
-                            				'<td class="td_search">' + result.medicines[i].STRENGTH_UNIT + '</td>' +
+                             				'<td class="td_search">' + result.medicines[i].STRENGTH_UNIT + '</td>' +
                             				//'<td class="td_search">' + result.medicines[i].PACK_TYPE + '</td>' +
                             				//'<td class="td_search">' + result.medicines[i].MANUFACTURER + '</td>' +
                             				'<td class="td_search">' + result.medicines[i].PRICE_PER_PACK + '</td>' +

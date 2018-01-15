@@ -43,7 +43,7 @@ block content
           option(value='') Select Medicine
           -  if(medicines.length > 0) {
             -  for (var i = 0; i < medicines.length; i++) {
-                option(data-name=medicines[i].GENERIC_NAME, data-form=medicines[i].FORM, data-medicine_id=medicines[i].MEDICINE_ID) #{medicines[i].GENERIC_NAME} #{medicines[i].FORM} 
+                option(data-name=medicines[i].GENERIC_NAME, data-form=medicines[i].FORM) #{medicines[i].GENERIC_NAME} #{medicines[i].FORM}
             - }
         - }
     h4.table-title.h4-with-margin Medicine Options

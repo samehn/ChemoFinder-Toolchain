@@ -14,7 +14,7 @@ select_medicine.prototype.select_medicine_page =  function(req, res) {
         tomodel.user_id = treatment_center_id;
         user_model.async_select_treatment_center_by_id(tomodel, function(treatment_center) {
             if(treatment_center.length > 0) {
-                medicine_model.async_select_medicine_not_in_treatment_center(tomodel, function(medicines) {
+                medicine_model.async_select_distinct_medicine_not_in_treatment_center(tomodel, function(medicines) {
 									if(medicines.length > 0){
                     res.render('doctor/select_medicine', {medicines: medicines});
 									}else{
@@ -43,7 +43,7 @@ select_medicine.prototype.select_medicine_details =  function(req, res) {
         tomodel.generic_name = data.generic_name;
         tomodel.form = data.form;
 				tomodel.medicine_id = data.medicine_id;
-       medicine_model.async_select_medicine_by_generic_and_form_and_id_grouped_by_price(tomodel, function(medicines) {
+       medicine_model.async_select_medicine_by_generic_and_form_in_pharmacies(tomodel, function(medicines) {
 					if(medicines.length > 0) {
 							for(var i=0; i<medicines.length; i++){
 								console.log("********** SELECT MEDICINES medicine_id " + medicines[i].MEDICINE_ID + " PHARMACY_ID : " + medicines[i].PHARMACY_ID);
