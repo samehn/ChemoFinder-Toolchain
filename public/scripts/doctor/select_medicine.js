@@ -16,12 +16,9 @@ function selectMedicine(element) {
 	var generic_name = $('option:selected', element).attr("data-name");
 	var form = $('option:selected', element).attr("data-form");
   //var medicine_id = $('option:selected', element).attr("data-medicine_id");
-  alert("here 1 " + generic_name + " -- " + form)
-	if(generic_name && form) {
-    alert("here 2")
-		var data = {generic_name: generic_name, form: form};
-    alert("here " + data)
-		console.log(data);
+  if(generic_name && form) {
+   var data = {generic_name: generic_name, form: form};
+    console.log(data);
 		$.ajax({
 	      type: "post",
 	      url: url +'/doctor/selectmedicinedetails',
