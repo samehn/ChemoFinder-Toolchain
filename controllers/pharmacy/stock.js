@@ -41,7 +41,7 @@ stock.prototype.stock_page =  function(req, res) {
 }
 
 stock.prototype.get_medicines_generic_and_form =  function(req, res) {
-    medicine_model.async_select_approved_medicines_distinct_generic_name(function(medicines) {
+    medicine_model.async_select_SRA_approved_medicines_distinct_generic_name(function(medicines) {
         if(medicines.length > 0) {
             res.send({message: "success", medicines: medicines});
         }

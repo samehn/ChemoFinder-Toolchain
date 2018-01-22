@@ -311,18 +311,24 @@ function add_new_medicine() {
   });
 }
 
+var originModal = null;
+
 function add_new_approved_medicine_modal() {
+  if(originModal == null){
+    originModal = $('#addNewApprovedMedicine').html();
+  }
   $.ajax({
     type: "get",
     url: url + '/pharmacy/getmedicinesgenericandform',
     success:  function(data){
       console.log(data);
+      $('#addNewApprovedMedicine').html(originModal);
       if(data.message == "success") {
-        var html = "";
+        var html = "<option value=\"\" class=\"form-control\">Select Medicine</option>";
         for (var i = 0; i < data.medicines.length; i++) {
           var html = html + "<option class='form-control' data-name='" + data.medicines[i].GENERIC_NAME + "' data-form='" + data.medicines[i].FORM + "'>" + data.medicines[i].GENERIC_NAME + " "  + data.medicines[i].FORM + "</option>"
         }
-        $('#medicineApproved').append(html);
+        $('#medicineApproved').html(html);
       }
       $('#addNewApprovedMedicine').modal('show');
     }
