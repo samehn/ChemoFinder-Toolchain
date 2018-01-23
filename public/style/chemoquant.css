@@ -494,10 +494,8 @@ welcome {
     margin-right: 20px;
 }
 .welcome__heath-corp {
-    position: absolute;
-    height: 140px;
-    top: -42px;
-    left: 110px;
+    height: 40px;
+    margin-right: 20px;
 }
 .cancer-characteristics {
     display: block;
@@ -1415,6 +1413,10 @@ td.highlight {
   .dataTable, .medicine-title,.welcome__branding,.page__subtitle,.div_search,.table-title 
   {
     visibility: visible;
+  }
+  footer {
+    visibility: hidden;
+    display: none;
   }
   main-comp {
         display: block;
