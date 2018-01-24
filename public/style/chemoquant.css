@@ -1413,8 +1413,9 @@ td.highlight {
   }
   .mg-btm-30{ margin-bottom: 0px; }
   .welcome__actions {
-    padding-bottom: 50px;
-    margin-bottom: 40px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    margin-bottom: 0px;
   }
   .welcome__home-buttons {
     padding-bottom: 0px;
@@ -1447,9 +1448,16 @@ td.highlight {
     height: 30px;
     margin-right: 20px;
   }
-  .dataTable, .medicine-title,.welcome__branding,.patient_info {
+  .dataTable, .medicine-title,.patient_info {
     page-break-inside: avoid;
     visibility: visible;
+  }
+  .welcome__branding {
+    visibility: visible;
+    border-top: 0px;
+    bottom: 0;
+    padding-top: 10px;
+    padding-bottom: 0px;
   }
   .footer,.tab-bar,.btn-primary {
     display: none;
