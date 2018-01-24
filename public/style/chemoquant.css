@@ -424,6 +424,7 @@ welcome {
 }
 .welcome__actions {
     padding-top: 50px;
+    margin-bottom: 40px;
 }
 .welcome__home-image {
     display: block;
@@ -1393,6 +1394,7 @@ input[type=number]::-webkit-inner-spin-button {
 .medicine-title {
     text-align: center;
     margin: 30px;
+    margin-bottom: 10px;
     font-weight: 900;
     font-size: large;
 }
@@ -1409,27 +1411,63 @@ td.highlight {
     visibility: hidden;
     display: block;
   }
-  thead {display: table-header-group;}
-  .dataTable, .medicine-title,.welcome__branding,.page__subtitle,.div_search,.table-title 
-  {
+  .mg-btm-30{ margin-bottom: 0px; }
+  .welcome__actions {
+    padding-bottom: 50px;
+    margin-bottom: 40px;
+  }
+  .welcome__home-buttons {
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+  }
+  .page__subtitle {
+    visibility: visible;
+    display: block;
+    text-align: center;
+    font-size: 30px;
+    font-weight: 600;
+    color: #56a3fc;
+    margin-bottom: 10px;
+  }
+  .table-title {
+    font-weight: bold;  
+    text-align: left;
+    margin-bottom: 0px;
+    color: #56a3fc;
+  }
+  .welcome__acs {
+    height: 30px;
+    margin-right: 20px;
+  }
+  .welcome__chai {
+    height: 30px;
+    margin-right: 20px;
+  }  
+  .welcome__heath-corp {
+    height: 30px;
+    margin-right: 20px;
+  }
+  .dataTable, .medicine-title,.welcome__branding,.patient_info {
+    page-break-inside: avoid;
     visibility: visible;
   }
-  footer {
-    visibility: hidden;
+  .footer,.tab-bar,.btn-primary {
     display: none;
   }
+  .div_search {
+    page-break-inside: avoid;
+    visibility: visible;
+    overflow-x:visible!important;
+    margin-top: 0px;
+  }
   main-comp {
-        display: block;
-        margin-top: 0px;
-        background-color: #fdfdfd;
-        width: 70.5cm;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    .dataTables_scrollHead,.dataTables_scrollBody{
-        overflow: visible!important;
-        transform: scale(1);
-    }
+    display: block;
+    margin-top: 0px;
+    background-color: #fdfdfd;
+    width: 70.5cm;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 .register-body {
