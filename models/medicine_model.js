@@ -141,7 +141,7 @@ medicine_model.prototype.async_select_approved_medicines_distinct_generic_name =
 };
 
 medicine_model.prototype.async_select_SRA_approved_medicines_distinct_generic_name = function(callback) {
-	var query = "SELECT DISTINCT GENERIC_NAME, FORM from DASH5082.CHEMO_MEDICINE WHERE APPROVED = TRUE AND SRA_APPROVED = TRUE";
+	var query = "SELECT DISTINCT GENERIC_NAME, FORM from DASH5082.CHEMO_MEDICINE WHERE APPROVED = TRUE ORDER BY GENERIC_NAME";
 	return this.dbQuery(query, callback);
 };
 medicine_model.prototype.async_select_approved_medicines = function(callback) {
