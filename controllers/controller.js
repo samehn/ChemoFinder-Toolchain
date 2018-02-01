@@ -255,7 +255,7 @@ function required(field) {
 	    if (typeof field[key] !== 'function') {
 	    	if(field[key] == null || controller.prototype.validator.isEmpty(field[key]))
 			{
-				var value = 'This filed is required';
+				var value = 'This field is required: ' + key;
 				var result = {[key+'_error']: value};
 				return result;
 			}
@@ -309,7 +309,7 @@ function isLength(field, min, max) {
 	    if (typeof field[key] !== 'function') {
 	    	if(!controller.prototype.validator.isLength(field[key], {min: min, max: max}))
 			{
-				var value = 'The length of this field should be between '+ min +' and ' + max;
+				var value = 'The length of this field should be between '+ min +' and ' + max + '. Field: ' + key +' Value: "' + field[key] + '"';
 				var result = {[key+'_error']: value};
 				return result;
 			}
@@ -345,7 +345,7 @@ function isInteger(field, options) {
 	    	else{
 	    		if(!controller.prototype.validator.isInt(field[key]))
 				{
-					var value = 'This field should be an integer';
+					var value = 'This field should be an integer. Field: ' + key + ' Value: ' + field[key];
 					var result = {[key+'_error']: value};
 					return result;
 				}
@@ -393,7 +393,7 @@ function isFloat(field, options) {
 	    	else{
 	    		if(!controller.prototype.validator.isFloat(field[key]))
 				{
-					var value = 'This field should be a float';
+					var value = 'This field should be a float. Field: ' + key + ' Value: "' + field[key] + '"';
 					var result = {[key+'_error']: value};
 					return result;
 				}

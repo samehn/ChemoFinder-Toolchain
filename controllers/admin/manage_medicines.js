@@ -669,13 +669,13 @@ function medicine_validations(data) {
     }
 
     if(!controller.moment(data.extract_date, 'DD/MM/YYYY', true).isValid() && !controller.moment(data.extract_date, 'DD-MM-YYYY', true).isValid() && !controller.moment(data.extract_date, 'DD-MMM-YYYY', true).isValid()) {
-    	validation_array = controller.mergeArrays(validation_array, {extract_date_error: 'This is not a valid date'});
+    	validation_array = controller.mergeArrays(validation_array, {extract_date_error: 'This is not a valid date. Field: Extract Date Value: '+data.extract_date});
     	// data.extract_date = controller.moment(data.extract_date).format('MM/DD/YYYY');
     }
 
     if(data.approval_date && data.approval_date.length > 0) {
 		if(!controller.moment(data.approval_date, 'DD/MM/YYYY', true).isValid() && !controller.moment(data.approval_date, 'DD-MM-YYYY', true).isValid() && !controller.moment(data.approval_date, 'DD-MMM-YYYY', true).isValid()) {
-	    	validation_array = controller.mergeArrays(validation_array, {approval_date_error: 'This is not a valid date'});
+	    	validation_array = controller.mergeArrays(validation_array, {approval_date_error: 'This is not a valid date. Field Approval Date Value: '+data.approval_date});
 	    	// data.approval_date = controller.moment(data.approval_date).format('MM/DD/YYYY');
 	    }
     }
