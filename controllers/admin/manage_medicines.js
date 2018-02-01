@@ -359,7 +359,7 @@ function parsing_approved_medicines(req, res) {
 	        var generic_name_cell = worksheet[generic_name_address];
 	        if(generic_name_cell != undefined)
 	        {
-	            data['generic_name'] = generic_name_cell.v;
+	            data['generic_name'] = generic_name_cell.v.trim();
 	        }
 	        else
 	        {
@@ -370,7 +370,7 @@ function parsing_approved_medicines(req, res) {
 	        var brand_name_cell = worksheet[brand_name_address];
 	        if(brand_name_cell != undefined)
 	        {
-	            data['brand_name'] = brand_name_cell.v;
+	            data['brand_name'] = brand_name_cell.v.trim();
 	        }
 	        else
 	        {
@@ -381,7 +381,7 @@ function parsing_approved_medicines(req, res) {
 	        var form_cell = worksheet[form_address];
 	        if(form_cell != undefined)
 	        {
-	            data['form'] = form_cell.v;
+	            data['form'] = form_cell.v.trim();
 	        }
 	        else
 	        {
@@ -392,7 +392,7 @@ function parsing_approved_medicines(req, res) {
 	        var strength_cell = worksheet[strength_address];
 	        if(strength_cell != undefined)
 	        {
-	            data['strength'] = strength_cell.v;
+	            data['strength'] = parseFloat(strength_cell.v.toString().trim());
 	        }
 	        else
 	        {
@@ -403,7 +403,7 @@ function parsing_approved_medicines(req, res) {
 	        var strength_unit_cell = worksheet[strength_unit_address];
 	        if(strength_unit_cell != undefined)
 	        {
-	            data['strength_unit'] = strength_unit_cell.v;
+	            data['strength_unit'] = strength_unit_cell.v.trim();
 	        }
 	        else
 	        {
@@ -414,7 +414,7 @@ function parsing_approved_medicines(req, res) {
 	        var specification_form_cell = worksheet[specification_form_address];
 	        if(specification_form_cell != undefined)
 	        {
-	            data['specification_form'] = specification_form_cell.v;
+	            data['specification_form'] = specification_form_cell.v.toString().trim();
 	        }
 	        else
 	        {
@@ -458,7 +458,7 @@ function parsing_approved_medicines(req, res) {
 	        var manufacturer_cell = worksheet[manufacturer_address];
 	        if(manufacturer_cell != undefined)
 	        {
-	            data['manufacturer'] = manufacturer_cell.v;
+	            data['manufacturer'] = manufacturer_cell.v.trim();
 	        }
 	        else
 	        {
@@ -470,7 +470,7 @@ function parsing_approved_medicines(req, res) {
 	        if(sra_cell != undefined)
 	        {
 	        	data['approve'] = 'true';
-	            data['sra'] = sra_cell.v;
+	            data['sra'] = sra_cell.v.trim();
 	        }
 	        else
 	        {
@@ -493,7 +493,7 @@ function parsing_approved_medicines(req, res) {
 	        var source_cell = worksheet[source_address];
 	        if(source_cell != undefined)
 	        {
-	            data['source'] = source_cell.v;
+	            data['source'] = source_cell.v.trim();
 	        }
 	        else
 	        {
@@ -527,7 +527,7 @@ function parsing_approved_medicines(req, res) {
 	        var comments_cell = worksheet[comments_address];
 	        if(comments_cell != undefined)
 	        {
-	            data['comments'] = comments_cell.v;
+	            data['comments'] = comments_cell.v.toString().trim();
 	        }
 	        else
 	        {

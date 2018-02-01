@@ -309,7 +309,7 @@ function isLength(field, min, max) {
 	    if (typeof field[key] !== 'function') {
 	    	if(!controller.prototype.validator.isLength(field[key], {min: min, max: max}))
 			{
-				var value = 'The length of this field should be between '+ min +' and ' + max + '. Field: ' + key +' Value: "' + field[key] + '"';
+				var value = 'The length of this field should be between '+ min +' and ' + max + ' characters. Field: ' + key +' Value: "' + field[key] + '"';
 				var result = {[key+'_error']: value};
 				return result;
 			}
