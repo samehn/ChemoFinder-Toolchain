@@ -3,20 +3,31 @@ admin_model  = require('../../models/admin_model');
 medicine_model  = require('../../models/medicine_model');
 stock_list_model  = require('../../models/stock_list_model');
 tomodel = {};
+
 //var dependency = JSON.parse(process.argv[2]);
 process.on('message', function(message){
     medicine_model.disapprove_rsa();
-    controller.async.eachLimit(message.medicines, 5, function(medicine, callback){
-        save_medicines_list(medicine, function() {
-            console.log("done");
-         callback();
-        });
-    },function(err){
+    console.log("medicines length is " + message.medicines.length);
+    var medicines_to_be_updated_list = [];
+    var medicines_to_be_insert_list = [];
+    var col_results = medicine_model.select_sra_medicine_by_main_keys_collection(message.medicines);
+    console.log("collection results has been completed");
+    for(var i=0; i<col_results.length; i++){
+      if(col_results[i][0]['MCOUNT'] > 0){
+        medicines_to_be_updated_list.push(message.medicines[i]);
+      }else {
+        medicines_to_be_insert_list.push(message.medicines[i]);
+      }
+    }
+    submit_medicine_to_database(medicines_to_be_insert_list, medicines_to_be_updated_list,function(err){
      if( err ) {
      // One of the iterations produced an error.
      // All processing will now stop.
      console.log('A file failed to process');
      } else {
+
+        console.log("the medicins to be updated length is " + medicines_to_be_updated_list.length);
+        console.log("the medicins to be inserted length is " + medicines_to_be_insert_list.length);
          console.log('All files have been processed successfully');
          tomodel.admin_id = message.admin_id;
          admin_model.async_select_admin_by_id(tomodel, function(admin) {
@@ -66,20 +77,27 @@ process.on('message', function(message){
 
         });
      }
-    });
+   });
 
 });
 
-var save_medicines_list = function(medicine, callback) {
-    rows = medicine_model.select_medicine_by_main_keys(medicine);
+var submit_medicine_to_database = function(medicines_to_be_insert_list, medicines_to_be_updated_list, callback){
+  medicine_model.update_insert_sra_medicine_by_main_keys_collection(medicines_to_be_insert_list, medicines_to_be_updated_list);
+  callback();
+}
+var save_medicines_list = function(medicine, update_list, insert_list, callback) {
+    rows = medicine_model.async_select_sra_medicine_by_main_keys(medicine, callback);
     medicine.b_rsa_approve = true;
-        if(rows.length > 0) {
+        if(rows != null && rows.length > 0) {
             medicine['medicine_id'] = rows[0].ID;
-            rows = medicine_model.update_medicine(medicine);
-            callback();
+            update_list.push(medicine);
+            //rows = medicine_model.async_SRA_update_medicine(medicine, callback);
+            //callback();
         }
         else {
-            medicine_model.insert_new_medicine(medicine);
-            callback();
+            insert_list.push(medicine);
+            //medicine_model.insert_new_medicine(medicine);
+            //callback();
         }
+        //callback();
 }

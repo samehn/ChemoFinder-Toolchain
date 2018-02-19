@@ -2,6 +2,36 @@ var model = function() {
     db = require('../config/db');
 };
 
+model.prototype.dbQueryPool = function(query, callback) {
+    var Pool = require("ibm_db").Pool
+    , pool = new Pool()
+    , cn = db.connString;
+    var result;
+    pool.open(db.connString, function(err, conn) {
+        console.log(query);
+            if (err ) {
+             return "error occurred " + err.message;
+            }
+            else {
+                conn.query(query, function(err, tables, moreResultSets) {
+                    result = tables;
+                    /*
+                        Close the connection to the database
+                        param 1: The callback function to execute on completion of close function.
+                    */
+                    // console.log(err);
+                    // console.log(result);
+                    conn.close(function(){
+                        console.log("Connection Closed");
+                        });
+                    // console.log(result);
+                    return callback(result);
+                });
+
+            }
+        } );
+}
+
 model.prototype.dbQuery = function(query, callback) {
     var result;
     db.ibmdb.open(db.connString, function(err, conn) {

@@ -423,7 +423,7 @@ stock.prototype.upload_out_of_stock_list =  function(req, res) {
 							req.session.parseOutofStock = true;
 							var medicines = parsing_out_of_stock_list(req, res);
 							req.session.parseOutofStock = false;
-							console.log(medicines);
+							//console.log(medicines);
 							console.log('File uploaded!');
 							console.log("**&&** upload out of stock medicines length is " + medicines.length);
 							if(medicines.length > 0) {
@@ -468,7 +468,7 @@ stock.prototype.upload_stock_list =  function(req, res) {
             }
             else {
                 var medicines = parsing_stock_list(req, res);
-                console.log(medicines);
+                //console.log(medicines);
                 console.log('File uploaded!');
                 if(medicines.length > 0) {
                     req.session.stock_uploading_message = "<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + medicines.length + " medicines will be added/updated on your stock. You will be notified by email once this operation is done.</div>";
